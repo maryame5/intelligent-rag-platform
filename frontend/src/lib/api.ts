@@ -433,7 +433,7 @@ export interface SendMessageResult {
 
 export async function sendChatMessage(params: {
   knowledgeBaseId: string;
-  conversationId?: string;
+  conversationId?: string | undefined;
   message: string;
 }): Promise<SendMessageResult> {
   const raw = await apiRequest<{
@@ -478,7 +478,7 @@ type ChatStreamEvent =
  */
 export async function sendChatMessageStream(params: {
   knowledgeBaseId: string;
-  conversationId?: string;
+  conversationId?: string | undefined;
   message: string;
   onChunk: (text: string) => void;
   onDone: (result: SendMessageResult) => void;
