@@ -1,0 +1,28 @@
+{
+  "name": "sample_benchmark",
+  "version": "v1",
+  "description": "Gabarit de benchmark retrieval/génération. À étoffer jusqu'à 50-100 questions (§9 du cahier des charges) une fois de vrais documents importés dans une knowledge base de test. Les questions ci-dessous sont des exemples illustrant le format attendu, pas un benchmark définitif.",
+  "questions": [
+    {
+      "id": "q001",
+      "question": "Quelle est la politique de congés payés de l'entreprise ?",
+      "expected_answer": "25 jours de congés payés par an.",
+      "expected_document_filenames": ["politique_conges.pdf"],
+      "notes": "Question factuelle simple, un seul document source attendu."
+    },
+    {
+      "id": "q002",
+      "question": "Quel est le processus de remboursement des notes de frais ?",
+      "expected_answer": null,
+      "expected_document_filenames": ["procedure_notes_de_frais.pdf"],
+      "notes": "Vérité terrain de retrieval sans réponse attendue figée (processus à plusieurs étapes)."
+    },
+    {
+      "id": "q003",
+      "question": "Quelle est la capitale de la Mongolie ?",
+      "expected_answer": null,
+      "expected_document_filenames": [],
+      "notes": "Question hors périmètre des documents : doit déclencher le refus déterministe (grounded=false), pas une réponse inventée."
+    }
+  ]
+}

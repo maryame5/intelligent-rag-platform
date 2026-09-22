@@ -1,0 +1,8 @@
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]  # la longueur de ligne est gérée par line-length, pas bloquante en plus
