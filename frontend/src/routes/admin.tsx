@@ -5,9 +5,9 @@ import { AdminContent } from "@/components/data-pages";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Observabilité — Acme Intelligence" },
+      { title: "Observabilité — SmartRAG" },
       { name: "description", content: "Performance, qualité RAG, traitements et traçabilité du workspace." },
-      { property: "og:title", content: "Observabilité — Acme Intelligence" },
+      { property: "og:title", content: "Observabilité — SmartRAG" },
       { property: "og:description", content: "Performance, qualité RAG, traitements et traçabilité." },
     ],
   }),

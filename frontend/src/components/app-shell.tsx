@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   Blocks,
@@ -36,25 +36,26 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 function useTheme() {
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(true);
   useEffect(() => {
-    const stored = localStorage.getItem("rag.theme") === "light";
-    setLight(stored);
-    document.documentElement.classList.toggle("light", stored);
+    const stored = localStorage.getItem("rag.theme");
+    const isDark = stored === "dark";
+    setLight(!isDark);
+    document.documentElement.classList.toggle("dark", isDark);
   }, []);
   const toggle = () => {
     setLight((prev) => {
-      const next = !prev;
-      localStorage.setItem("rag.theme", next ? "light" : "dark");
-      document.documentElement.classList.toggle("light", next);
-      return next;
+      const nextLight = !prev;
+      localStorage.setItem("rag.theme", nextLight ? "light" : "dark");
+      document.documentElement.classList.toggle("dark", !nextLight);
+      return nextLight;
     });
   };
   return { light, toggle };
 }
 
 const nav = [
-  { to: "/", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
+  { to: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
   { to: "/chat", label: "Conversations", icon: MessagesSquare },
   { to: "/verified", label: "Réponses vérifiées", icon: ShieldCheck },
   { to: "/team", label: "Équipe & accès", icon: Users },
@@ -62,6 +63,7 @@ const nav = [
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const { session, ready, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -71,6 +73,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
   const { data: notifications = [] } = useQuery({ queryKey: ["notifications"], queryFn: api.getNotifications });
   const unread = notifications.filter((n) => !n.read).length;
+
+  const markReadMutation = useMutation({
+    mutationFn: (id: string) => api.markNotificationRead(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  });
 
   useEffect(() => {
     if (ready && !session) navigate({ to: "/auth", replace: true });
@@ -102,13 +109,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       >
         <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-3">
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-xs font-bold text-primary-foreground">
-            AI
-          </div>
+          <img src="/icon.png" alt="Logo" className="size-7 shrink-0 rounded-md object-contain" />
           {!collapsed ? (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">Acme Industries</p>
-              <p className="truncate text-[11px] text-muted-foreground">Workspace · plan Business</p>
+              <p className="truncate text-sm font-semibold">SmartRAG</p>
+              <p className="truncate text-[11px] text-muted-foreground">Plateforme RAG</p>
             </div>
           ) : null}
         </div>
@@ -243,18 +248,38 @@ export function AppShell({ children }: { children: ReactNode }) {
               <PopoverContent align="end" className="w-88 p-0">
                 <div className="flex items-center justify-between border-b border-border px-3 py-2">
                   <span className="text-sm font-medium">Notifications</span>
-                  <span className="text-xs text-muted-foreground">{unread} non lues</span>
+                  <span className="text-xs text-muted-foreground">{unread} non lue{unread > 1 ? "s" : ""}</span>
                 </div>
                 <ul className="max-h-80 divide-y divide-border overflow-y-auto">
-                  {notifications.map((n) => (
-                    <li key={n.id} className={cn("px-3 py-2.5", !n.read && "bg-primary/5")}>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium">{n.title}</p>
-                        <span className="shrink-0 text-[11px] text-muted-foreground">{n.at}</span>
-                      </div>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{n.body}</p>
+                  {notifications.length === 0 ? (
+                    <li className="px-4 py-6 text-center text-xs text-muted-foreground">
+                      Aucune notification
                     </li>
-                  ))}
+                  ) : (
+                    notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        onClick={() => {
+                          if (!n.read) markReadMutation.mutate(n.id);
+                        }}
+                        className={cn(
+                          "cursor-pointer px-3 py-2.5 transition-colors hover:bg-secondary/60",
+                          !n.read && "bg-primary/5 font-medium"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium">{n.title}</p>
+                          <span className="shrink-0 text-[11px] text-muted-foreground">
+                            {new Date(n.createdAt).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{n.description}</p>
+                      </li>
+                    ))
+                  )}
                 </ul>
               </PopoverContent>
             </Popover>

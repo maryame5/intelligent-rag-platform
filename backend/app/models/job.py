@@ -19,7 +19,7 @@ class IngestionJob(Base):
     __tablename__ = "ingestion_jobs"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    document_id = Column(GUID(), ForeignKey("documents.id"), nullable=False, index=True)
+    document_id = Column(GUID(), ForeignKey("documents.id", ondelete="CASCADE"), nullable=False, index=True)
     status = Column(Enum(JobStatus), nullable=False, default=JobStatus.PENDING)
     error_message = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

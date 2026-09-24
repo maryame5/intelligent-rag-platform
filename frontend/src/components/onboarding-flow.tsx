@@ -52,8 +52,8 @@ export function OnboardingFlow() {
       <header className="border-b px-5 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div className="flex items-center gap-2 font-semibold">
-            <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">AI</span>
-            Acme Intelligence
+            <img src="/icon.png" alt="SmartRAG" className="size-8 rounded-md object-contain" />
+            SmartRAG
           </div>
           <span className="text-sm text-muted-foreground">Configuration initiale</span>
         </div>
@@ -75,7 +75,7 @@ export function OnboardingFlow() {
               <span className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary">
                 <BookOpen />
               </span>
-              <h1 className="mt-5 text-2xl font-semibold">Bienvenue sur Acme Intelligence</h1>
+              <h1 className="mt-5 text-2xl font-semibold">Bienvenue sur SmartRAG</h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 Vous allez créer votre première knowledge base — un espace documentaire que vous
                 pourrez interroger en langage naturel une fois des documents importés.

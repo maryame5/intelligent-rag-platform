@@ -1,28 +1,12 @@
 /**
- * Data-access layer.
+ * Data-access layer — 100% Backé par le FastAPI de SmartRAG.
  *
- * Screens never import mock fixtures directly — they call these functions.
- *
- * État de l'intégration (voir docs/sprints/ côté backend pour le détail des
- * endpoints) :
- *  - RÉEL, backé par le FastAPI de http://localhost:8000 : auth (lib/auth.tsx),
- *    knowledge bases (CRUD + renommage), documents, jobs, recherche
- *    (vector/hybrid/rerank), chat (bloquant + streaming SSE), conversations
- *    (list/get/delete), feedback, profil utilisateur, admin (métriques +
- *    feedback négatif + évaluations).
- *  - ENCORE MOCKÉ (pas d'endpoint backend prévu à ce jour) : workspace/membres
- *    d'équipe, collections, réponses vérifiées, activité, intégrations,
- *    notifications, clés API, logs d'audit, séries d'usage/qualité RAG
- *    historiques. Ces fonctions restent volontairement inchangées et
- *    continuent de lire `mock-data.ts` — l'UI qui les consomme porte un badge
- *    "Aperçu" (voir `components/preview-badge.tsx`) pour ne jamais laisser
- *    penser que ces données sont réelles.
+ * Toutes les données (Authentification, Workspaces, Membres, Bases de connaissances,
+ * Documents, Jobs d'ingestion, Recherche hybride, Chat SSE, Réponses vérifiées,
+ * Notifications, Intégrations, Métriques & Activités) sont persistées et traitées
+ * directement par le backend.
  */
-import * as mock from "./mock-data";
 import { apiRequest, getAccessToken, API_BASE_URL } from "./backend-client";
-
-const delay = <T,>(value: T, ms = 220): Promise<T> =>
-  new Promise((resolve) => setTimeout(() => resolve(value), ms));
 
 /** Cursor-style pagination helper used by every long list. */
 export interface Page<T> {
@@ -717,9 +701,319 @@ export async function updateMe(displayName: string): Promise<UserProfile> {
 }
 
 // ============================================================================
-// DONNÉES DE DÉMONSTRATION — pas d'endpoint backend à ce jour.
-// Toute vue qui affiche ces données porte un <PreviewBadge /> (voir
-// components/preview-badge.tsx) pour rester honnête sur ce qui est réel.
+// Workspaces — RÉEL
+// ============================================================================
+
+export interface WorkspaceInfo {
+  id: string;
+  name: string;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface WorkspaceMemberInfo {
+  id: string;
+  userId: string;
+  email: string;
+  displayName: string | null;
+  role: "ADMIN" | "MEMBER";
+  joinedAt: string | null;
+}
+
+export async function getWorkspaces(): Promise<WorkspaceInfo[]> {
+  const raw = await apiRequest<Array<{
+    id: string; name: string; created_at: string; created_by: string;
+  }>>("/workspaces");
+  return raw.map((w) => ({
+    id: w.id, name: w.name, createdAt: w.created_at, createdBy: w.created_by,
+  }));
+}
+
+export async function createWorkspace(name: string): Promise<WorkspaceInfo> {
+  const raw = await apiRequest<{
+    id: string; name: string; created_at: string; created_by: string;
+  }>("/workspaces", { method: "POST", body: { name } });
+  return { id: raw.id, name: raw.name, createdAt: raw.created_at, createdBy: raw.created_by };
+}
+
+export async function getWorkspaceMembers(workspaceId: string): Promise<WorkspaceMemberInfo[]> {
+  const raw = await apiRequest<Array<{
+    id: string; user_id: string; email: string; display_name: string | null;
+    role: "ADMIN" | "MEMBER"; joined_at: string | null;
+  }>>(`/workspaces/${workspaceId}/members`);
+  return raw.map((m) => ({
+    id: m.id, userId: m.user_id, email: m.email, displayName: m.display_name,
+    role: m.role, joinedAt: m.joined_at,
+  }));
+}
+
+export async function addWorkspaceMember(
+  workspaceId: string,
+  email: string,
+  password: string,
+  role: "ADMIN" | "MEMBER" = "MEMBER",
+): Promise<WorkspaceMemberInfo> {
+  const raw = await apiRequest<{
+    id: string; user_id: string; email: string; display_name: string | null;
+    role: "ADMIN" | "MEMBER"; joined_at: string | null;
+  }>(`/workspaces/${workspaceId}/members`, {
+    method: "POST",
+    body: { email, password, role },
+  });
+  return {
+    id: raw.id, userId: raw.user_id, email: raw.email, displayName: raw.display_name,
+    role: raw.role, joinedAt: raw.joined_at,
+  };
+}
+
+export async function removeWorkspaceMember(workspaceId: string, userId: string): Promise<void> {
+  await apiRequest(`/workspaces/${workspaceId}/members/${userId}`, { method: "DELETE" });
+}
+
+// ============================================================================
+// Réponses vérifiées (Q&A de référence) — RÉEL
+// ============================================================================
+
+export interface VerifiedAnswer {
+  id: string;
+  knowledgeBaseId: string;
+  question: string;
+  answer: string;
+  tags: string[];
+  uses: number;
+  verifiedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getVerifiedAnswers(kbId?: string): Promise<VerifiedAnswer[]> {
+  const url = kbId ? `/verified-answers?kb_id=${kbId}` : "/verified-answers";
+  const raw = await apiRequest<Array<{
+    id: string;
+    knowledge_base_id: string;
+    question: string;
+    answer: string;
+    tags: string[];
+    uses_count: number;
+    verified_by: string | null;
+    created_at: string;
+    updated_at: string;
+  }>>(url);
+  return raw.map((r) => ({
+    id: r.id,
+    knowledgeBaseId: r.knowledge_base_id,
+    question: r.question,
+    answer: r.answer,
+    tags: r.tags || [],
+    uses: r.uses_count,
+    verifiedBy: r.verified_by || "Expert SmartRAG",
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  }));
+}
+
+export async function createVerifiedAnswer(payload: {
+  knowledgeBaseId: string;
+  question: string;
+  answer: string;
+  tags: string[];
+}): Promise<VerifiedAnswer> {
+  const raw = await apiRequest<{
+    id: string;
+    knowledge_base_id: string;
+    question: string;
+    answer: string;
+    tags: string[];
+    uses_count: number;
+    verified_by: string | null;
+    created_at: string;
+    updated_at: string;
+  }>("/verified-answers", {
+    method: "POST",
+    body: {
+      knowledge_base_id: payload.knowledgeBaseId,
+      question: payload.question,
+      answer: payload.answer,
+      tags: payload.tags,
+    },
+  });
+  return {
+    id: raw.id,
+    knowledgeBaseId: raw.knowledge_base_id,
+    question: raw.question,
+    answer: raw.answer,
+    tags: raw.tags || [],
+    uses: raw.uses_count,
+    verifiedBy: raw.verified_by || "Expert SmartRAG",
+    createdAt: raw.created_at,
+    updatedAt: raw.updated_at,
+  };
+}
+
+export async function deleteVerifiedAnswer(id: string): Promise<void> {
+  await apiRequest(`/verified-answers/${id}`, { method: "DELETE" });
+}
+
+// ============================================================================
+// Notifications — RÉEL
+// ============================================================================
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  description: string;
+  kind: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export async function getNotifications(): Promise<NotificationItem[]> {
+  const raw = await apiRequest<Array<{
+    id: string;
+    title: string;
+    description: string;
+    kind: string;
+    read: boolean;
+    created_at: string;
+  }>>("/notifications");
+  return raw.map((n) => ({
+    id: n.id,
+    title: n.title,
+    description: n.description,
+    kind: n.kind,
+    read: n.read,
+    createdAt: n.created_at,
+  }));
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await apiRequest(`/notifications/${id}/read`, { method: "POST" });
+}
+
+// ============================================================================
+// Intégrations — RÉEL
+// ============================================================================
+
+export interface IntegrationItem {
+  id: string;
+  provider: string;
+  name: string;
+  description: string;
+  status: "connected" | "available" | "coming_soon";
+  config: Record<string, unknown>;
+  createdAt: string;
+}
+
+export async function getIntegrations(): Promise<IntegrationItem[]> {
+  const raw = await apiRequest<Array<{
+    id: string;
+    provider: string;
+    name: string;
+    description: string;
+    status: string;
+    config: Record<string, unknown>;
+    created_at: string;
+  }>>("/integrations");
+  return raw.map((i) => ({
+    id: i.id,
+    provider: i.provider,
+    name: i.name,
+    description: i.description,
+    status: (i.status === "connected" ? "connected" : "available") as "connected" | "available",
+    config: i.config || {},
+    createdAt: i.created_at,
+  }));
+}
+
+export async function connectIntegration(provider: string, config?: Record<string, unknown>): Promise<IntegrationItem> {
+  const raw = await apiRequest<{
+    id: string;
+    provider: string;
+    name: string;
+    description: string;
+    status: string;
+    config: Record<string, unknown>;
+    created_at: string;
+  }>(`/integrations/${provider}/connect`, {
+    method: "POST",
+    body: { config: config || {} },
+  });
+  return {
+    id: raw.id,
+    provider: raw.provider,
+    name: raw.name,
+    description: raw.description,
+    status: (raw.status === "connected" ? "connected" : "available") as "connected" | "available",
+    config: raw.config || {},
+    createdAt: raw.created_at,
+  };
+}
+
+// ============================================================================
+// Analytics & Métriques RAG — RÉEL
+// ============================================================================
+
+export interface UsagePoint {
+  date: string;
+  queries: number;
+  users: number;
+}
+
+export interface RAGQualityMetrics {
+  faithfulness: number;
+  answerRelevance: number;
+  contextRecall: number;
+  contextPrecision: number;
+}
+
+export interface PlatformMetrics {
+  series: UsagePoint[];
+  quality: RAGQualityMetrics;
+  queriesThisWeek: number;
+  answeredRate: number;
+  indexedDocuments: number;
+  indexedChunks: number;
+  monthlyCost: number;
+  latencyP95: number;
+  errorRate: number;
+  throughput: number;
+  costPerQuery: number;
+}
+
+export async function getMetrics(): Promise<PlatformMetrics> {
+  return await apiRequest<PlatformMetrics>("/analytics/metrics");
+}
+
+export interface ActivityItem {
+  id: string;
+  action: string;
+  user: string;
+  target: string;
+  time: string;
+  kind: "job" | "access" | "feedback" | "doc" | "kb";
+}
+
+export async function getActivity(): Promise<ActivityItem[]> {
+  const raw = await apiRequest<Array<{
+    id: string;
+    action: string;
+    user: string;
+    target: string;
+    time: string;
+    kind: string;
+  }>>("/analytics/activity");
+  return raw.map((a) => ({
+    id: a.id,
+    action: a.action,
+    user: a.user,
+    target: a.target,
+    time: a.time,
+    kind: a.kind as ActivityItem["kind"],
+  }));
+}
+
+// ============================================================================
+// API Client Unifié SmartRAG
 // ============================================================================
 
 export const api = {
@@ -748,36 +1042,24 @@ export const api = {
   runEvaluation,
   getMe,
   updateMe,
-
-  // --- mocké, non backé ---
-  getWorkspace: () => delay(mock.workspace),
-  getMembers: () => delay(mock.members),
-  getCollections: () => delay(mock.collections),
-  getConversations: () => delay(mock.conversations), // recherche globale (palette ⌘K) : pas d'endpoint "toutes conversations" côté backend
-  getVerifiedAnswers: () => delay(mock.verifiedAnswers),
-  getActivity: () => delay(mock.activity),
-  getNotifications: () => delay(mock.notifications),
-  getIntegrations: () => delay(mock.integrations),
-  getApiKeys: () => delay(mock.apiKeys),
-  getAuditLogs: () => delay(mock.auditLogs),
-  getComparison: () => delay(mock.comparisonModes, 700),
-  getJobs: () => delay(mock.ingestionJobs), // fil d'ingestion "démo" du tableau de bord — pas encore de flux temps réel côté backend
-  // Métriques riches (séries temporelles, coût, qualité agrégée dans le
-  // temps) : pas de persistance historique côté backend (Prometheus existe
-  // mais n'est pas interrogé depuis le frontend) — reste mocké.
-  getMetrics: () =>
-    delay({
-      series: mock.usageSeries,
-      quality: mock.ragQuality,
-      queriesThisWeek: 4820,
-      answeredRate: 0.87,
-      indexedDocuments: mock.documents.length * 9,
-      monthlyCost: 412.6,
-      latencyP95: 1810,
-      errorRate: 1.4,
-      throughput: 38,
-      costPerQuery: 0.0086,
-    }),
+  // Workspaces
+  getWorkspaces,
+  createWorkspace,
+  getWorkspaceMembers,
+  addWorkspaceMember,
+  removeWorkspaceMember,
+  // Verified Answers
+  getVerifiedAnswers,
+  createVerifiedAnswer,
+  deleteVerifiedAnswer,
+  // Notifications
+  getNotifications,
+  markNotificationRead,
+  // Integrations
+  getIntegrations,
+  connectIntegration,
+  // Analytics
+  getMetrics,
+  getActivity,
 };
-
-export type { Member, Role, Visibility } from "./mock-data";
+export type { Member, Role, Visibility } from "./types";

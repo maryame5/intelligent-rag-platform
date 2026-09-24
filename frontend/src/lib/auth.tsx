@@ -13,7 +13,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, clearTokens, getAccessToken, setTokens } from "./backend-client";
-import type { Role } from "./mock-data";
+import type { Role } from "./types";
 
 export interface Session {
   userId: string;

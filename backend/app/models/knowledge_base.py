@@ -12,5 +12,5 @@ class KnowledgeBase(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
-    owner_id = Column(GUID(), ForeignKey("users.id"), nullable=False, index=True)
+    owner_id = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

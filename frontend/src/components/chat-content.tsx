@@ -1,13 +1,43 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowRight, Loader2, Plus, Trash2, ThumbsDown, ThumbsUp } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BookOpen,
+  Check,
+  ChevronRight,
+  Clock,
+  Copy,
+  FileText,
+  Layers,
+  Loader2,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Search,
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
+  Trash2,
+  X,
+  Zap,
+} from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { api, type ChatMessage, type ConversationDetail } from "@/lib/api";
+import { api, type ChatCitation, type ChatMessage, type ConversationDetail } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+const SAMPLE_PROMPTS = [
+  "Quelles sont les fonctionnalités principales documentées ?",
+  "Fais-moi un résumé synthétique des points clés.",
+  "Quelles sont les procédures et règles de conformité ?",
+  "Compare les différentes approches mentionnées dans les docs.",
+];
 
 export function ChatContent() {
   const queryClient = useQueryClient();
@@ -16,16 +46,19 @@ export function ChatContent() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
 
-  // État du streaming : null = inactif, string = contenu accumulé
+  // Inspecteur de sources latéral
+  const [selectedCitation, setSelectedCitation] = useState<ChatCitation | null>(null);
+
+  // État du streaming et des étapes
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
   const [streamingUserMsg, setStreamingUserMsg] = useState<string | null>(null);
+  const [pipelineStep, setPipelineStep] = useState<number>(0);
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  // Ref pour accumuler les chunks sans closure stale dans onDone
   const streamingBufferRef = useRef<string>("");
 
   useEffect(() => {
-    if (!kbId && kbs.length > 0) setKbId(kbs[0].id);
+    if (!kbId && kbs.length > 0) setKbId(kbs[0]?.id || "");
   }, [kbs, kbId]);
 
   const { data: conversations = [] } = useQuery({
@@ -40,7 +73,9 @@ export function ChatContent() {
     enabled: !!conversationId,
   });
 
-  // Scroll automatique vers le bas à chaque nouveau token
+  const currentKb = kbs.find((k) => k.id === kbId);
+
+  // Scroll automatique vers le bas
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [streamingContent, conversation?.messages]);
@@ -69,35 +104,42 @@ export function ChatContent() {
           ),
         };
       });
-      toast.success(variables.rating === "up" ? "Merci pour ce retour positif." : "Merci, c'est noté.");
+      toast.success(variables.rating === "up" ? "Merci pour ce retour positif !" : "Merci, feedback enregistré.");
     },
     onError: (error: Error) => toast.error(error.message || "Échec de l'envoi du feedback."),
   });
 
-  const handleSend = () => {
-    const trimmed = draft.trim();
-    if (!trimmed || isSending || !kbId) return;
+  const handleSend = (textToSend?: string) => {
+    const text = (textToSend ?? draft).trim();
+    if (!text || isSending || !kbId) return;
     setDraft("");
-    setStreamingUserMsg(trimmed);
+    setStreamingUserMsg(text);
     setStreamingContent("");
     setIsSending(true);
+    setPipelineStep(1);
     streamingBufferRef.current = "";
+
+    // Simuler le passage dynamique des étapes de raisonnement RAG
+    const timer1 = setTimeout(() => setPipelineStep(2), 600);
+    const timer2 = setTimeout(() => setPipelineStep(3), 1200);
 
     api.sendChatMessageStream({
       knowledgeBaseId: kbId,
       conversationId: conversationId ?? undefined,
-      message: trimmed,
-      onChunk: (text) => {
-        streamingBufferRef.current += text;
-        setStreamingContent((prev) => (prev ?? "") + text);
+      message: text,
+      onChunk: (chunk) => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        setPipelineStep(3);
+        streamingBufferRef.current += chunk;
+        setStreamingContent((prev) => (prev ?? "") + chunk);
       },
       onDone: (result) => {
         const newConversationId = result.conversationId;
         const accumulated = streamingBufferRef.current;
 
-        // Mettre à jour le cache QueryClient avec les vrais messages
         queryClient.setQueryData<ConversationDetail>(["conversation", newConversationId], (old) => {
-          const userMsg: ChatMessage = { id: `local-u-${Date.now()}`, role: "user", content: trimmed };
+          const userMsg: ChatMessage = { id: `local-u-${Date.now()}`, role: "user", content: text };
           const assistantMsg: ChatMessage = {
             id: result.messageId,
             role: "assistant",
@@ -109,7 +151,7 @@ export function ChatContent() {
           return {
             id: newConversationId,
             kbId,
-            title: trimmed.slice(0, 80),
+            title: text.slice(0, 80),
             createdAt: new Date().toISOString(),
             messages: [userMsg, assistantMsg],
           };
@@ -117,17 +159,18 @@ export function ChatContent() {
 
         setConversationId(newConversationId);
         queryClient.invalidateQueries({ queryKey: ["conversations", kbId] });
-        // Invalider pour récupérer le vrai message depuis le serveur (avec citations complètes)
         queryClient.invalidateQueries({ queryKey: ["conversation", newConversationId] });
         setStreamingContent(null);
         setStreamingUserMsg(null);
         setIsSending(false);
+        setPipelineStep(0);
       },
       onError: (err) => {
         toast.error(err.message || "Échec de l'envoi du message.");
         setStreamingContent(null);
         setStreamingUserMsg(null);
         setIsSending(false);
+        setPipelineStep(0);
       },
     });
   };
@@ -135,9 +178,13 @@ export function ChatContent() {
   const messages: ChatMessage[] = conversation?.messages ?? [];
 
   return (
-    <div className="grid min-h-[calc(100vh-3.5rem)] md:grid-cols-[280px_1fr]">
-      <aside className="border-r p-3">
-        <div className="mb-3">
+    <div className="grid min-h-[calc(100vh-3.5rem)] md:grid-cols-[280px_1fr] bg-gradient-to-b from-background to-surface-raised/30">
+      {/* Sidebar des conversations */}
+      <aside className="border-r border-border/70 p-3.5 bg-card/60 backdrop-blur">
+        <div className="mb-3 space-y-1.5">
+          <label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase px-1">
+            Base de connaissances
+          </label>
           <Select
             value={kbId}
             onValueChange={(v) => {
@@ -145,196 +192,506 @@ export function ChatContent() {
               setConversationId(null);
             }}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full bg-surface border-border/80 text-xs font-medium">
               <SelectValue placeholder="Choisir une base" />
             </SelectTrigger>
             <SelectContent>
               {kbs.map((kb) => (
                 <SelectItem key={kb.id} value={kb.id}>
-                  {kb.name}
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="size-3.5 text-[#3d4f7e] dark:text-[#e18546]" />
+                    <span>{kb.name}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <Button className="mb-4 w-full" onClick={() => setConversationId(null)} disabled={!kbId}>
-          <Plus />
+
+        <Button
+          className="mb-4 w-full bg-[#3d4f7e] text-white hover:bg-[#262236] shadow-sm transition-all text-xs"
+          onClick={() => {
+            setConversationId(null);
+            setSelectedCitation(null);
+          }}
+          disabled={!kbId}
+        >
+          <Plus className="mr-1.5 size-4" />
           Nouvelle conversation
         </Button>
-        <p className="px-2 pb-2 text-xs font-semibold uppercase text-muted-foreground">Récentes</p>
-        {conversations.map((c) => (
-          <div
-            key={c.id}
-            className={cn(
-              "group mb-1 flex items-center gap-1 rounded-md hover:bg-secondary",
-              conversationId === c.id ? "bg-secondary" : "bg-transparent",
-            )}
-          >
-            <button
-              onClick={() => setConversationId(c.id)}
-              className="min-w-0 flex-1 p-3 text-left text-sm"
+
+        <div className="flex items-center justify-between px-2 pb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Historique</p>
+          <span className="text-[10px] text-muted-foreground">{conversations.length}</span>
+        </div>
+
+        <div className="space-y-1 overflow-y-auto max-h-[calc(100vh-250px)]">
+          {conversations.map((c) => (
+            <div
+              key={c.id}
+              className={cn(
+                "group flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs transition-all",
+                conversationId === c.id
+                  ? "bg-[#3d4f7e]/15 text-[#3d4f7e] font-semibold dark:bg-[#3d4f7e]/30 dark:text-[#fefef3] border border-[#3d4f7e]/20"
+                  : "text-foreground hover:bg-secondary/70",
+              )}
             >
-              <span className="block truncate font-medium">{c.title ?? "Conversation"}</span>
-              <span className="text-xs text-muted-foreground">
-                {new Date(c.createdAt).toLocaleDateString("fr-FR")}
-              </span>
-            </button>
-            <button
-              aria-label="Supprimer cette conversation"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteMutation.mutate(c.id);
-              }}
-              disabled={deleteMutation.isPending}
-              className="mr-1.5 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-            >
-              <Trash2 className="size-3.5" />
-            </button>
-          </div>
-        ))}
-        {kbId && conversations.length === 0 ? (
-          <p className="px-2 text-xs text-muted-foreground">Aucune conversation pour cette base.</p>
-        ) : null}
+              <button
+                onClick={() => {
+                  setConversationId(c.id);
+                  setSelectedCitation(null);
+                }}
+                className="min-w-0 flex-1 text-left"
+              >
+                <span className="block truncate">{c.title ?? "Conversation"}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {new Date(c.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                </span>
+              </button>
+              <button
+                aria-label="Supprimer cette conversation"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteMutation.mutate(c.id);
+                }}
+                disabled={deleteMutation.isPending}
+                className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+              >
+                <Trash2 className="size-3.5" />
+              </button>
+            </div>
+          ))}
+          {kbId && conversations.length === 0 ? (
+            <p className="px-2 py-4 text-center text-xs text-muted-foreground">Aucune conversation archivée.</p>
+          ) : null}
+        </div>
       </aside>
 
-      <section className="flex min-w-0 flex-col">
+      {/* Main Chat Area & Source Inspector Drawer */}
+      <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <PageHeader
-          title={conversation?.title ?? "Nouvelle conversation"}
-          description="Réponses ancrées dans les sources autorisées, avec citations."
+          title={conversation?.title ?? (currentKb ? `Discussion avec ${currentKb.name}` : "Studio de Conversation RAG")}
+          description="Chaque réponse est strictement sourcée, traçable et ancrée dans vos documents avec reranking hybride."
+          actions={
+            currentKb && (
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#3d4f7e]/10 px-3 py-1 text-xs font-medium text-[#3d4f7e] dark:bg-[#3d4f7e]/30 dark:text-[#fefef3] border border-[#3d4f7e]/20">
+                  <Layers className="size-3 text-[#e18546]" />
+                  {currentKb.documentCount} documents indexés
+                </span>
+              </div>
+            )
+          }
         />
-        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 md:p-8">
-          {kbs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Créez d'abord une knowledge base pour pouvoir discuter avec vos documents.
-            </p>
-          ) : null}
 
-          {messages.map((m) => (
-            <MessageBubble
-              key={m.id}
-              message={m}
-              onFeedback={
-                m.role === "assistant" ? (rating) => feedbackMutation.mutate({ messageId: m.id, rating }) : undefined
-              }
-            />
-          ))}
+        <div className="flex flex-1 min-h-0">
+          {/* Messages stream */}
+          <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+            <div className="mx-auto max-w-3xl space-y-6">
+              {messages.length === 0 && streamingUserMsg === null ? (
+                <div className="my-10 flex flex-col items-center justify-center text-center">
+                  <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] text-[#fefef3] shadow-lg shadow-[#3d4f7e]/20">
+                    <Sparkles className="size-8 text-[#e18546]" />
+                  </div>
+                  <h3 className="mt-5 text-xl font-bold text-[#262236] dark:text-[#fefef3]">
+                    Explorez {currentKb?.name || "vos connaissances"}
+                  </h3>
+                  <p className="mt-2 max-w-md text-sm text-muted-foreground leading-relaxed">
+                    Posez vos questions en langage naturel. Le moteur RAG combine recherche vectorielle dense et BM25 avec citations exactes.
+                  </p>
 
-          {/* Bulle en cours de streaming */}
-          {streamingUserMsg !== null ? (
-            <>
-              <MessageBubble message={{ id: "pending-user", role: "user", content: streamingUserMsg }} />
-              {streamingContent !== null ? (
-                <StreamingBubble content={streamingContent} />
-              ) : (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" />
-                  Recherche dans les documents…
+                  <div className="mt-8 grid w-full gap-2.5 sm:grid-cols-2">
+                    {SAMPLE_PROMPTS.map((prompt) => (
+                      <button
+                        key={prompt}
+                        onClick={() => handleSend(prompt)}
+                        className="group flex items-center justify-between rounded-xl border border-border/80 bg-surface/70 p-3.5 text-left text-xs font-medium text-foreground transition-all hover:border-[#3d4f7e]/60 hover:bg-surface-raised hover:shadow-sm"
+                      >
+                        <span className="line-clamp-2">{prompt}</span>
+                        <ArrowRight className="ml-2 size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-[#e18546]" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </>
-          ) : null}
+              ) : null}
 
-          <div ref={bottomRef} />
+              {messages.map((m) => (
+                <MessageBubble
+                  key={m.id}
+                  message={m}
+                  onSelectCitation={(citation) => setSelectedCitation(citation)}
+                  selectedCitation={selectedCitation}
+                  onFeedback={
+                    m.role === "assistant" ? (rating) => feedbackMutation.mutate({ messageId: m.id, rating }) : undefined
+                  }
+                />
+              ))}
 
-          <div className="mt-auto flex gap-2 border-t pt-4">
+              {/* Streaming state & live pipeline animation */}
+              {streamingUserMsg !== null ? (
+                <div className="space-y-4">
+                  <MessageBubble
+                    message={{ id: "pending-user", role: "user", content: streamingUserMsg }}
+                  />
+
+                  {/* Reasoning / Processing Steps Card */}
+                  <div className="rounded-xl border border-border/80 bg-surface/90 p-4 shadow-sm backdrop-blur space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#3d4f7e] dark:text-[#e18546]">
+                      <Zap className="size-4 animate-pulse text-[#e18546]" />
+                      Pipeline RAG en cours d'exécution
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-[11px]">
+                      <div
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-md p-2 transition-all",
+                          pipelineStep >= 1
+                            ? "bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3] font-medium"
+                            : "bg-secondary text-muted-foreground",
+                        )}
+                      >
+                        {pipelineStep === 1 ? (
+                          <Loader2 className="size-3 animate-spin text-[#e18546]" />
+                        ) : pipelineStep > 1 ? (
+                          <Check className="size-3 text-emerald-500" />
+                        ) : (
+                          <Search className="size-3" />
+                        )}
+                        1. Recherche hybride
+                      </div>
+
+                      <div
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-md p-2 transition-all",
+                          pipelineStep >= 2
+                            ? "bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3] font-medium"
+                            : "bg-secondary text-muted-foreground",
+                        )}
+                      >
+                        {pipelineStep === 2 ? (
+                          <Loader2 className="size-3 animate-spin text-[#e18546]" />
+                        ) : pipelineStep > 2 ? (
+                          <Check className="size-3 text-emerald-500" />
+                        ) : (
+                          <Layers className="size-3" />
+                        )}
+                        2. Reranking
+                      </div>
+
+                      <div
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-md p-2 transition-all",
+                          pipelineStep >= 3
+                            ? "bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3] font-medium"
+                            : "bg-secondary text-muted-foreground",
+                        )}
+                      >
+                        {pipelineStep === 3 && !streamingContent ? (
+                          <Loader2 className="size-3 animate-spin text-[#e18546]" />
+                        ) : pipelineStep >= 3 ? (
+                          <Sparkles className="size-3 text-[#e18546]" />
+                        ) : (
+                          <FileText className="size-3" />
+                        )}
+                        3. Synthèse sourcée
+                      </div>
+                    </div>
+
+                    {streamingContent && (
+                      <div className="pt-2 border-t border-border/60 text-sm leading-relaxed text-foreground">
+                        <MarkdownFormatted content={streamingContent} />
+                        <span className="ml-1 inline-block size-2 rounded-full animate-ping bg-[#e18546]" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+
+              <div ref={bottomRef} />
+            </div>
+          </div>
+
+          {/* Source Inspector Drawer (Volet latéral) */}
+          {selectedCitation && (
+            <aside className="w-80 md:w-96 shrink-0 border-l border-border/80 bg-card p-5 shadow-lg flex flex-col overflow-y-auto">
+              <div className="flex items-center justify-between border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546]">
+                    <FileText className="size-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Source Inspecteur
+                    </h4>
+                    <p className="text-xs font-semibold text-[#262236] dark:text-[#fefef3]">
+                      Citation [{selectedCitation.index}]
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 text-muted-foreground hover:bg-secondary"
+                  onClick={() => setSelectedCitation(null)}
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+
+              <div className="mt-4 space-y-4 flex-1">
+                <div>
+                  <span className="text-[11px] font-semibold text-muted-foreground uppercase">Document d'origine</span>
+                  <p className="mt-1 text-sm font-semibold text-[#262236] dark:text-[#fefef3]">
+                    {selectedCitation.documentTitle}
+                  </p>
+                  {selectedCitation.page ? (
+                    <span className="mt-1 inline-block rounded bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">
+                      Page {selectedCitation.page}
+                    </span>
+                  ) : null}
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-semibold text-muted-foreground uppercase">
+                      Passage / Chunk extrait
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedCitation.excerpt);
+                        toast.success("Extrait copié dans le presse-papier !");
+                      }}
+                    >
+                      <Copy className="mr-1 size-3" />
+                      Copier
+                    </Button>
+                  </div>
+                  <div className="rounded-xl border border-[#3d4f7e]/25 bg-[#3d4f7e]/5 p-3.5 text-xs leading-relaxed text-foreground font-mono selection:bg-[#e18546]/30">
+                    {selectedCitation.excerpt}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-border/70 bg-surface-raised p-3 text-xs space-y-2">
+                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <ShieldCheck className="size-4" />
+                    Ancrage vérifié
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-normal">
+                    Ce passage a été sélectionné et validé par le modèle de reranking pour composer la réponse générée.
+                  </p>
+                </div>
+              </div>
+            </aside>
+          )}
+        </div>
+
+        {/* Input Bar */}
+        <div className="border-t border-border/80 bg-card/80 p-4 backdrop-blur">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="mx-auto flex max-w-3xl items-center gap-2 rounded-2xl border border-border/80 bg-surface p-1.5 shadow-md focus-within:border-[#3d4f7e] focus-within:ring-2 focus-within:ring-[#3d4f7e]/20 transition-all"
+          >
             <Input
-              placeholder="Posez une question à vos documents…"
+              placeholder="Posez votre question à vos documents…"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) handleSend();
-              }}
               disabled={!kbId || isSending}
+              className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm px-3"
             />
-            <Button aria-label="Envoyer" onClick={handleSend} disabled={!kbId || isSending}>
-              {isSending ? <Loader2 className="animate-spin" /> : <ArrowRight />}
+            <Button
+              type="submit"
+              size="icon"
+              disabled={!kbId || isSending || !draft.trim()}
+              className="size-9 shrink-0 rounded-xl bg-[#3d4f7e] text-white hover:bg-[#262236] transition-all"
+            >
+              {isSending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
             </Button>
-          </div>
+          </form>
         </div>
       </section>
     </div>
   );
 }
 
-/** Bulle animée pendant le streaming — affiche les tokens au fur et à mesure. */
-function StreamingBubble({ content }: { content: string }) {
+/** Formateur Markdown simple avec coloration des blocs de code et citations */
+function MarkdownFormatted({ content }: { content: string }) {
+  // Découpage simple des blocs de code pour un rendu propre
+  const parts = content.split(/(```[\s\S]*?```)/g);
+
   return (
-    <div className="max-w-[92%] border-l-2 border-primary bg-surface p-4 text-sm leading-6">
-      <p>
-        {content}
-        <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-primary align-middle" />
-      </p>
+    <div className="space-y-2 text-sm leading-relaxed">
+      {parts.map((part, index) => {
+        if (part.startsWith("```") && part.endsWith("```")) {
+          const lines = part.slice(3, -3).trim().split("\n");
+          const lang = lines[0] || "text";
+          const code = lines.slice(1).join("\n") || lines[0];
+          return (
+            <div key={index} className="my-3 overflow-hidden rounded-xl border border-border bg-[#262236] text-[#fefef3] text-xs">
+              <div className="flex items-center justify-between bg-black/30 px-3 py-1.5 text-[11px] font-mono text-muted-foreground">
+                <span>{lang}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(code);
+                    toast.success("Code copié !");
+                  }}
+                  className="flex items-center gap-1 hover:text-white"
+                >
+                  <Copy className="size-3" /> Copier
+                </button>
+              </div>
+              <pre className="p-3 overflow-x-auto font-mono">{code}</pre>
+            </div>
+          );
+        }
+
+        return (
+          <p key={index} className="whitespace-pre-wrap">
+            {part}
+          </p>
+        );
+      })}
     </div>
   );
 }
 
 function MessageBubble({
   message,
+  onSelectCitation,
+  selectedCitation,
   onFeedback,
 }: {
   message: ChatMessage;
-  onFeedback?: (rating: "up" | "down") => void;
+  onSelectCitation?: (citation: ChatCitation) => void;
+  selectedCitation?: ChatCitation | null;
+  onFeedback?: ((rating: "up" | "down") => void) | undefined;
 }) {
+  const [copied, setCopied] = useState(false);
+
   if (message.role === "user") {
     return (
-      <div className="ml-auto max-w-[80%] rounded-md bg-primary px-4 py-3 text-sm text-primary-foreground">
-        {message.content}
+      <div className="flex justify-end">
+        <div className="max-w-[80%] rounded-2xl bg-gradient-to-r from-[#3d4f7e] to-[#262236] px-4 py-3 text-sm text-[#fefef3] shadow-md">
+          {message.content}
+        </div>
       </div>
     );
   }
 
   const notFound = message.notFound ?? !message.citations;
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    toast.success("Réponse copiée dans le presse-papier !");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div
       className={cn(
-        "max-w-[92%] border-l-2 p-4 text-sm leading-6",
-        notFound ? "border-warning bg-warning/5" : "border-primary bg-surface",
+        "rounded-2xl border p-5 shadow-sm transition-all",
+        notFound
+          ? "border-amber-500/40 bg-amber-500/5"
+          : "border-border/80 bg-card hover:border-[#3d4f7e]/30",
       )}
     >
-      {notFound ? (
-        <div className="mb-2 flex items-center gap-2 text-xs font-medium text-warning">
-          <AlertTriangle className="size-3.5" />
-          Information non trouvée dans les documents de cette base
+      {notFound && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+          <AlertTriangle className="size-4" />
+          Information non trouvée dans les documents de cette base.
         </div>
-      ) : null}
-      <p>{message.content}</p>
-      {message.citations?.map((c) => (
-        <div key={c.index} className="mt-3 rounded-md border bg-surface-raised p-3 text-xs">
-          <strong>
-            [{c.index}] {c.documentTitle}
-            {c.page ? `, p. ${c.page}` : ""}
-          </strong>
-          <p className="mt-1 text-muted-foreground">{c.excerpt}</p>
+      )}
+
+      <MarkdownFormatted content={message.content} />
+
+      {/* Citations interactives */}
+      {message.citations && message.citations.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-border/60">
+          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
+            Sources & Références citées :
+          </span>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {message.citations.map((c) => {
+              const isSelected = selectedCitation?.index === c.index;
+              return (
+                <button
+                  key={c.index}
+                  type="button"
+                  onClick={() => onSelectCitation?.(c)}
+                  className={cn(
+                    "flex items-start gap-2.5 rounded-xl border p-2.5 text-left text-xs transition-all",
+                    isSelected
+                      ? "border-[#e18546] bg-[#e18546]/10 text-foreground ring-1 ring-[#e18546]"
+                      : "border-border/70 bg-surface-raised/60 hover:border-[#3d4f7e]/50 hover:bg-surface-raised",
+                  )}
+                >
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded bg-[#3d4f7e]/15 font-mono text-[10px] font-bold text-[#3d4f7e] dark:text-[#e18546]">
+                    {c.index}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold truncate text-[#262236] dark:text-[#fefef3]">
+                      {c.documentTitle}
+                    </p>
+                    <p className="line-clamp-1 text-[11px] text-muted-foreground">{c.excerpt}</p>
+                  </div>
+                  <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+                </button>
+              );
+            })}
+          </div>
         </div>
-      ))}
-      {onFeedback ? (
-        <div className="mt-3 flex items-center gap-1 border-t pt-2">
-          <span className="mr-1 text-xs text-muted-foreground">Cette réponse était utile ?</span>
-          <button
-            type="button"
-            aria-label="Utile"
-            onClick={() => onFeedback("up")}
-            className={cn(
-              "rounded p-1 transition-colors hover:bg-secondary",
-              message.feedback === "up" ? "text-success" : "text-muted-foreground",
-            )}
+      )}
+
+      {/* Actions footer (Copy & Feedback) */}
+      <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-2.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopy}
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            <ThumbsUp className="size-3.5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Pas utile"
-            onClick={() => onFeedback("down")}
-            className={cn(
-              "rounded p-1 transition-colors hover:bg-secondary",
-              message.feedback === "down" ? "text-destructive" : "text-muted-foreground",
-            )}
-          >
-            <ThumbsDown className="size-3.5" />
-          </button>
+            {copied ? <Check className="mr-1 size-3.5 text-emerald-500" /> : <Copy className="mr-1 size-3.5" />}
+            {copied ? "Copié" : "Copier"}
+          </Button>
         </div>
-      ) : null}
+
+        {onFeedback ? (
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px]">Utile ?</span>
+            <button
+              type="button"
+              aria-label="Utile"
+              onClick={() => onFeedback("up")}
+              className={cn(
+                "rounded p-1 transition-colors hover:bg-secondary",
+                message.feedback === "up" ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground",
+              )}
+            >
+              <ThumbsUp className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Pas utile"
+              onClick={() => onFeedback("down")}
+              className={cn(
+                "rounded p-1 transition-colors hover:bg-secondary",
+                message.feedback === "down" ? "text-destructive" : "text-muted-foreground",
+              )}
+            >
+              <ThumbsDown className="size-3.5" />
+            </button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
+

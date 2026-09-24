@@ -6,6 +6,10 @@ from app.models.job import IngestionJob, JobStatus
 from app.models.conversation import Conversation
 from app.models.message import Message, MessageRole
 from app.models.feedback import MessageFeedback, FeedbackRating
+from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
+from app.models.verified_answer import VerifiedAnswer
+from app.models.notification import Notification
+from app.models.integration import Integration
 
 __all__ = [
     "User",
@@ -21,4 +25,10 @@ __all__ = [
     "MessageRole",
     "MessageFeedback",
     "FeedbackRating",
+    "Workspace",
+    "WorkspaceMember",
+    "WorkspaceRole",
+    "VerifiedAnswer",
+    "Notification",
+    "Integration",
 ]

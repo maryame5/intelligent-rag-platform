@@ -5,9 +5,9 @@ import { SettingsContent } from "@/components/data-pages";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Paramètres — Acme Intelligence" },
+      { title: "Paramètres — SmartRAG" },
       { name: "description", content: "Profil, workspace, sécurité et préférences de réponse." },
-      { property: "og:title", content: "Paramètres — Acme Intelligence" },
+      { property: "og:title", content: "Paramètres — SmartRAG" },
       { property: "og:description", content: "Profil, workspace, sécurité et préférences de réponse." },
     ],
   }),

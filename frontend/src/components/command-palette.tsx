@@ -15,8 +15,23 @@ import { api } from "@/lib/api";
 export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const navigate = useNavigate();
   const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
-  const { data: convos = [] } = useQuery({ queryKey: ["conversations"], queryFn: api.getConversations });
-  const { data: verified = [] } = useQuery({ queryKey: ["verified"], queryFn: api.getVerifiedAnswers });
+  const { data: convos = [] } = useQuery({
+    queryKey: ["all-convos", kbs.map((k) => k.id)],
+    queryFn: async () => {
+      const lists = await Promise.all(kbs.map((kb) => api.getConversationsForKb(kb.id)));
+      return lists.flat();
+    },
+    enabled: kbs.length > 0,
+  });
+  const { data: docs = [] } = useQuery({
+    queryKey: ["all-docs-palette", kbs.map((k) => k.id)],
+    queryFn: async () => {
+      const lists = await Promise.all(kbs.map((kb) => api.getDocuments(kb.id, 5)));
+      return lists.flat();
+    },
+    enabled: kbs.length > 0,
+  });
+  const { data: verified = [] } = useQuery({ queryKey: ["verified"], queryFn: () => api.getVerifiedAnswers() });
 
   const go = (to: string, params?: Record<string, string>) => {
     onOpenChange(false);
@@ -70,10 +85,11 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Documents">
-          {["Politique de télétravail 2026", "Playbook escalade support", "Guide migration API v3"].map((d) => (
-            <CommandItem key={d} value={d} onSelect={() => go("/knowledge-bases")}>
+          {docs.slice(0, 6).map((d) => (
+            <CommandItem key={d.id} value={d.title} onSelect={() => go("/knowledge-bases/$kbId", { kbId: d.knowledgeBaseId })}>
               <FileText className="size-4" />
-              {d}
+              <span className="truncate">{d.title}</span>
+              <span className="ml-auto text-xs text-muted-foreground">{d.status}</span>
             </CommandItem>
           ))}
         </CommandGroup>

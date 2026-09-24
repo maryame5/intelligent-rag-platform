@@ -23,8 +23,8 @@ class MessageFeedback(Base):
     )
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    message_id = Column(GUID(), ForeignKey("messages.id"), nullable=False, index=True)
-    user_id = Column(GUID(), ForeignKey("users.id"), nullable=False, index=True)
+    message_id = Column(GUID(), ForeignKey("messages.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     rating = Column(Enum(FeedbackRating), nullable=False)
     comment = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

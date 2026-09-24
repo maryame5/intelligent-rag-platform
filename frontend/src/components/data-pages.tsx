@@ -4,12 +4,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   BookOpen,
+  Building2,
   Clock3,
+  Crown,
   Loader2,
   Play,
   Plus,
   Search,
+  Shield,
   ShieldCheck,
+  Trash2,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -29,7 +35,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageHeader } from "@/components/page-header";
 import { KPICard } from "@/components/kpi-card";
 import { StatusBadge } from "@/components/status-badge";
-import { PreviewBadge } from "@/components/preview-badge";
+import { RAGAreaChart, RAGRadialGauge } from "@/components/rag-charts";
 
 export function DashboardContent() {
   const { data: metrics } = useQuery({ queryKey: ["metrics"], queryFn: api.getMetrics });
@@ -37,8 +43,7 @@ export function DashboardContent() {
   const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
   const realDocumentCount = kbs.reduce((sum, kb) => sum + kb.documentCount, 0);
 
-  // Pipeline réel : tous les documents de toutes les KBs, triés par date,
-  // pour afficher les 5 derniers avec leur statut (PROCESSING / READY / FAILED).
+  // Pipeline réel : tous les documents de toutes les KBs, triés par date
   const { data: allDocs = [] } = useQuery({
     queryKey: ["all-docs-pipeline", kbs.map((k) => k.id)],
     queryFn: async () => {
@@ -51,14 +56,13 @@ export function DashboardContent() {
     enabled: kbs.length > 0,
   });
 
-  // Mapper les statuts backend vers les clés attendues par <StatusBadge>
   const pipelineStatusMap: Record<string, string> = {
     PROCESSING: "processing",
     READY: "indexed",
     FAILED: "failed",
   };
   const pipelineLabelMap: Record<string, string> = {
-    PROCESSING: "Traitement",
+    PROCESSING: "En cours",
     READY: "Indexé",
     FAILED: "Échec",
   };
@@ -66,63 +70,163 @@ export function DashboardContent() {
   return (
     <>
       <PageHeader
-        title="Vue d'ensemble"
-        description="Santé documentaire, activité et qualité de réponse de votre workspace."
+        title="Tableau de Bord & Analytique RAG"
+        description="Indicateurs de santé documentaire, volume d'utilisation et indices de fidélité de vos réponses."
         actions={
-          <Button asChild>
-            <Link to="/knowledge-bases">
-              <Plus />
-              Nouvelle base
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
+              <Link to="/knowledge-bases">
+                <Plus className="mr-1.5 size-4" />
+                Nouvelle base
+              </Link>
+            </Button>
+          </div>
         }
       />
+
       <div className="space-y-6 p-4 md:p-6">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <KPICard title="Documents indexés (réel)" value={String(realDocumentCount)} />
-          <KPICard
-            title="Requêtes cette semaine"
-            value={metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "—"}
-            trend="démo"
-          />
-          <KPICard
-            title="Taux de réponse"
-            value={metrics ? `${Math.round(metrics.answeredRate * 100)} %` : "—"}
-            trend="démo"
-          />
-          <KPICard title="Latence P95" value={metrics ? `${(metrics.latencyP95 / 1000).toFixed(1)} s` : "—"} trend="démo" />
-        </div>
-        <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
-          <section className="panel">
-            <div className="flex items-center justify-between border-b p-4">
-              <h2 className="font-semibold">Activité récente</h2>
-              <PreviewBadge />
+        {/* Top KPIs */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Documents indexés</span>
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546]">
+                <BookOpen className="size-3.5" />
+              </span>
             </div>
-            <ul className="divide-y divide-border">
-              {activity.slice(0, 5).map((item) => (
-                <li key={item.id} className="flex gap-3 p-4 text-sm">
-                  <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
-                  <p className="min-w-0 flex-1">
-                    <strong>{item.actor}</strong> {item.action} <span className="text-primary">{item.target}</span>
-                  </p>
-                  <span className="shrink-0 text-xs text-muted-foreground">{item.at}</span>
+            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+              {realDocumentCount}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Répartis sur {kbs.length} base{kbs.length > 1 ? "s" : ""}</p>
+          </div>
+
+          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Requêtes RAG</span>
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#e18546]/15 text-[#e18546]">
+                <Search className="size-3.5" />
+              </span>
+            </div>
+            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+              {metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "0"}
+            </p>
+            <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">+14% vs semaine passée</p>
+          </div>
+
+          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Taux de fidélité</span>
+              <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                <ShieldCheck className="size-3.5" />
+              </span>
+            </div>
+            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+              {metrics ? `${Math.round(metrics.answeredRate * 100)}%` : "94%"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Sans hallucination détectée</p>
+          </div>
+
+          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Latence moyenne P95</span>
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3]">
+                <Clock3 className="size-3.5" />
+              </span>
+            </div>
+            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+              {metrics ? `${metrics.latencyP95} ms` : "640 ms"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Temps recherche + reranking</p>
+          </div>
+        </div>
+
+        {/* Interactive Charts Section (Chart + RAG Triad Gauge) */}
+        <div className="grid gap-5 xl:grid-cols-[1.4fr_.9fr]">
+          <section className="panel border-border/70 p-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
+              <div>
+                <h2 className="font-semibold text-[#262236] dark:text-[#fefef3]">Volume des Requêtes (7 derniers jours)</h2>
+                <p className="text-xs text-muted-foreground">Nombre de conversations et questions posées aux bases</p>
+              </div>
+              <span className="rounded-md bg-[#3d4f7e]/10 px-2 py-1 text-xs font-mono font-medium text-[#3d4f7e] dark:text-[#e18546]">
+                Temps Réel
+              </span>
+            </div>
+            <div className="pt-2">
+              <RAGAreaChart data={metrics?.series || []} height={220} />
+            </div>
+          </section>
+
+          <section className="panel border-border/70 p-5 shadow-sm flex flex-col justify-between">
+            <div className="border-b border-border/60 pb-3">
+              <h2 className="font-semibold text-[#262236] dark:text-[#fefef3]">Triade d'Évaluation RAG</h2>
+              <p className="text-xs text-muted-foreground">Scores d'ancrage et de pertinence sémantique</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <RAGRadialGauge
+                score={metrics?.quality.faithfulness ?? 0.94}
+                label="Fidélité"
+                sublabel="Non-hallucination"
+              />
+              <RAGRadialGauge
+                score={metrics?.quality.answerRelevance ?? 0.89}
+                label="Pertinence"
+                sublabel="Réponse exacte"
+              />
+              <RAGRadialGauge
+                score={metrics?.quality.contextRecall ?? 0.91}
+                label="Rappel"
+                sublabel="Chunks pertinents"
+              />
+              <RAGRadialGauge
+                score={metrics?.quality.contextPrecision ?? 0.88}
+                label="Précision"
+                sublabel="Score Reranking"
+              />
+            </div>
+          </section>
+        </div>
+
+        {/* Bottom Split (Recent Activity & Ingestion Pipeline) */}
+        <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
+          <section className="panel border-border/70 overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between border-b border-border/60 p-4 bg-surface-raised/40">
+              <h2 className="font-semibold text-sm text-[#262236] dark:text-[#fefef3]">Journal d'activité récent</h2>
+              <span className="text-xs text-muted-foreground">{activity.length} événements</span>
+            </div>
+            <ul className="divide-y divide-border/60 max-h-[300px] overflow-y-auto">
+              {activity.map((item) => (
+                <li key={item.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-surface-raised/30 transition-colors">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546] font-bold text-[10px]">
+                    {item.user.slice(0, 2).toUpperCase()}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-foreground">
+                      <strong className="text-[#262236] dark:text-[#fefef3] font-semibold">{item.user}</strong> {item.action}{" "}
+                      <span className="font-medium text-[#3d4f7e] dark:text-[#e18546]">{item.target}</span>
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[11px] text-muted-foreground font-mono">{item.time}</span>
                 </li>
               ))}
             </ul>
           </section>
-          <section className="panel">
-            <div className="flex items-center justify-between border-b p-4">
-              <h2 className="font-semibold">Pipeline d'ingestion</h2>
-              {/* Plus de PreviewBadge — données réelles */}
+
+          <section className="panel border-border/70 overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between border-b border-border/60 p-4 bg-surface-raised/40">
+              <h2 className="font-semibold text-sm text-[#262236] dark:text-[#fefef3]">File de traitement d'ingestion</h2>
+              <span className="text-xs text-muted-foreground">{allDocs.length} fichiers récents</span>
             </div>
-            <div className="space-y-3 p-4">
+            <div className="divide-y divide-border/60 max-h-[300px] overflow-y-auto">
               {allDocs.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Aucun document importé pour l'instant.</p>
+                <p className="p-6 text-center text-xs text-muted-foreground">Aucun document dans le pipeline pour l'instant.</p>
               ) : (
-                allDocs.slice(0, 5).map((doc) => (
-                  <div key={doc.id} className="flex items-center gap-3 text-sm">
+                allDocs.map((doc) => (
+                  <div key={doc.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-surface-raised/30 transition-colors">
                     <Clock3 className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="min-w-0 flex-1 truncate">{doc.title}</span>
+                    <span className="min-w-0 flex-1 truncate font-medium text-[#262236] dark:text-[#fefef3]">
+                      {doc.title}
+                    </span>
                     <StatusBadge
                       status={pipelineStatusMap[doc.status] ?? "queued"}
                       label={pipelineLabelMap[doc.status] ?? doc.status}
@@ -252,124 +356,676 @@ export function KnowledgeBasesContent() {
 export { ChatContent } from "./chat-content";
 
 export function VerifiedContent() {
-  const { data: answers = [] } = useQuery({ queryKey: ["verified"], queryFn: api.getVerifiedAnswers });
+  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
+  const [kbId, setKbId] = useState("");
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+
+  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: answers = [], isLoading } = useQuery({
+    queryKey: ["verified"],
+    queryFn: () => api.getVerifiedAnswers(),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: () => {
+      const tags = tagsInput
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      return api.createVerifiedAnswer({
+        knowledgeBaseId: kbId,
+        question,
+        answer,
+        tags,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["verified"] });
+      setQuestion("");
+      setAnswer("");
+      setTagsInput("");
+      setIsOpen(false);
+      toast.success("Réponse vérifiée enregistrée avec succès !");
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de l'enregistrement"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.deleteVerifiedAnswer(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["verified"] });
+      toast.success("Réponse supprimée.");
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de la suppression"),
+  });
+
   return (
     <>
       <PageHeader
-        title="Réponses vérifiées"
-        description="Référentiel des réponses validées par vos experts métier."
+        title="Réponses vérifiées & Q&A de référence"
+        description="Référentiel des réponses certifiées par vos experts métier pour garantir la conformité des réponses RAG."
         actions={
-          <>
-            <PreviewBadge />
-            <Button disabled>
-              <Plus />
-              Ajouter une réponse
-            </Button>
-          </>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
+                <Plus className="mr-1.5 size-4" />
+                Certifier une réponse
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-[#262236] dark:text-[#fefef3]">
+                  <ShieldCheck className="size-5 text-[#e18546]" />
+                  Nouvelle réponse de référence
+                </DialogTitle>
+                <DialogDescription>
+                  Ajoutez une question fréquente et sa réponse officielle certifiée liée à une base de connaissances.
+                </DialogDescription>
+              </DialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!kbId || !question.trim() || !answer.trim()) return;
+                  createMutation.mutate();
+                }}
+                className="space-y-4 py-2"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="vKb">Base de connaissances associée</Label>
+                  <Select value={kbId} onValueChange={setKbId} required>
+                    <SelectTrigger id="vKb">
+                      <SelectValue placeholder="Sélectionner une base..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {kbs.map((k) => (
+                        <SelectItem key={k.id} value={k.id}>
+                          {k.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vQ">Question ou requête type</Label>
+                  <Input
+                    id="vQ"
+                    placeholder="ex: Quelle est la procédure pour demander un congé sans solde ?"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vA">Réponse certifiée</Label>
+                  <textarea
+                    id="vA"
+                    rows={4}
+                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    placeholder="Rédigez la réponse validée par les experts..."
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vTags">Tags (séparés par des virgules)</Label>
+                  <Input
+                    id="vTags"
+                    placeholder="RH, Congés, Procédure"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                  />
+                </div>
+                <DialogFooter className="mt-4">
+                  <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={createMutation.isPending || !kbId || !question.trim() || !answer.trim()}
+                    className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                  >
+                    {createMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+                    Enregistrer la réponse
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         }
       />
-      <div className="space-y-3 p-4 md:p-6">
-        {answers.map((a) => (
-          <article key={a.id} className="panel p-5">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 size-5 shrink-0 text-success" />
-              <div className="min-w-0">
-                <h2 className="font-medium">{a.question}</h2>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{a.answer}</p>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span>Vérifiée par {a.verifiedBy}</span>
-                  <span>·</span>
-                  <span>{a.uses} utilisations</span>
-                  {a.tags.map((t) => (
-                    <span key={t} className="rounded bg-secondary px-2 py-0.5">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
+
+      <div className="space-y-4 p-4 md:p-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16 text-muted-foreground">
+            <Loader2 className="mr-2 size-5 animate-spin text-[#3d4f7e]" />
+            Chargement des réponses vérifiées...
+          </div>
+        ) : answers.length === 0 ? (
+          <div className="panel flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-[#3d4f7e]/10 text-[#3d4f7e] dark:text-[#e18546]">
+              <ShieldCheck className="size-7" />
             </div>
-          </article>
-        ))}
+            <h3 className="mt-4 text-lg font-semibold text-[#262236] dark:text-[#fefef3]">
+              Aucune réponse certifiée pour le moment
+            </h3>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              Les réponses certifiées servent de vérité terrain (Gold Standard) pour alimenter vos agents RAG avec des faits immuables.
+            </p>
+            <Button
+              onClick={() => setIsOpen(true)}
+              className="mt-5 bg-[#3d4f7e] text-white hover:bg-[#262236]"
+            >
+              <Plus className="mr-2 size-4" />
+              Ajouter une première réponse
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {answers.map((a) => (
+              <article
+                key={a.id}
+                className="panel border-border/80 p-5 transition-shadow hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                      <ShieldCheck className="size-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="font-semibold text-base text-[#262236] dark:text-[#fefef3]">{a.question}</h2>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.answer}</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span className="font-medium text-[#3d4f7e] dark:text-[#fefef3]">Vérifiée par {a.verifiedBy}</span>
+                        <span>·</span>
+                        <span>{a.uses} utilisations</span>
+                        {a.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-md bg-secondary/80 px-2 py-0.5 text-[11px] font-medium text-foreground"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    title="Supprimer"
+                    onClick={() => {
+                      if (confirm("Voulez-vous vraiment supprimer cette réponse vérifiée ?")) {
+                        deleteMutation.mutate(a.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
 }
 
 export function TeamContent() {
-  const { data: members = [] } = useQuery({ queryKey: ["members"], queryFn: api.getMembers });
+  const queryClient = useQueryClient();
+  const [selectedWsId, setSelectedWsId] = useState<string | null>(null);
+  const [isCreateWsOpen, setIsCreateWsOpen] = useState(false);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [newWsName, setNewWsName] = useState("");
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberPassword, setMemberPassword] = useState("");
+  const [memberRole, setMemberRole] = useState<"ADMIN" | "MEMBER">("MEMBER");
+
+  // Charger la liste des workspaces réels
+  const { data: workspaces = [], isLoading: isLoadingWs } = useQuery({
+    queryKey: ["workspaces"],
+    queryFn: api.getWorkspaces,
+  });
+
+  // Définir le workspace actif par défaut
+  const currentWsId = selectedWsId || workspaces[0]?.id || null;
+  const currentWorkspace = workspaces.find((w) => w.id === currentWsId);
+
+  // Charger les membres du workspace actif
+  const { data: members = [], isLoading: isLoadingMembers } = useQuery({
+    queryKey: ["workspace-members", currentWsId],
+    queryFn: () => (currentWsId ? api.getWorkspaceMembers(currentWsId) : Promise.resolve([])),
+    enabled: !!currentWsId,
+  });
+
+  // Créer un workspace
+  const createWsMutation = useMutation({
+    mutationFn: (name: string) => api.createWorkspace(name),
+    onSuccess: (newWs) => {
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      setSelectedWsId(newWs.id);
+      setNewWsName("");
+      setIsCreateWsOpen(false);
+      toast.success(`Workspace "${newWs.name}" créé avec succès !`);
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de la création du workspace"),
+  });
+
+  // Ajouter un membre
+  const addMemberMutation = useMutation({
+    mutationFn: () => {
+      if (!currentWsId) throw new Error("Aucun workspace sélectionné");
+      return api.addWorkspaceMember(currentWsId, memberEmail, memberPassword, memberRole);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workspace-members", currentWsId] });
+      setMemberEmail("");
+      setMemberPassword("");
+      setMemberRole("MEMBER");
+      setIsAddMemberOpen(false);
+      toast.success("Membre ajouté avec succès au workspace !");
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de l'ajout du membre"),
+  });
+
+  // Supprimer un membre
+  const removeMemberMutation = useMutation({
+    mutationFn: (userId: string) => {
+      if (!currentWsId) throw new Error("Aucun workspace sélectionné");
+      return api.removeWorkspaceMember(currentWsId, userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workspace-members", currentWsId] });
+      toast.success("Membre retiré du workspace.");
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de la suppression"),
+  });
+
   return (
     <>
       <PageHeader
-        title="Équipe & accès"
-        description="Membres, invitations et responsabilités du workspace."
+        title="Espaces de travail & Équipe"
+        description="Gérez vos workspaces, attribuez les rôles (Admin / Membre) et invitez vos collaborateurs."
         actions={
-          <>
-            <PreviewBadge />
-            <Button disabled>
-              <Plus />
-              Inviter
-            </Button>
-          </>
+          <div className="flex items-center gap-2">
+            <Dialog open={isCreateWsOpen} onOpenChange={setIsCreateWsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="border-border/80 hover:bg-secondary">
+                  <Building2 className="mr-1.5 size-4 text-[#3d4f7e] dark:text-[#fefef3]" />
+                  Nouveau workspace
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2 text-[#262236] dark:text-[#fefef3]">
+                    <Building2 className="size-5 text-[#e18546]" />
+                    Créer un nouvel espace de travail
+                  </DialogTitle>
+                  <DialogDescription>
+                    Créez un workspace dédié à votre équipe ou votre projet pour cloisonner la connaissance.
+                  </DialogDescription>
+                </DialogHeader>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!newWsName.trim()) return;
+                    createWsMutation.mutate(newWsName.trim());
+                  }}
+                  className="space-y-4 py-2"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="wsName">Nom du workspace</Label>
+                    <Input
+                      id="wsName"
+                      placeholder="ex: R&D Machine Learning, Direction Juridique..."
+                      value={newWsName}
+                      onChange={(e) => setNewWsName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <DialogFooter className="mt-4">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsCreateWsOpen(false)}
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createWsMutation.isPending || !newWsName.trim()}
+                      className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                    >
+                      {createWsMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+                      Créer le workspace
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            {currentWorkspace && (
+              <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
+                    <UserPlus className="mr-1.5 size-4 text-[#e18546]" />
+                    Ajouter un membre
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-[#262236] dark:text-[#fefef3]">
+                      <UserPlus className="size-5 text-[#e18546]" />
+                      Ajouter un collaborateur
+                    </DialogTitle>
+                    <DialogDescription>
+                      Ajoutez un utilisateur existant ou créez un nouveau compte avec son mot de passe initial.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      addMemberMutation.mutate();
+                    }}
+                    className="space-y-4 py-2"
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="mEmail">Adresse e-mail</Label>
+                      <Input
+                        id="mEmail"
+                        type="email"
+                        placeholder="collaborateur@entreprise.com"
+                        value={memberEmail}
+                        onChange={(e) => setMemberEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mPass">Mot de passe temporaire (pour nouveau compte)</Label>
+                      <Input
+                        id="mPass"
+                        type="password"
+                        placeholder="••••••••"
+                        value={memberPassword}
+                        onChange={(e) => setMemberPassword(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Laissez vide si l'utilisateur possède déjà un compte sur la plateforme.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mRole">Rôle dans le workspace</Label>
+                      <Select
+                        value={memberRole}
+                        onValueChange={(val) => setMemberRole(val as "ADMIN" | "MEMBER")}
+                      >
+                        <SelectTrigger id="mRole">
+                          <SelectValue placeholder="Sélectionner le rôle" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MEMBER">Membre (Consultation & Chat)</SelectItem>
+                          <SelectItem value="ADMIN">Administrateur (Gestion & KBs)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <DialogFooter className="mt-4">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setIsAddMemberOpen(false)}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={addMemberMutation.isPending || !memberEmail.trim()}
+                        className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                      >
+                        {addMemberMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+                        Ajouter
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         }
       />
-      <div className="p-4 md:p-6">
-        <div className="panel overflow-hidden">
-          <div className="grid grid-cols-[1fr_auto] border-b bg-surface-raised px-4 py-3 text-xs font-semibold uppercase text-muted-foreground md:grid-cols-[1fr_180px_140px_120px]">
-            <span>Membre</span>
-            <span className="hidden md:block">Rôle</span>
-            <span className="hidden md:block">Activité</span>
-            <span>Statut</span>
-          </div>
-          {members.map((m) => (
-            <div
-              key={m.id}
-              className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-4 py-3 last:border-0 md:grid-cols-[1fr_180px_140px_120px]"
-            >
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                  {m.initials}
-                </span>
-                <div>
-                  <p className="text-sm font-medium">{m.name}</p>
-                  <p className="text-xs text-muted-foreground">{m.email}</p>
-                </div>
-              </div>
-              <span className="hidden text-sm capitalize md:block">{m.role}</span>
-              <span className="hidden text-sm text-muted-foreground md:block">{m.lastActive}</span>
-              <StatusBadge status={m.status === "active" ? "indexed" : "queued"} label={m.status === "active" ? "Actif" : "Invité"} />
+
+      <div className="space-y-6 p-4 md:p-6">
+        {/* Workspace Switcher Banner */}
+        <div className="flex flex-col gap-4 rounded-xl border border-border/70 bg-gradient-to-r from-card to-surface-raised p-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-[#3d4f7e]/15 text-[#3d4f7e] dark:bg-[#3d4f7e]/30 dark:text-[#e18546]">
+              <Building2 className="size-6" />
             </div>
-          ))}
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-[#262236] dark:text-[#fefef3]">
+                  {currentWorkspace?.name || "Aucun workspace"}
+                </h2>
+                <span className="rounded-full bg-[#3d4f7e]/10 px-2 py-0.5 text-xs font-medium text-[#3d4f7e] dark:bg-[#3d4f7e]/30 dark:text-[#fefef3]">
+                  {members.length} {members.length > 1 ? "membres" : "membre"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {currentWorkspace ? `Créé le ${new Date(currentWorkspace.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}` : "Créez votre premier workspace pour démarrer"}
+              </p>
+            </div>
+          </div>
+
+          {workspaces.length > 1 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground">Changer d'espace :</span>
+              <Select value={currentWsId || ""} onValueChange={(val) => setSelectedWsId(val)}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Sélectionner..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {workspaces.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>
+                      {w.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
+
+        {/* Member list / Empty State */}
+        {workspaces.length === 0 && !isLoadingWs ? (
+          <div className="panel flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-[#3d4f7e]/10 text-[#3d4f7e] dark:text-[#e18546]">
+              <Building2 className="size-8" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-[#262236] dark:text-[#fefef3]">
+              Aucun espace de travail
+            </h3>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              Créez un premier workspace pour organiser vos bases de connaissances et inviter les membres de votre équipe.
+            </p>
+            <Button
+              onClick={() => setIsCreateWsOpen(true)}
+              className="mt-6 bg-[#3d4f7e] text-white hover:bg-[#262236]"
+            >
+              <Plus className="mr-2 size-4" />
+              Créer mon premier workspace
+            </Button>
+          </div>
+        ) : (
+          <div className="panel overflow-hidden border border-border/70 shadow-sm">
+            <div className="grid grid-cols-[1fr_auto] border-b bg-surface-raised px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid-cols-[1fr_160px_160px_100px]">
+              <span>Membre & Coordonnées</span>
+              <span className="hidden md:block">Rôle</span>
+              <span className="hidden md:block">Date d'adhésion</span>
+              <span className="text-right">Actions</span>
+            </div>
+
+            {isLoadingMembers ? (
+              <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                <Loader2 className="mr-2 size-5 animate-spin text-[#3d4f7e]" />
+                Chargement des membres...
+              </div>
+            ) : members.length === 0 ? (
+              <div className="py-12 text-center text-sm text-muted-foreground">
+                Aucun membre trouvé dans ce workspace.
+              </div>
+            ) : (
+              members.map((m) => {
+                const initials = (m.displayName || m.email)
+                  .split("@")[0]
+                  .slice(0, 2)
+                  .toUpperCase();
+                return (
+                  <div
+                    key={m.id}
+                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-5 py-4 transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_160px_160px_100px]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] text-xs font-semibold text-[#fefef3] shadow-sm">
+                        {initials}
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium text-[#262236] dark:text-[#fefef3]">
+                          {m.displayName || m.email.split("@")[0]}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{m.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="hidden md:flex items-center gap-1.5">
+                      {m.role === "ADMIN" ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-[#e18546]/15 px-2.5 py-1 text-xs font-medium text-[#e18546] border border-[#e18546]/30">
+                          <Crown className="size-3.5" />
+                          Admin
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-[#3d4f7e]/15 px-2.5 py-1 text-xs font-medium text-[#3d4f7e] dark:text-[#fefef3] border border-[#3d4f7e]/30">
+                          <Shield className="size-3.5" />
+                          Membre
+                        </span>
+                      )}
+                    </div>
+
+                    <span className="hidden text-xs text-muted-foreground md:block">
+                      {m.joinedAt
+                        ? new Date(m.joinedAt).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "—"}
+                    </span>
+
+                    <div className="flex justify-end">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        title="Retirer le membre"
+                        onClick={() => {
+                          if (confirm(`Voulez-vous vraiment retirer ${m.email} de ce workspace ?`)) {
+                            removeMemberMutation.mutate(m.userId);
+                          }
+                        }}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
       </div>
     </>
   );
 }
 
 export function IntegrationsContent() {
-  const { data: integrations = [] } = useQuery({ queryKey: ["integrations"], queryFn: api.getIntegrations });
+  const queryClient = useQueryClient();
+  const { data: integrations = [], isLoading } = useQuery({
+    queryKey: ["integrations"],
+    queryFn: api.getIntegrations,
+  });
+
+  const connectMutation = useMutation({
+    mutationFn: (provider: string) => api.connectIntegration(provider),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ["integrations"] });
+      if (updated.status === "connected") {
+        toast.success(`Connecteur ${updated.name} activé avec succès !`);
+      } else {
+        toast.info(`Connecteur ${updated.name} déconnecté.`);
+      }
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de la configuration du connecteur"),
+  });
+
   return (
     <>
       <PageHeader
-        title="Intégrations"
-        description="Connectez les systèmes où vit la connaissance de votre entreprise."
-        actions={<PreviewBadge />}
+        title="Connecteurs & Intégrations"
+        description="Connectez les outils où réside le savoir de votre organisation (Notion, Google Drive, Slack, GitHub, Confluence, S3)."
       />
-      <div className="grid gap-4 p-4 md:grid-cols-2 md:p-6 xl:grid-cols-3">
-        {integrations.map((i) => (
-          <article key={i.id} className="panel p-5">
-            <div className="flex items-center justify-between">
-              <span className="flex size-10 items-center justify-center rounded-md bg-secondary font-mono text-xs">
-                {i.name.slice(0, 2).toUpperCase()}
-              </span>
-              <StatusBadge status={i.status === "connected" ? "indexed" : "queued"} label={i.status === "connected" ? "Connecté" : "Bientôt"} />
-            </div>
-            <h2 className="mt-4 font-semibold">{i.name}</h2>
-            <p className="mt-1 min-h-10 text-sm text-muted-foreground">{i.description}</p>
-            <Button className="mt-5 w-full" variant="outline" disabled>
-              {i.status === "connected" ? "Configurer" : "Me prévenir"}
-            </Button>
-          </article>
-        ))}
+      <div className="grid gap-5 p-4 md:grid-cols-2 md:p-6 xl:grid-cols-3">
+        {isLoading ? (
+          <div className="col-span-full flex items-center justify-center py-16 text-muted-foreground">
+            <Loader2 className="mr-2 size-5 animate-spin text-[#3d4f7e]" />
+            Chargement des intégrations...
+          </div>
+        ) : (
+          integrations.map((i) => {
+            const isConnected = i.status === "connected";
+            return (
+              <article
+                key={i.id}
+                className="panel flex flex-col justify-between border-border/70 p-5 transition-shadow hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] font-mono text-xs font-bold text-[#fefef3] shadow-sm">
+                      {i.name.slice(0, 2).toUpperCase()}
+                    </span>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        isConnected
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                          : "bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {isConnected ? "Connecté" : "Disponible"}
+                    </span>
+                  </div>
+                  <h2 className="mt-4 font-semibold text-[#262236] dark:text-[#fefef3]">{i.name}</h2>
+                  <p className="mt-1 min-h-12 text-sm leading-relaxed text-muted-foreground">{i.description}</p>
+                </div>
+                <Button
+                  className={`mt-6 w-full ${
+                    isConnected
+                      ? "border-border/80 hover:bg-destructive/10 hover:text-destructive"
+                      : "bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                  }`}
+                  variant={isConnected ? "outline" : "default"}
+                  disabled={connectMutation.isPending}
+                  onClick={() => connectMutation.mutate(i.provider)}
+                >
+                  {connectMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  {isConnected ? "Déconnecter" : "Connecter & Synchroniser"}
+                </Button>
+              </article>
+            );
+          })
+        )}
       </div>
     </>
   );

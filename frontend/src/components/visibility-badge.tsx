@@ -1,5 +1,5 @@
 import { Globe, Lock, Users } from "lucide-react";
-import type { Visibility } from "@/lib/mock-data";
+import type { Visibility } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const map = {

@@ -146,28 +146,28 @@ export interface NotificationItem {
 }
 
 export const workspace = {
-  id: "ws_acme",
-  name: "Acme Industries",
+  id: "ws_smartrag",
+  name: "SmartRAG",
   plan: "Business",
   seats: 214,
   createdAt: "2024-11-03",
 };
 
 export const members: Member[] = [
-  { id: "u1", name: "Maryame Idrissi", email: "maryame@acme.io", role: "owner", lastActive: "il y a 2 min", initials: "MI", kbCount: 12, status: "active" },
-  { id: "u2", name: "Julien Marchand", email: "julien@acme.io", role: "admin", lastActive: "il y a 18 min", initials: "JM", kbCount: 9, status: "active" },
-  { id: "u3", name: "Sofia Ben Amar", email: "sofia@acme.io", role: "editor", lastActive: "il y a 1 h", initials: "SB", kbCount: 5, status: "active" },
-  { id: "u4", name: "Tom Nguyen", email: "tom@acme.io", role: "editor", lastActive: "il y a 3 h", initials: "TN", kbCount: 4, status: "active" },
-  { id: "u5", name: "Claire Dubois", email: "claire@acme.io", role: "member", lastActive: "hier", initials: "CD", kbCount: 3, status: "active" },
-  { id: "u6", name: "Ahmed Ziani", email: "ahmed@acme.io", role: "member", lastActive: "il y a 2 j", initials: "AZ", kbCount: 2, status: "active" },
-  { id: "u7", name: "Lena Petit", email: "lena@acme.io", role: "member", lastActive: "—", initials: "LP", kbCount: 0, status: "invited" },
-  { id: "u8", name: "Marc Oliveira", email: "marc@acme.io", role: "editor", lastActive: "—", initials: "MO", kbCount: 0, status: "invited" },
+  { id: "u1", name: "Maryame Idrissi", email: "maryame@smartrag.io", role: "owner", lastActive: "il y a 2 min", initials: "MI", kbCount: 12, status: "active" },
+  { id: "u2", name: "Julien Marchand", email: "julien@smartrag.io", role: "admin", lastActive: "il y a 18 min", initials: "JM", kbCount: 9, status: "active" },
+  { id: "u3", name: "Sofia Ben Amar", email: "sofia@smartrag.io", role: "editor", lastActive: "il y a 1 h", initials: "SB", kbCount: 5, status: "active" },
+  { id: "u4", name: "Tom Nguyen", email: "tom@smartrag.io", role: "editor", lastActive: "il y a 3 h", initials: "TN", kbCount: 4, status: "active" },
+  { id: "u5", name: "Claire Dubois", email: "claire@smartrag.io", role: "member", lastActive: "hier", initials: "CD", kbCount: 3, status: "active" },
+  { id: "u6", name: "Ahmed Ziani", email: "ahmed@smartrag.io", role: "member", lastActive: "il y a 2 j", initials: "AZ", kbCount: 2, status: "active" },
+  { id: "u7", name: "Lena Petit", email: "lena@smartrag.io", role: "member", lastActive: "—", initials: "LP", kbCount: 0, status: "invited" },
+  { id: "u8", name: "Marc Oliveira", email: "marc@smartrag.io", role: "editor", lastActive: "—", initials: "MO", kbCount: 0, status: "invited" },
 ];
 
 export const collections = ["Produit", "RH", "Juridique", "Support"];
 
 export const knowledgeBases: KnowledgeBase[] = [
-  { id: "kb_prod_docs", name: "Documentation produit", collection: "Produit", description: "Specs, release notes et guides d'intégration de la suite Acme.", visibility: "workspace", documents: 428, chunks: 12840, coverage: 92, freshnessDays: 6, updatedAt: "2026-09-09", members: ["u1", "u2", "u3", "u4"], recallAtK: 0.91, precisionAtK: 0.78 },
+  { id: "kb_prod_docs", name: "Documentation produit", collection: "Produit", description: "Specs, release notes et guides d'intégration de la suite SmartRAG.", visibility: "workspace", documents: 428, chunks: 12840, coverage: 92, freshnessDays: 6, updatedAt: "2026-09-09", members: ["u1", "u2", "u3", "u4"], recallAtK: 0.91, precisionAtK: 0.78 },
   { id: "kb_api_ref", name: "Référence API", collection: "Produit", description: "OpenAPI, exemples de code et guides de migration v2 → v3.", visibility: "workspace", documents: 156, chunks: 5320, coverage: 88, freshnessDays: 3, updatedAt: "2026-09-10", members: ["u1", "u4"], recallAtK: 0.87, precisionAtK: 0.81 },
   { id: "kb_hr", name: "Procédures RH", collection: "RH", description: "Congés, onboarding, politique de télétravail, avantages.", visibility: "team", documents: 94, chunks: 2210, coverage: 79, freshnessDays: 21, updatedAt: "2026-09-04", members: ["u1", "u3", "u5"], recallAtK: 0.83, precisionAtK: 0.74 },
   { id: "kb_legal", name: "Base légale & conformité", collection: "Juridique", description: "Contrats types, RGPD, DPA, politiques de rétention.", visibility: "private", documents: 61, chunks: 1890, coverage: 71, freshnessDays: 34, updatedAt: "2026-08-28", members: ["u1", "u2"], recallAtK: 0.76, precisionAtK: 0.7 },

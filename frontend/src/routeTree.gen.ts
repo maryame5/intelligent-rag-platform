@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -36,6 +37,11 @@ const AdminRoute = AdminRouteImport.update({
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationsRoute = IntegrationsRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/chat': typeof ChatRoute
+  '/dashboard': typeof DashboardRoute
   '/integrations': typeof IntegrationsRoute
   '/onboarding': typeof OnboardingRoute
   '/settings': typeof SettingsRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/chat': typeof ChatRoute
+  '/dashboard': typeof DashboardRoute
   '/integrations': typeof IntegrationsRoute
   '/onboarding': typeof OnboardingRoute
   '/settings': typeof SettingsRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/chat': typeof ChatRoute
+  '/dashboard': typeof DashboardRoute
   '/integrations': typeof IntegrationsRoute
   '/onboarding': typeof OnboardingRoute
   '/settings': typeof SettingsRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/chat'
+    | '/dashboard'
     | '/integrations'
     | '/onboarding'
     | '/settings'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/chat'
+    | '/dashboard'
     | '/integrations'
     | '/onboarding'
     | '/settings'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/chat'
+    | '/dashboard'
     | '/integrations'
     | '/onboarding'
     | '/settings'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   ChatRoute: typeof ChatRoute
+  DashboardRoute: typeof DashboardRoute
   IntegrationsRoute: typeof IntegrationsRoute
   OnboardingRoute: typeof OnboardingRoute
   SettingsRoute: typeof SettingsRoute
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integrations': {
@@ -299,6 +319,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ChatRoute: ChatRoute,
+  DashboardRoute: DashboardRoute,
   IntegrationsRoute: IntegrationsRoute,
   OnboardingRoute: OnboardingRoute,
   SettingsRoute: SettingsRoute,

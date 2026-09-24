@@ -75,10 +75,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Acme Intelligence — Plateforme RAG d'entreprise" },
+      { title: "SmartRAG — Plateforme RAG d'entreprise" },
       { name: "description", content: "Plateforme d'intelligence documentaire : bases de connaissance gouvernées, réponses citées et observabilité." },
-      { name: "author", content: "Acme Intelligence" },
-      { property: "og:title", content: "Acme Intelligence — Plateforme RAG d'entreprise" },
+      { name: "author", content: "SmartRAG" },
+      { property: "og:title", content: "SmartRAG — Plateforme RAG d'entreprise" },
       { property: "og:description", content: "Bases de connaissance gouvernées, réponses citées et observabilité." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

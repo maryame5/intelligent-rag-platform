@@ -15,7 +15,7 @@ import { api, documentStatusBadge, documentTypeLabel } from "@/lib/api";
 export const Route = createFileRoute("/knowledge-bases/$kbId")({
   head: () => ({
     meta: [
-      { title: "Base de connaissance — Acme Intelligence" },
+      { title: "Base de connaissance — SmartRAG" },
       { name: "description", content: "Documents, accès et paramètres de la base." },
     ],
   }),
@@ -35,12 +35,21 @@ function KnowledgeBaseDetail() {
 
   const { data: kb } = useQuery({ queryKey: ["kb", kbId], queryFn: () => api.getKnowledgeBase(kbId) });
   const { data: docs = [] } = useQuery({ queryKey: ["docs", kbId], queryFn: () => api.getDocuments(kbId) });
-  const { data: members = [] } = useQuery({ queryKey: ["members"], queryFn: api.getMembers });
+  const { data: workspaces = [] } = useQuery({ queryKey: ["workspaces"], queryFn: api.getWorkspaces });
+  const currentWsId = workspaces[0]?.id;
+  const { data: members = [] } = useQuery({
+    queryKey: ["workspace-members", currentWsId],
+    queryFn: () => (currentWsId ? api.getWorkspaceMembers(currentWsId) : Promise.resolve([])),
+    enabled: !!currentWsId,
+  });
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<(typeof docs)[number] | null>(null);
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const { document, jobId } = await api.uploadDocument(kbId, file);
-      toast.info(`« ${file.name} » envoyé, traitement en cours…`);
+      toast.info(`« ${file.name} » envoyé, traitement et indexation en cours…`);
       await queryClient.invalidateQueries({ queryKey: ["docs", kbId] });
       const job = await api.pollJobUntilDone(jobId);
       return { document, job };
@@ -75,7 +84,6 @@ function KnowledgeBaseDetail() {
   });
 
   const [newKbName, setNewKbName] = useState("");
-  // Initialiser le champ une fois la KB chargée
   const [kbNameInitialised, setKbNameInitialised] = useState(false);
   if (kb && !kbNameInitialised) {
     setNewKbName(kb.name);
@@ -98,6 +106,13 @@ function KnowledgeBaseDetail() {
     e.target.value = "";
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) uploadMutation.mutate(file);
+  };
+
   const filtered = docs.filter((d) => d.title.toLowerCase().includes(query.toLowerCase()));
 
   return (
@@ -115,21 +130,26 @@ function KnowledgeBaseDetail() {
               className="hidden"
               onChange={handleFileSelected}
             />
-            <Button onClick={() => fileInputRef.current?.click()} disabled={uploadMutation.isPending}>
-              {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <Upload />}
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadMutation.isPending}
+              className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+            >
+              {uploadMutation.isPending ? <Loader2 className="animate-spin mr-1.5 size-4" /> : <Upload className="mr-1.5 size-4" />}
               Importer un document
             </Button>
           </>
         }
       />
 
-      <div className="space-y-5 p-4 md:p-6">
+      <div className="space-y-6 p-4 md:p-6">
+        {/* Top KPIs */}
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard label="Documents" value={String(kb?.documentCount ?? 0)} icon={FileText} />
           <KpiCard
             label="Indexés"
             value={String(docs.filter((d) => d.status === "READY").length)}
-            hint="prêts pour la recherche"
+            hint="prêts pour le RAG"
           />
           <KpiCard
             label="En traitement"
@@ -141,13 +161,16 @@ function KnowledgeBaseDetail() {
           />
         </div>
 
+        {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-1 border-b border-border">
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${
-                tab === t ? "border-primary font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`-mb-px border-b-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                tab === t
+                  ? "border-[#3d4f7e] text-[#3d4f7e] dark:border-[#e18546] dark:text-[#e18546]"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {t}
@@ -156,34 +179,61 @@ function KnowledgeBaseDetail() {
         </div>
 
         {tab === "Documents" ? (
-          <section className="space-y-4">
-            <div className="flex max-w-md items-center gap-2 rounded-md border border-border bg-surface px-3">
+          <section className="space-y-5">
+            {/* Drag & Drop Zone */}
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`panel flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all border-2 border-dashed ${
+                isDragging
+                  ? "border-[#e18546] bg-[#e18546]/10 scale-[1.01]"
+                  : "border-border/80 hover:border-[#3d4f7e]/50 hover:bg-surface-raised/40"
+              }`}
+            >
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546]">
+                <Upload className="size-6" />
+              </div>
+              <h3 className="mt-3 text-sm font-bold text-[#262236] dark:text-[#fefef3]">
+                Glissez-déposez vos fichiers ici, ou cliquez pour parcourir
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Formats acceptés : PDF, DOCX, Markdown, HTML, TXT (Traitement automatique en chunks vectorisés)
+              </p>
+            </div>
+
+            <div className="flex max-w-md items-center gap-2 rounded-xl border border-border/80 bg-surface px-3 py-1 shadow-sm">
               <Search className="size-4 text-muted-foreground" />
               <Input
-                className="border-0 shadow-none focus-visible:ring-0"
-                placeholder="Rechercher un document…"
+                className="border-0 shadow-none focus-visible:ring-0 text-xs"
+                placeholder="Rechercher parmi les documents indexés…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
+
             {filtered.length === 0 ? (
               <EmptyState
                 icon={FileText}
                 title="Aucun document"
                 description="Importez des fichiers PDF, DOCX, HTML ou Markdown pour alimenter cette base."
                 action={
-                  <Button onClick={() => fileInputRef.current?.click()}>
-                    <Upload />
+                  <Button onClick={() => fileInputRef.current?.click()} className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
+                    <Upload className="mr-1.5 size-4" />
                     Importer
                   </Button>
                 }
               />
             ) : (
-              <div className="panel overflow-hidden">
-                <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-border bg-surface-raised px-4 py-2.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase md:grid-cols-[1fr_80px_140px_120px_40px]">
+              <div className="panel overflow-hidden border border-border/70 shadow-sm">
+                <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-border/70 bg-surface-raised/60 px-5 py-3 text-xs font-semibold tracking-wider text-muted-foreground uppercase md:grid-cols-[1fr_100px_140px_120px_40px]">
                   <span>Document</span>
-                  <span className="hidden md:block">Type</span>
-                  <span className="hidden md:block">Déposé le</span>
+                  <span className="hidden md:block">Format</span>
+                  <span className="hidden md:block">Date d'import</span>
                   <span>Statut</span>
                   <span />
                 </div>
@@ -192,21 +242,23 @@ function KnowledgeBaseDetail() {
                   return (
                     <div
                       key={d.id}
-                      className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border px-4 py-2.5 text-sm last:border-0 md:grid-cols-[1fr_80px_140px_120px_40px]"
+                      className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border/60 px-5 py-3.5 text-xs transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_100px_140px_120px_40px]"
                     >
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        {d.status === "FAILED" ? (
-                          <AlertCircle className="size-4 shrink-0 text-destructive" />
-                        ) : (
-                          <FileText className="size-4 shrink-0 text-muted-foreground" />
-                        )}
-                        <span className="truncate">{d.title}</span>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#3d4f7e]/10 text-[#3d4f7e] dark:text-[#e18546]">
+                          {d.status === "FAILED" ? (
+                            <AlertCircle className="size-4 text-destructive" />
+                          ) : (
+                            <FileText className="size-4" />
+                          )}
+                        </div>
+                        <span className="truncate font-medium text-sm text-[#262236] dark:text-[#fefef3]">{d.title}</span>
                       </div>
-                      <span className="hidden font-mono text-xs text-muted-foreground md:block">
+                      <span className="hidden font-mono text-[11px] text-muted-foreground uppercase md:block">
                         {documentTypeLabel(d.mimeType)}
                       </span>
                       <span className="hidden truncate text-xs text-muted-foreground md:block">
-                        {new Date(d.createdAt).toLocaleDateString("fr-FR")}
+                        {new Date(d.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
                       </span>
                       <span className="justify-self-start">
                         <StatusBadge status={badge.status} label={badge.label} />
@@ -215,10 +267,15 @@ function KnowledgeBaseDetail() {
                         variant="ghost"
                         size="icon"
                         aria-label="Supprimer"
-                        onClick={() => deleteMutation.mutate(d.id)}
+                        onClick={() => {
+                          if (confirm(`Voulez-vous supprimer « ${d.title} » ?`)) {
+                            deleteMutation.mutate(d.id);
+                          }
+                        }}
                         disabled={deleteMutation.isPending}
+                        className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                       >
-                        <Trash2 className="size-4 text-muted-foreground" />
+                        <Trash2 className="size-4" />
                       </Button>
                     </div>
                   );
@@ -229,26 +286,33 @@ function KnowledgeBaseDetail() {
         ) : null}
 
         {tab === "Accès" ? (
-          <section className="panel max-w-3xl p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold">Membres ayant accès</h2>
-              <PreviewBadge />
+          <section className="panel max-w-3xl p-6 shadow-sm border-border/70">
+            <div className="flex items-center justify-between border-b pb-3 mb-4">
+              <div>
+                <h2 className="font-semibold text-[#262236] dark:text-[#fefef3]">Membres du workspace ayant accès</h2>
+                <p className="text-xs text-muted-foreground">
+                  Tous les collaborateurs de ce workspace peuvent interroger cette base documentaire.
+                </p>
+              </div>
+              <span className="rounded-full bg-[#3d4f7e]/10 px-2.5 py-1 text-xs font-medium text-[#3d4f7e] dark:text-[#e18546]">
+                {members.length} membre{members.length > 1 ? "s" : ""}
+              </span>
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Le backend actuel ne gère qu'un propriétaire par base (pas encore de permissions
-              partagées) — cette liste illustre la fonctionnalité cible.
-            </p>
-            <ul className="mt-5 divide-y divide-border border-t border-border">
+            <ul className="divide-y divide-border/60">
               {members.map((m) => (
-                <li key={m.id} className="flex items-center gap-3 py-3">
-                  <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {m.initials}
+                <li key={m.id} className="flex items-center gap-3 py-3.5">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] text-xs font-semibold text-[#fefef3]">
+                    {(m.displayName || m.email).slice(0, 2).toUpperCase()}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{m.name}</p>
+                    <p className="text-sm font-medium text-[#262236] dark:text-[#fefef3]">
+                      {m.displayName || m.email.split("@")[0]}
+                    </p>
                     <p className="truncate text-xs text-muted-foreground">{m.email}</p>
                   </div>
-                  <span className="text-sm capitalize text-muted-foreground">{m.role}</span>
+                  <span className="inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    {m.role === "ADMIN" ? "Administrateur" : "Membre"}
+                  </span>
                 </li>
               ))}
             </ul>
