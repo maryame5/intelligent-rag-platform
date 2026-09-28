@@ -1,12 +1,14 @@
 # Production RAG Platform
 
+[![CI](https://github.com/maryame5/intelligent-rag-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/maryame5/intelligent-rag-platform/actions/workflows/ci.yml)
+
 Système RAG production-ready : ingestion de documents, retrieval hybride (vector + BM25), reranking,
 génération grounded avec citations, évaluation automatique, observabilité et CI/CD.
 
 ## Stack
 - **Frontend** : React + TypeScript + Vite + Tailwind
 - **Backend** : FastAPI + Pydantic + SQLAlchemy
-- **Data** : PostgreSQL + Vector DB + Redis + MinIO
+- **Data** : PostgreSQL (recherche vectorielle) + Redis + MinIO
 - **Async** : Celery + Redis
 - **Infra** : Docker Compose + GitHub Actions
 - **Observability** : Prometheus + Grafana + logs structurés
@@ -43,5 +45,5 @@ Voir `docs/roadmap.md` — 8 sprints d'une semaine, du squelette au système obs
 ## Sprint actuel
 
 Les 8 sprints du planning initial sont terminés (voir `docs/sprints/` pour le détail de
-chacun). Prochaines étapes : backlog futur (§13 du cahier des charges) ou intégration avec
-le frontend une fois celui-ci prêt.
+chacun). Le projet est présenté comme une démo publique d'un système RAG hybride évalué ;
+les métriques sans données observées sont affichées comme indisponibles plutôt qu'inventées.

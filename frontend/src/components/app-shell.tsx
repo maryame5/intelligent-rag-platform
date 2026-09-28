@@ -414,8 +414,3 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
-    </div>
-  );
-}

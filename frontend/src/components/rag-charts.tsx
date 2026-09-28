@@ -133,7 +133,7 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
 }
 
 interface RadialGaugeProps {
-  score: number; // 0 to 1
+  score: number | null;
   label: string;
   sublabel?: string;
   size?: number;
@@ -143,7 +143,7 @@ export function RAGRadialGauge({ score, label, sublabel, size = 90 }: RadialGaug
   const strokeWidth = 7;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const percent = Math.min(Math.max(score, 0), 1);
+  const percent = score == null ? 0 : Math.min(Math.max(score, 0), 1);
   const strokeDashoffset = circumference - percent * circumference;
 
   return (
@@ -168,12 +168,12 @@ export function RAGRadialGauge({ score, label, sublabel, size = 90 }: RadialGaug
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            className="stroke-indigo-600 transition-all duration-700"
+            className={score == null ? "stroke-slate-200" : "stroke-indigo-600 transition-all duration-700"}
             fill="none"
           />
         </svg>
         <span className="absolute text-sm font-bold font-mono text-slate-900">
-          {Math.round(percent * 100)}%
+          {score == null ? "—" : `${Math.round(percent * 100)}%`}
         </span>
       </div>
       <p className="mt-2 text-xs font-semibold text-slate-800">{label}</p>

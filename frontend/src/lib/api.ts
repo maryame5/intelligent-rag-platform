@@ -960,24 +960,24 @@ export interface UsagePoint {
 }
 
 export interface RAGQualityMetrics {
-  faithfulness: number;
-  answerRelevance: number;
-  contextRecall: number;
-  contextPrecision: number;
+  faithfulness: number | null;
+  answerRelevance: number | null;
+  contextRecall: number | null;
+  contextPrecision: number | null;
 }
 
 export interface PlatformMetrics {
   series: UsagePoint[];
   quality: RAGQualityMetrics;
   queriesThisWeek: number;
-  answeredRate: number;
+  answeredRate: number | null;
   indexedDocuments: number;
   indexedChunks: number;
-  monthlyCost: number;
-  latencyP95: number;
-  errorRate: number;
-  throughput: number;
-  costPerQuery: number;
+  monthlyCost: number | null;
+  latencyP95: number | null;
+  errorRate: number | null;
+  throughput: number | null;
+  costPerQuery: number | null;
 }
 
 export async function getMetrics(): Promise<PlatformMetrics> {

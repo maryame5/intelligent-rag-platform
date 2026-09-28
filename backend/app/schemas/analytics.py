@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel
 
 class UsagePoint(BaseModel):
@@ -7,23 +8,23 @@ class UsagePoint(BaseModel):
     users: int
 
 class RAGQuality(BaseModel):
-    faithfulness: float
-    answerRelevance: float
-    contextRecall: float
-    contextPrecision: float
+    faithfulness: Optional[float] = None
+    answerRelevance: Optional[float] = None
+    contextRecall: Optional[float] = None
+    contextPrecision: Optional[float] = None
 
 class PlatformMetricsOut(BaseModel):
     series: list[UsagePoint]
     quality: RAGQuality
     queriesThisWeek: int
-    answeredRate: float
+    answeredRate: Optional[float] = None
     indexedDocuments: int
     indexedChunks: int
-    monthlyCost: float
-    latencyP95: int
-    errorRate: float
-    throughput: int
-    costPerQuery: float
+    monthlyCost: Optional[float] = None
+    latencyP95: Optional[float] = None
+    errorRate: Optional[float] = None
+    throughput: Optional[float] = None
+    costPerQuery: Optional[float] = None
 
 class ActivityItemOut(BaseModel):
     id: str

@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -33,7 +32,7 @@ def get_metrics(
     # Feedbacks
     total_feedbacks = db.query(func.count(MessageFeedback.id)).scalar() or 0
     up_feedbacks = db.query(func.count(MessageFeedback.id)).filter(MessageFeedback.rating == FeedbackRating.UP).scalar() or 0
-    satisfaction_rate = (up_feedbacks / total_feedbacks) if total_feedbacks > 0 else 0.92
+    satisfaction_rate = (up_feedbacks / total_feedbacks) if total_feedbacks > 0 else None
 
     # Usage series over last 7 days
     today = datetime.now(timezone.utc).date()
@@ -48,29 +47,39 @@ def get_metrics(
             .scalar()
             or 0
         )
+        day_users = (
+            db.query(func.count(func.distinct(Conversation.user_id)))
+            .join(Message, Message.conversation_id == Conversation.id)
+            .filter(Message.role == MessageRole.USER, func.date(Message.created_at) == d)
+            .scalar()
+            or 0
+        )
         series.append(UsagePoint(
             date=day_str,
-            queries=max(day_queries, (i + 1) * 3 + (total_queries % 7)),  # Realistic baseline
-            users=max(1, (doc_count % 5) + 1),
+            queries=day_queries,
+            users=day_users,
         ))
+
+    queries_this_week = sum(point.queries for point in series)
 
     return PlatformMetricsOut(
         series=series,
         quality=RAGQuality(
-            faithfulness=0.91,
-            answerRelevance=0.88,
-            contextRecall=0.86,
-            contextPrecision=0.89,
+            # Quality is only available after a persisted evaluation run.
+            faithfulness=None,
+            answerRelevance=None,
+            contextRecall=None,
+            contextPrecision=None,
         ),
-        queriesThisWeek=max(total_queries, sum(p.queries for p in series)),
-        answeredRate=round(satisfaction_rate, 2),
+        queriesThisWeek=queries_this_week,
+        answeredRate=round(satisfaction_rate, 2) if satisfaction_rate is not None else None,
         indexedDocuments=doc_count,
         indexedChunks=chunk_count,
-        monthlyCost=round(doc_count * 0.42 + total_queries * 0.005 + 14.5, 2),
-        latencyP95=640,
-        errorRate=0.2,
-        throughput=max(12, min(80, total_queries + 5)),
-        costPerQuery=0.0042,
+        monthlyCost=None,
+        latencyP95=None,
+        errorRate=None,
+        throughput=None,
+        costPerQuery=None,
     )
 
 @router.get("/activity", response_model=list[ActivityItemOut])

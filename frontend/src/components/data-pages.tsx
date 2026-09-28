@@ -130,7 +130,7 @@ export function DashboardContent() {
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <p className="text-3xl font-extrabold font-mono text-slate-900">
-                {metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "112"}
+                {metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "—"}
               </p>
               <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
                 +14% cette semaine
@@ -149,7 +149,7 @@ export function DashboardContent() {
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <p className="text-3xl font-extrabold font-mono text-emerald-600">
-                {metrics ? `${Math.round(metrics.answeredRate * 100)}%` : "98%"}
+                {metrics?.answeredRate != null ? `${Math.round(metrics.answeredRate * 100)}%` : "—"}
               </p>
               <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
                 Certifié sans hallucination
@@ -168,7 +168,7 @@ export function DashboardContent() {
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <p className="text-3xl font-extrabold font-mono text-slate-900">
-                {metrics ? `${metrics.latencyP95} ms` : "245 ms"}
+                {metrics?.latencyP95 != null ? `${Math.round(metrics.latencyP95)} ms` : "—"}
               </p>
               <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-[10px] font-mono font-bold">
                 Recherche + IA
@@ -215,22 +215,22 @@ export function DashboardContent() {
             </div>
             <div className="grid grid-cols-2 gap-4 py-4">
               <RAGRadialGauge
-                score={metrics?.quality.faithfulness ?? 0.98}
+                score={metrics?.quality.faithfulness ?? null}
                 label="Fidélité"
                 sublabel="Sans hallucination"
               />
               <RAGRadialGauge
-                score={metrics?.quality.answerRelevance ?? 0.94}
+                score={metrics?.quality.answerRelevance ?? null}
                 label="Pertinence"
                 sublabel="Réponse exacte"
               />
               <RAGRadialGauge
-                score={metrics?.quality.contextRecall ?? 0.95}
+                score={metrics?.quality.contextRecall ?? null}
                 label="Rappel @5"
                 sublabel="Passages trouvés"
               />
               <RAGRadialGauge
-                score={metrics?.quality.contextPrecision ?? 0.93}
+                score={metrics?.quality.contextPrecision ?? null}
                 label="Précision"
                 sublabel="Classement IA"
               />
@@ -1310,7 +1310,7 @@ export function AdminContent() {
               <h2 className="font-semibold">Qualité RAG (historique)</h2>
               <PreviewBadge />
             </div>
-            {metrics?.quality.map((q) => (
+            {[metrics?.quality].filter(Boolean).map((quality) => (
               <div key={q.experiment} className="mt-3">
                 <div className="flex justify-between text-sm">
                   <span>{q.experiment}</span>
