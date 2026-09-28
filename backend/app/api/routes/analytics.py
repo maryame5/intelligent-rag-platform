@@ -18,19 +18,47 @@ from app.schemas.analytics import ActivityItemOut, PlatformMetricsOut, RAGQualit
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
+
+def _owned_kb_ids_subquery(db: Session, user: User):
+    return db.query(KnowledgeBase.id).filter(KnowledgeBase.owner_id == user.id)
+
 @router.get("/metrics", response_model=PlatformMetricsOut)
 def get_metrics(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Calculate platform metrics from real database entities."""
-    # Documents count
-    doc_count = db.query(func.count(Document.id)).scalar() or 0
-    chunk_count = db.query(func.count(Chunk.id)).scalar() or 0
+    """Calculate metrics from the current user's data only."""
+    owned_kb_ids = _owned_kb_ids_subquery(db, current_user)
+    doc_count = (
+        db.query(func.count(Document.id))
+        .filter(Document.knowledge_base_id.in_(owned_kb_ids))
+        .scalar()
+        or 0
+    )
+    chunk_count = (
+        db.query(func.count(Chunk.id))
+        .join(Document, Chunk.document_id == Document.id)
+        .filter(Document.knowledge_base_id.in_(owned_kb_ids))
+        .scalar()
+        or 0
+    )
 
     # Feedbacks
-    total_feedbacks = db.query(func.count(MessageFeedback.id)).scalar() or 0
-    up_feedbacks = db.query(func.count(MessageFeedback.id)).filter(MessageFeedback.rating == FeedbackRating.UP).scalar() or 0
+    total_feedbacks = (
+        db.query(func.count(MessageFeedback.id))
+        .filter(MessageFeedback.user_id == current_user.id)
+        .scalar()
+        or 0
+    )
+    up_feedbacks = (
+        db.query(func.count(MessageFeedback.id))
+        .filter(
+            MessageFeedback.user_id == current_user.id,
+            MessageFeedback.rating == FeedbackRating.UP,
+        )
+        .scalar()
+        or 0
+    )
     satisfaction_rate = (up_feedbacks / total_feedbacks) if total_feedbacks > 0 else None
 
     # Usage series over last 7 days
@@ -39,25 +67,18 @@ def get_metrics(
     for i in range(6, -1, -1):
         d = today - timedelta(days=i)
         day_str = d.strftime("%d/%m")
-        # messages on that date
         day_queries = (
             db.query(func.count(Message.id))
-            .filter(Message.role == MessageRole.USER, func.date(Message.created_at) == d)
+            .join(Conversation, Message.conversation_id == Conversation.id)
+            .filter(
+                Conversation.user_id == current_user.id,
+                Message.role == MessageRole.USER,
+                func.date(Message.created_at) == d,
+            )
             .scalar()
             or 0
         )
-        day_users = (
-            db.query(func.count(func.distinct(Conversation.user_id)))
-            .join(Message, Message.conversation_id == Conversation.id)
-            .filter(Message.role == MessageRole.USER, func.date(Message.created_at) == d)
-            .scalar()
-            or 0
-        )
-        series.append(UsagePoint(
-            date=day_str,
-            queries=day_queries,
-            users=day_users,
-        ))
+        series.append(UsagePoint(date=day_str, queries=day_queries, users=1 if day_queries > 0 else 0))
 
     queries_this_week = sum(point.queries for point in series)
 
@@ -86,35 +107,55 @@ def get_activity(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Return recent platform activity feed from database."""
+    """Return recent activity for the current user's resources only."""
+    owned_kb_ids = _owned_kb_ids_subquery(db, current_user)
     items: list[ActivityItemOut] = []
 
     # Recent documents
-    recent_docs = db.query(Document).order_by(Document.created_at.desc()).limit(10).all()
+    recent_docs = (
+        db.query(Document)
+        .filter(Document.knowledge_base_id.in_(owned_kb_ids))
+        .order_by(Document.created_at.desc())
+        .limit(10)
+        .all()
+    )
     for doc in recent_docs:
         items.append(ActivityItemOut(
             id=str(doc.id),
             action="a téléversé et indexé",
-            user="Système" if not doc.created_by else "Utilisateur",
+            user="Vous",
             target=doc.filename,
             time=doc.created_at.strftime("%d %b %H:%M") if doc.created_at else "Récemment",
             kind="doc",
         ))
 
     # Recent knowledge bases
-    recent_kbs = db.query(KnowledgeBase).order_by(KnowledgeBase.created_at.desc()).limit(5).all()
+    recent_kbs = (
+        db.query(KnowledgeBase)
+        .filter(KnowledgeBase.owner_id == current_user.id)
+        .order_by(KnowledgeBase.created_at.desc())
+        .limit(5)
+        .all()
+    )
     for kb in recent_kbs:
         items.append(ActivityItemOut(
             id=str(kb.id),
             action="a créé la base de connaissances",
-            user="Admin",
+            user="Vous",
             target=kb.name,
             time=kb.created_at.strftime("%d %b %H:%M") if kb.created_at else "Récemment",
             kind="kb",
         ))
 
     # Recent jobs
-    recent_jobs = db.query(IngestionJob).order_by(IngestionJob.created_at.desc()).limit(5).all()
+    recent_jobs = (
+        db.query(IngestionJob)
+        .join(Document, IngestionJob.document_id == Document.id)
+        .filter(Document.knowledge_base_id.in_(owned_kb_ids))
+        .order_by(IngestionJob.created_at.desc())
+        .limit(5)
+        .all()
+    )
     for job in recent_jobs:
         items.append(ActivityItemOut(
             id=str(job.id),

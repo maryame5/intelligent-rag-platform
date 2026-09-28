@@ -57,13 +57,13 @@ def list_integrations(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List integrations for workspace or platform defaults."""
-    db_items = db.query(Integration).all()
+    """List integrations owned by the current user."""
+    db_items = db.query(Integration).filter(Integration.user_id == current_user.id).all()
     if not db_items:
-        # Seed default integrations
         created_items = []
         for p in DEFAULT_PROVIDERS:
             integ = Integration(
+                user_id=current_user.id,
                 workspace_id=workspace_id,
                 provider=p["provider"],
                 name=p["name"],
@@ -87,9 +87,14 @@ def connect_integration(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    integ = db.query(Integration).filter(Integration.provider == provider).first()
+    integ = (
+        db.query(Integration)
+        .filter(Integration.provider == provider, Integration.user_id == current_user.id)
+        .first()
+    )
     if not integ:
         integ = Integration(
+            user_id=current_user.id,
             workspace_id=payload.workspace_id,
             provider=provider,
             name=provider.capitalize(),

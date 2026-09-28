@@ -11,6 +11,7 @@ class Integration(Base):
     __tablename__ = "integrations"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
     workspace_id = Column(GUID(), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=True)
     provider = Column(String(50), nullable=False)  # notion, gdrive, slack, github, confluence, s3
     name = Column(String(100), nullable=False)
