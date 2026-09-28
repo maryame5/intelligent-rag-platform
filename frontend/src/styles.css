@@ -1,7 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -10,7 +10,7 @@
   --radius-md: calc(var(--radius) - 1px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Inter", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -49,87 +49,100 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Specific palette design tokens from brand guide */
+  --color-brand-navy: #28264B;
+  --color-brand-pearl: #E8EAE7;
+  --color-brand-crimson: #AA0033;
+  --color-brand-periwinkle: #959EC9;
+  --color-brand-slate: #4E5174;
 }
 
 /* Light (default) */
 :root {
   --radius: 0.625rem;
-  --background: #ffffff;
-  --foreground: #0f172a;
+  --background: #fbfcfb;
+  --foreground: #28264b;
   --surface: #ffffff;
-  --surface-raised: #f8fafc;
+  --surface-raised: #f2f4f2;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #28264b;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #1e293b;
+  --popover-foreground: #28264b;
+  --primary: #28264b;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f8fafc;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
+  --secondary: #e8eae7;
+  --secondary-foreground: #28264b;
+  --muted: #e8eae7;
+  --muted-foreground: #4e5174;
+  --accent: #f0f2f0;
+  --accent-foreground: #aa0033;
+  --destructive: #aa0033;
   --destructive-foreground: #ffffff;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --info: #3b82f6;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #2563eb;
+  --success: #15803d;
+  --warning: #b45309;
+  --info: #4e5174;
+  --border: #dcdfd9;
+  --input: #dcdfd9;
+  --ring: #aa0033;
   
-  --sidebar: #f8fafc;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #1e293b;
+  --sidebar: #f4f6f3;
+  --sidebar-foreground: #28264b;
+  --sidebar-primary: #28264b;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e2e8f0;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #2563eb;
+  --sidebar-accent: #e8eae7;
+  --sidebar-accent-foreground: #aa0033;
+  --sidebar-border: #dcdfd9;
+  --sidebar-ring: #aa0033;
   
-  --chart-1: #2563eb;
-  --chart-2: #0284c7;
-  --chart-3: #10b981;
-  --chart-4: #f59e0b;
-  --chart-5: #ef4444;
+  --chart-1: #aa0033;
+  --chart-2: #28264b;
+  --chart-3: #959ec9;
+  --chart-4: #4e5174;
+  --chart-5: #15803d;
 }
 
 /* Dark mode */
 .dark {
-  --background: #262236;
-  --foreground: #fefef3;
-  --surface: #1e1b2b;
-  --surface-raised: #2a263c;
-  --card: #1e1b2b;
-  --card-foreground: #fefef3;
-  --popover: #1e1b2b;
-  --popover-foreground: #fefef3;
-  --primary: #4e639e;
+  --background: #1c1a35;
+  --foreground: #e8eae7;
+  --surface: #28264b;
+  --surface-raised: #34325a;
+  --card: #28264b;
+  --card-foreground: #e8eae7;
+  --popover: #28264b;
+  --popover-foreground: #e8eae7;
+  --primary: #aa0033;
   --primary-foreground: #ffffff;
-  --secondary: #332e48;
-  --secondary-foreground: #fefef3;
-  --muted: #3a3551;
-  --muted-foreground: #a6a3b6;
-  --accent: #3a3551;
-  --accent-foreground: #fefef3;
-  --destructive: #dc2626;
+  --secondary: #38355f;
+  --secondary-foreground: #e8eae7;
+  --muted: #343158;
+  --muted-foreground: #959ec9;
+  --accent: #3d3a68;
+  --accent-foreground: #e8eae7;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --success: #059669;
-  --warning: #d97706;
-  --info: #2563eb;
-  --border: #38334d;
-  --input: #38334d;
-  --ring: #e18546;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --info: #959ec9;
+  --border: #4e5174;
+  --input: #4e5174;
+  --ring: #aa0033;
   
-  --sidebar: #191624;
-  --sidebar-foreground: #fefef3;
-  --sidebar-primary: #3d4f7e;
+  --sidebar: #17152e;
+  --sidebar-foreground: #e8eae7;
+  --sidebar-primary: #aa0033;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #2a263c;
-  --sidebar-accent-foreground: #fefef3;
-  --sidebar-border: #38334d;
-  --sidebar-ring: #e18546;
+  --sidebar-accent: #28264b;
+  --sidebar-accent-foreground: #e8eae7;
+  --sidebar-border: #38355f;
+  --sidebar-ring: #aa0033;
+  
+  --chart-1: #aa0033;
+  --chart-2: #959ec9;
+  --chart-3: #e8eae7;
+  --chart-4: #4e5174;
+  --chart-5: #22c55e;
 }
 
 @layer base {
@@ -163,7 +176,7 @@
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 3px 0 rgba(40, 38, 75, 0.04), 0 1px 2px -1px rgba(40, 38, 75, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -174,7 +187,7 @@
   content: "";
   position: absolute;
   inset: -1px;
-  background: linear-gradient(135deg, rgba(61, 79, 126, 0.4), rgba(225, 133, 70, 0.3));
+  background: linear-gradient(135deg, rgba(170, 0, 51, 0.4), rgba(149, 158, 201, 0.3));
   border-radius: inherit;
   z-index: -1;
   opacity: 0;
@@ -184,6 +197,23 @@
   opacity: 1;
 }
 
+/* Template Gradient Presets */
+.bg-gradient-brand-ruby-navy {
+  background: linear-gradient(135deg, #aa0033 0%, #28264b 100%);
+}
+.bg-gradient-brand-slate-pearl {
+  background: linear-gradient(135deg, #4e5174 0%, #e8eae7 100%);
+}
+.bg-gradient-brand-peri-ruby {
+  background: linear-gradient(135deg, #959ec9 0%, #aa0033 100%);
+}
+.bg-gradient-brand-pearl-peri {
+  background: linear-gradient(135deg, #e8eae7 0%, #959ec9 100%);
+}
+.bg-gradient-brand-peri-slate {
+  background: linear-gradient(135deg, #959ec9 0%, #4e5174 100%);
+}
+
 @utility grid-lines {
   background-image:
     linear-gradient(to right, var(--border) 1px, transparent 1px),
@@ -191,4 +221,3 @@
   background-size: 36px 36px;
   opacity: 0.4;
 }
-

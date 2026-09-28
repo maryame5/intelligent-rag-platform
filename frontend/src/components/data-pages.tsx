@@ -74,7 +74,7 @@ export function DashboardContent() {
         description="Indicateurs de santé documentaire, volume d'utilisation et indices de fidélité de vos réponses."
         actions={
           <div className="flex items-center gap-2">
-            <Button asChild className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
+            <Button asChild className="bg-[#AA0033] text-white hover:bg-[#28264B]">
               <Link to="/knowledge-bases">
                 <Plus className="mr-1.5 size-4" />
                 Nouvelle base
@@ -90,11 +90,11 @@ export function DashboardContent() {
           <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Documents indexés</span>
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546]">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#AA0033]/15 text-[#AA0033] dark:text-[#AA0033]">
                 <BookOpen className="size-3.5" />
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
               {realDocumentCount}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">Répartis sur {kbs.length} base{kbs.length > 1 ? "s" : ""}</p>
@@ -103,11 +103,11 @@ export function DashboardContent() {
           <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Requêtes RAG</span>
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#e18546]/15 text-[#e18546]">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#AA0033]/15 text-[#AA0033]">
                 <Search className="size-3.5" />
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
               {metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "0"}
             </p>
             <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">+14% vs semaine passée</p>
@@ -120,7 +120,7 @@ export function DashboardContent() {
                 <ShieldCheck className="size-3.5" />
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
               {metrics ? `${Math.round(metrics.answeredRate * 100)}%` : "94%"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">Sans hallucination détectée</p>
@@ -129,11 +129,11 @@ export function DashboardContent() {
           <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Latence moyenne P95</span>
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3]">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#AA0033]/15 text-[#AA0033] dark:text-[#E8EAE7]">
                 <Clock3 className="size-3.5" />
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
               {metrics ? `${metrics.latencyP95} ms` : "640 ms"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">Temps recherche + reranking</p>
@@ -145,10 +145,10 @@ export function DashboardContent() {
           <section className="panel border-border/70 p-5 shadow-sm">
             <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
               <div>
-                <h2 className="font-semibold text-[#262236] dark:text-[#fefef3]">Volume des Requêtes (7 derniers jours)</h2>
+                <h2 className="font-semibold text-[#28264B] dark:text-[#E8EAE7]">Volume des Requêtes (7 derniers jours)</h2>
                 <p className="text-xs text-muted-foreground">Nombre de conversations et questions posées aux bases</p>
               </div>
-              <span className="rounded-md bg-[#3d4f7e]/10 px-2 py-1 text-xs font-mono font-medium text-[#3d4f7e] dark:text-[#e18546]">
+              <span className="rounded-md bg-[#AA0033]/10 px-2 py-1 text-xs font-mono font-medium text-[#AA0033] dark:text-[#AA0033]">
                 Temps Réel
               </span>
             </div>
@@ -159,7 +159,7 @@ export function DashboardContent() {
 
           <section className="panel border-border/70 p-5 shadow-sm flex flex-col justify-between">
             <div className="border-b border-border/60 pb-3">
-              <h2 className="font-semibold text-[#262236] dark:text-[#fefef3]">Triade d'Évaluation RAG</h2>
+              <h2 className="font-semibold text-[#28264B] dark:text-[#E8EAE7]">Triade d'Évaluation RAG</h2>
               <p className="text-xs text-muted-foreground">Scores d'ancrage et de pertinence sémantique</p>
             </div>
             <div className="grid grid-cols-2 gap-4 py-4">
@@ -191,19 +191,19 @@ export function DashboardContent() {
         <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
           <section className="panel border-border/70 overflow-hidden shadow-sm">
             <div className="flex items-center justify-between border-b border-border/60 p-4 bg-surface-raised/40">
-              <h2 className="font-semibold text-sm text-[#262236] dark:text-[#fefef3]">Journal d'activité récent</h2>
+              <h2 className="font-semibold text-sm text-[#28264B] dark:text-[#E8EAE7]">Journal d'activité récent</h2>
               <span className="text-xs text-muted-foreground">{activity.length} événements</span>
             </div>
             <ul className="divide-y divide-border/60 max-h-[300px] overflow-y-auto">
               {activity.map((item) => (
                 <li key={item.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-surface-raised/30 transition-colors">
-                  <span className="flex size-7 items-center justify-center rounded-full bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546] font-bold text-[10px]">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-[#AA0033]/15 text-[#AA0033] dark:text-[#AA0033] font-bold text-[10px]">
                     {item.user.slice(0, 2).toUpperCase()}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-foreground">
-                      <strong className="text-[#262236] dark:text-[#fefef3] font-semibold">{item.user}</strong> {item.action}{" "}
-                      <span className="font-medium text-[#3d4f7e] dark:text-[#e18546]">{item.target}</span>
+                      <strong className="text-[#28264B] dark:text-[#E8EAE7] font-semibold">{item.user}</strong> {item.action}{" "}
+                      <span className="font-medium text-[#AA0033] dark:text-[#AA0033]">{item.target}</span>
                     </p>
                   </div>
                   <span className="shrink-0 text-[11px] text-muted-foreground font-mono">{item.time}</span>
@@ -214,7 +214,7 @@ export function DashboardContent() {
 
           <section className="panel border-border/70 overflow-hidden shadow-sm">
             <div className="flex items-center justify-between border-b border-border/60 p-4 bg-surface-raised/40">
-              <h2 className="font-semibold text-sm text-[#262236] dark:text-[#fefef3]">File de traitement d'ingestion</h2>
+              <h2 className="font-semibold text-sm text-[#28264B] dark:text-[#E8EAE7]">File de traitement d'ingestion</h2>
               <span className="text-xs text-muted-foreground">{allDocs.length} fichiers récents</span>
             </div>
             <div className="divide-y divide-border/60 max-h-[300px] overflow-y-auto">
@@ -224,7 +224,7 @@ export function DashboardContent() {
                 allDocs.map((doc) => (
                   <div key={doc.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-surface-raised/30 transition-colors">
                     <Clock3 className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="min-w-0 flex-1 truncate font-medium text-[#262236] dark:text-[#fefef3]">
+                    <span className="min-w-0 flex-1 truncate font-medium text-[#28264B] dark:text-[#E8EAE7]">
                       {doc.title}
                     </span>
                     <StatusBadge
@@ -410,15 +410,15 @@ export function VerifiedContent() {
         actions={
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
+              <Button className="bg-[#AA0033] text-white hover:bg-[#28264B]">
                 <Plus className="mr-1.5 size-4" />
                 Certifier une réponse
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-[#262236] dark:text-[#fefef3]">
-                  <ShieldCheck className="size-5 text-[#e18546]" />
+                <DialogTitle className="flex items-center gap-2 text-[#28264B] dark:text-[#E8EAE7]">
+                  <ShieldCheck className="size-5 text-[#AA0033]" />
                   Nouvelle réponse de référence
                 </DialogTitle>
                 <DialogDescription>
@@ -486,7 +486,7 @@ export function VerifiedContent() {
                   <Button
                     type="submit"
                     disabled={createMutation.isPending || !kbId || !question.trim() || !answer.trim()}
-                    className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                    className="bg-[#AA0033] text-white hover:bg-[#28264B]"
                   >
                     {createMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                     Enregistrer la réponse
@@ -501,15 +501,15 @@ export function VerifiedContent() {
       <div className="space-y-4 p-4 md:p-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="mr-2 size-5 animate-spin text-[#3d4f7e]" />
+            <Loader2 className="mr-2 size-5 animate-spin text-[#AA0033]" />
             Chargement des réponses vérifiées...
           </div>
         ) : answers.length === 0 ? (
           <div className="panel flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-[#3d4f7e]/10 text-[#3d4f7e] dark:text-[#e18546]">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-[#AA0033]/10 text-[#AA0033] dark:text-[#AA0033]">
               <ShieldCheck className="size-7" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-[#262236] dark:text-[#fefef3]">
+            <h3 className="mt-4 text-lg font-semibold text-[#28264B] dark:text-[#E8EAE7]">
               Aucune réponse certifiée pour le moment
             </h3>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
@@ -517,7 +517,7 @@ export function VerifiedContent() {
             </p>
             <Button
               onClick={() => setIsOpen(true)}
-              className="mt-5 bg-[#3d4f7e] text-white hover:bg-[#262236]"
+              className="mt-5 bg-[#AA0033] text-white hover:bg-[#28264B]"
             >
               <Plus className="mr-2 size-4" />
               Ajouter une première réponse
@@ -536,10 +536,10 @@ export function VerifiedContent() {
                       <ShieldCheck className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <h2 className="font-semibold text-base text-[#262236] dark:text-[#fefef3]">{a.question}</h2>
+                      <h2 className="font-semibold text-base text-[#28264B] dark:text-[#E8EAE7]">{a.question}</h2>
                       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.answer}</p>
                       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium text-[#3d4f7e] dark:text-[#fefef3]">Vérifiée par {a.verifiedBy}</span>
+                        <span className="font-medium text-[#AA0033] dark:text-[#E8EAE7]">Vérifiée par {a.verifiedBy}</span>
                         <span>·</span>
                         <span>{a.uses} utilisations</span>
                         {a.tags.map((t) => (
@@ -657,14 +657,14 @@ export function TeamContent() {
             <Dialog open={isCreateWsOpen} onOpenChange={setIsCreateWsOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="border-border/80 hover:bg-secondary">
-                  <Building2 className="mr-1.5 size-4 text-[#3d4f7e] dark:text-[#fefef3]" />
+                  <Building2 className="mr-1.5 size-4 text-[#AA0033] dark:text-[#E8EAE7]" />
                   Nouveau workspace
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2 text-[#262236] dark:text-[#fefef3]">
-                    <Building2 className="size-5 text-[#e18546]" />
+                  <DialogTitle className="flex items-center gap-2 text-[#28264B] dark:text-[#E8EAE7]">
+                    <Building2 className="size-5 text-[#AA0033]" />
                     Créer un nouvel espace de travail
                   </DialogTitle>
                   <DialogDescription>
@@ -700,7 +700,7 @@ export function TeamContent() {
                     <Button
                       type="submit"
                       disabled={createWsMutation.isPending || !newWsName.trim()}
-                      className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                      className="bg-[#AA0033] text-white hover:bg-[#28264B]"
                     >
                       {createWsMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                       Créer le workspace
@@ -713,15 +713,15 @@ export function TeamContent() {
             {currentWorkspace && (
               <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
-                    <UserPlus className="mr-1.5 size-4 text-[#e18546]" />
+                  <Button className="bg-[#AA0033] text-white hover:bg-[#28264B]">
+                    <UserPlus className="mr-1.5 size-4 text-[#AA0033]" />
                     Ajouter un membre
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-[#262236] dark:text-[#fefef3]">
-                      <UserPlus className="size-5 text-[#e18546]" />
+                    <DialogTitle className="flex items-center gap-2 text-[#28264B] dark:text-[#E8EAE7]">
+                      <UserPlus className="size-5 text-[#AA0033]" />
                       Ajouter un collaborateur
                     </DialogTitle>
                     <DialogDescription>
@@ -785,7 +785,7 @@ export function TeamContent() {
                       <Button
                         type="submit"
                         disabled={addMemberMutation.isPending || !memberEmail.trim()}
-                        className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                        className="bg-[#AA0033] text-white hover:bg-[#28264B]"
                       >
                         {addMemberMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                         Ajouter
@@ -803,15 +803,15 @@ export function TeamContent() {
         {/* Workspace Switcher Banner */}
         <div className="flex flex-col gap-4 rounded-xl border border-border/70 bg-gradient-to-r from-card to-surface-raised p-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-[#3d4f7e]/15 text-[#3d4f7e] dark:bg-[#3d4f7e]/30 dark:text-[#e18546]">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-[#AA0033]/15 text-[#AA0033] dark:bg-[#AA0033]/30 dark:text-[#AA0033]">
               <Building2 className="size-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold text-[#262236] dark:text-[#fefef3]">
+                <h2 className="text-base font-semibold text-[#28264B] dark:text-[#E8EAE7]">
                   {currentWorkspace?.name || "Aucun workspace"}
                 </h2>
-                <span className="rounded-full bg-[#3d4f7e]/10 px-2 py-0.5 text-xs font-medium text-[#3d4f7e] dark:bg-[#3d4f7e]/30 dark:text-[#fefef3]">
+                <span className="rounded-full bg-[#AA0033]/10 px-2 py-0.5 text-xs font-medium text-[#AA0033] dark:bg-[#AA0033]/30 dark:text-[#E8EAE7]">
                   {members.length} {members.length > 1 ? "membres" : "membre"}
                 </span>
               </div>
@@ -843,10 +843,10 @@ export function TeamContent() {
         {/* Member list / Empty State */}
         {workspaces.length === 0 && !isLoadingWs ? (
           <div className="panel flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex size-16 items-center justify-center rounded-2xl bg-[#3d4f7e]/10 text-[#3d4f7e] dark:text-[#e18546]">
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-[#AA0033]/10 text-[#AA0033] dark:text-[#AA0033]">
               <Building2 className="size-8" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-[#262236] dark:text-[#fefef3]">
+            <h3 className="mt-4 text-lg font-semibold text-[#28264B] dark:text-[#E8EAE7]">
               Aucun espace de travail
             </h3>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
@@ -854,7 +854,7 @@ export function TeamContent() {
             </p>
             <Button
               onClick={() => setIsCreateWsOpen(true)}
-              className="mt-6 bg-[#3d4f7e] text-white hover:bg-[#262236]"
+              className="mt-6 bg-[#AA0033] text-white hover:bg-[#28264B]"
             >
               <Plus className="mr-2 size-4" />
               Créer mon premier workspace
@@ -871,7 +871,7 @@ export function TeamContent() {
 
             {isLoadingMembers ? (
               <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                <Loader2 className="mr-2 size-5 animate-spin text-[#3d4f7e]" />
+                <Loader2 className="mr-2 size-5 animate-spin text-[#AA0033]" />
                 Chargement des membres...
               </div>
             ) : members.length === 0 ? (
@@ -890,11 +890,11 @@ export function TeamContent() {
                     className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-5 py-4 transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_160px_160px_100px]"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] text-xs font-semibold text-[#fefef3] shadow-sm">
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#AA0033] to-[#28264B] text-xs font-semibold text-[#E8EAE7] shadow-sm">
                         {initials}
                       </span>
                       <div>
-                        <p className="text-sm font-medium text-[#262236] dark:text-[#fefef3]">
+                        <p className="text-sm font-medium text-[#28264B] dark:text-[#E8EAE7]">
                           {m.displayName || m.email.split("@")[0]}
                         </p>
                         <p className="text-xs text-muted-foreground">{m.email}</p>
@@ -903,12 +903,12 @@ export function TeamContent() {
 
                     <div className="hidden md:flex items-center gap-1.5">
                       {m.role === "ADMIN" ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-[#e18546]/15 px-2.5 py-1 text-xs font-medium text-[#e18546] border border-[#e18546]/30">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-[#AA0033]/15 px-2.5 py-1 text-xs font-medium text-[#AA0033] border border-[#AA0033]/30">
                           <Crown className="size-3.5" />
                           Admin
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-[#3d4f7e]/15 px-2.5 py-1 text-xs font-medium text-[#3d4f7e] dark:text-[#fefef3] border border-[#3d4f7e]/30">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-[#AA0033]/15 px-2.5 py-1 text-xs font-medium text-[#AA0033] dark:text-[#E8EAE7] border border-[#AA0033]/30">
                           <Shield className="size-3.5" />
                           Membre
                         </span>
@@ -980,7 +980,7 @@ export function IntegrationsContent() {
       <div className="grid gap-5 p-4 md:grid-cols-2 md:p-6 xl:grid-cols-3">
         {isLoading ? (
           <div className="col-span-full flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="mr-2 size-5 animate-spin text-[#3d4f7e]" />
+            <Loader2 className="mr-2 size-5 animate-spin text-[#AA0033]" />
             Chargement des intégrations...
           </div>
         ) : (
@@ -993,7 +993,7 @@ export function IntegrationsContent() {
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] font-mono text-xs font-bold text-[#fefef3] shadow-sm">
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#AA0033] to-[#28264B] font-mono text-xs font-bold text-[#E8EAE7] shadow-sm">
                       {i.name.slice(0, 2).toUpperCase()}
                     </span>
                     <span
@@ -1006,14 +1006,14 @@ export function IntegrationsContent() {
                       {isConnected ? "Connecté" : "Disponible"}
                     </span>
                   </div>
-                  <h2 className="mt-4 font-semibold text-[#262236] dark:text-[#fefef3]">{i.name}</h2>
+                  <h2 className="mt-4 font-semibold text-[#28264B] dark:text-[#E8EAE7]">{i.name}</h2>
                   <p className="mt-1 min-h-12 text-sm leading-relaxed text-muted-foreground">{i.description}</p>
                 </div>
                 <Button
                   className={`mt-6 w-full ${
                     isConnected
                       ? "border-border/80 hover:bg-destructive/10 hover:text-destructive"
-                      : "bg-[#3d4f7e] text-white hover:bg-[#262236]"
+                      : "bg-[#AA0033] text-white hover:bg-[#28264B]"
                   }`}
                   variant={isConnected ? "outline" : "default"}
                   disabled={connectMutation.isPending}

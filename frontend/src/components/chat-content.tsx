@@ -199,7 +199,7 @@ export function ChatContent() {
               {kbs.map((kb) => (
                 <SelectItem key={kb.id} value={kb.id}>
                   <div className="flex items-center gap-2">
-                    <BookOpen className="size-3.5 text-[#3d4f7e] dark:text-[#e18546]" />
+                    <BookOpen className="size-3.5 text-[#AA0033] dark:text-[#959EC9]" />
                     <span>{kb.name}</span>
                   </div>
                 </SelectItem>
@@ -209,7 +209,7 @@ export function ChatContent() {
         </div>
 
         <Button
-          className="mb-4 w-full bg-[#3d4f7e] text-white hover:bg-[#262236] shadow-sm transition-all text-xs"
+          className="mb-4 w-full bg-[#AA0033] text-white hover:bg-[#880029] shadow-sm transition-all text-xs"
           onClick={() => {
             setConversationId(null);
             setSelectedCitation(null);
@@ -232,7 +232,7 @@ export function ChatContent() {
               className={cn(
                 "group flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs transition-all",
                 conversationId === c.id
-                  ? "bg-[#3d4f7e]/15 text-[#3d4f7e] font-semibold dark:bg-[#3d4f7e]/30 dark:text-[#fefef3] border border-[#3d4f7e]/20"
+                  ? "bg-[#AA0033]/15 text-[#AA0033] font-semibold dark:bg-[#AA0033]/25 dark:text-[#E8EAE7] border border-[#AA0033]/30"
                   : "text-foreground hover:bg-secondary/70",
               )}
             >
@@ -275,8 +275,8 @@ export function ChatContent() {
           actions={
             currentKb && (
               <div className="flex items-center gap-2">
-                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#3d4f7e]/10 px-3 py-1 text-xs font-medium text-[#3d4f7e] dark:bg-[#3d4f7e]/30 dark:text-[#fefef3] border border-[#3d4f7e]/20">
-                  <Layers className="size-3 text-[#e18546]" />
+                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#AA0033]/10 px-3 py-1 text-xs font-medium text-[#AA0033] dark:bg-[#AA0033]/20 dark:text-[#E8EAE7] border border-[#AA0033]/20">
+                  <Layers className="size-3 text-[#AA0033]" />
                   {currentKb.documentCount} documents indexés
                 </span>
               </div>
@@ -290,10 +290,10 @@ export function ChatContent() {
             <div className="mx-auto max-w-3xl space-y-6">
               {messages.length === 0 && streamingUserMsg === null ? (
                 <div className="my-10 flex flex-col items-center justify-center text-center">
-                  <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] text-[#fefef3] shadow-lg shadow-[#3d4f7e]/20">
-                    <Sparkles className="size-8 text-[#e18546]" />
+                  <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#28264B] to-[#1c1a35] text-[#E8EAE7] shadow-lg shadow-[#28264B]/20">
+                    <Sparkles className="size-8 text-[#AA0033]" />
                   </div>
-                  <h3 className="mt-5 text-xl font-bold text-[#262236] dark:text-[#fefef3]">
+                  <h3 className="mt-5 text-xl font-bold text-[#28264B] dark:text-[#E8EAE7]">
                     Explorez {currentKb?.name || "vos connaissances"}
                   </h3>
                   <p className="mt-2 max-w-md text-sm text-muted-foreground leading-relaxed">
@@ -305,10 +305,10 @@ export function ChatContent() {
                       <button
                         key={prompt}
                         onClick={() => handleSend(prompt)}
-                        className="group flex items-center justify-between rounded-xl border border-border/80 bg-surface/70 p-3.5 text-left text-xs font-medium text-foreground transition-all hover:border-[#3d4f7e]/60 hover:bg-surface-raised hover:shadow-sm"
+                        className="group flex items-center justify-between rounded-xl border border-border/80 bg-surface/70 p-3.5 text-left text-xs font-medium text-foreground transition-all hover:border-[#AA0033]/60 hover:bg-surface-raised hover:shadow-sm"
                       >
                         <span className="line-clamp-2">{prompt}</span>
-                        <ArrowRight className="ml-2 size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-[#e18546]" />
+                        <ArrowRight className="ml-2 size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-[#AA0033]" />
                       </button>
                     ))}
                   </div>
@@ -336,8 +336,8 @@ export function ChatContent() {
 
                   {/* Reasoning / Processing Steps Card */}
                   <div className="rounded-xl border border-border/80 bg-surface/90 p-4 shadow-sm backdrop-blur space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-[#3d4f7e] dark:text-[#e18546]">
-                      <Zap className="size-4 animate-pulse text-[#e18546]" />
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#28264B] dark:text-[#959EC9]">
+                      <Zap className="size-4 animate-pulse text-[#AA0033]" />
                       Pipeline RAG en cours d'exécution
                     </div>
 
@@ -346,12 +346,12 @@ export function ChatContent() {
                         className={cn(
                           "flex items-center gap-1.5 rounded-md p-2 transition-all",
                           pipelineStep >= 1
-                            ? "bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3] font-medium"
+                            ? "bg-[#28264B]/10 text-[#28264B] dark:text-[#E8EAE7] font-medium"
                             : "bg-secondary text-muted-foreground",
                         )}
                       >
                         {pipelineStep === 1 ? (
-                          <Loader2 className="size-3 animate-spin text-[#e18546]" />
+                          <Loader2 className="size-3 animate-spin text-[#AA0033]" />
                         ) : pipelineStep > 1 ? (
                           <Check className="size-3 text-emerald-500" />
                         ) : (
@@ -364,12 +364,12 @@ export function ChatContent() {
                         className={cn(
                           "flex items-center gap-1.5 rounded-md p-2 transition-all",
                           pipelineStep >= 2
-                            ? "bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3] font-medium"
+                            ? "bg-[#28264B]/10 text-[#28264B] dark:text-[#E8EAE7] font-medium"
                             : "bg-secondary text-muted-foreground",
                         )}
                       >
                         {pipelineStep === 2 ? (
-                          <Loader2 className="size-3 animate-spin text-[#e18546]" />
+                          <Loader2 className="size-3 animate-spin text-[#AA0033]" />
                         ) : pipelineStep > 2 ? (
                           <Check className="size-3 text-emerald-500" />
                         ) : (
@@ -382,14 +382,14 @@ export function ChatContent() {
                         className={cn(
                           "flex items-center gap-1.5 rounded-md p-2 transition-all",
                           pipelineStep >= 3
-                            ? "bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#fefef3] font-medium"
+                            ? "bg-[#28264B]/10 text-[#28264B] dark:text-[#E8EAE7] font-medium"
                             : "bg-secondary text-muted-foreground",
                         )}
                       >
                         {pipelineStep === 3 && !streamingContent ? (
-                          <Loader2 className="size-3 animate-spin text-[#e18546]" />
+                          <Loader2 className="size-3 animate-spin text-[#AA0033]" />
                         ) : pipelineStep >= 3 ? (
-                          <Sparkles className="size-3 text-[#e18546]" />
+                          <Sparkles className="size-3 text-[#AA0033]" />
                         ) : (
                           <FileText className="size-3" />
                         )}
@@ -400,7 +400,7 @@ export function ChatContent() {
                     {streamingContent && (
                       <div className="pt-2 border-t border-border/60 text-sm leading-relaxed text-foreground">
                         <MarkdownFormatted content={streamingContent} />
-                        <span className="ml-1 inline-block size-2 rounded-full animate-ping bg-[#e18546]" />
+                        <span className="ml-1 inline-block size-2 rounded-full animate-ping bg-[#AA0033]" />
                       </div>
                     )}
                   </div>
@@ -416,14 +416,14 @@ export function ChatContent() {
             <aside className="w-80 md:w-96 shrink-0 border-l border-border/80 bg-card p-5 shadow-lg flex flex-col overflow-y-auto">
               <div className="flex items-center justify-between border-b pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546]">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-[#28264B]/10 text-[#28264B] dark:text-[#959EC9]">
                     <FileText className="size-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       Source Inspecteur
                     </h4>
-                    <p className="text-xs font-semibold text-[#262236] dark:text-[#fefef3]">
+                    <p className="text-xs font-semibold text-[#28264B] dark:text-[#E8EAE7]">
                       Citation [{selectedCitation.index}]
                     </p>
                   </div>
@@ -441,7 +441,7 @@ export function ChatContent() {
               <div className="mt-4 space-y-4 flex-1">
                 <div>
                   <span className="text-[11px] font-semibold text-muted-foreground uppercase">Document d'origine</span>
-                  <p className="mt-1 text-sm font-semibold text-[#262236] dark:text-[#fefef3]">
+                  <p className="mt-1 text-sm font-semibold text-[#28264B] dark:text-[#E8EAE7]">
                     {selectedCitation.documentTitle}
                   </p>
                   {selectedCitation.page ? (
@@ -469,7 +469,7 @@ export function ChatContent() {
                       Copier
                     </Button>
                   </div>
-                  <div className="rounded-xl border border-[#3d4f7e]/25 bg-[#3d4f7e]/5 p-3.5 text-xs leading-relaxed text-foreground font-mono selection:bg-[#e18546]/30">
+                  <div className="rounded-xl border border-[#28264B]/20 bg-[#28264B]/5 p-3.5 text-xs leading-relaxed text-foreground font-mono selection:bg-[#AA0033]/20">
                     {selectedCitation.excerpt}
                   </div>
                 </div>
@@ -495,7 +495,7 @@ export function ChatContent() {
               e.preventDefault();
               handleSend();
             }}
-            className="mx-auto flex max-w-3xl items-center gap-2 rounded-2xl border border-border/80 bg-surface p-1.5 shadow-md focus-within:border-[#3d4f7e] focus-within:ring-2 focus-within:ring-[#3d4f7e]/20 transition-all"
+            className="mx-auto flex max-w-3xl items-center gap-2 rounded-2xl border border-border/80 bg-surface p-1.5 shadow-md focus-within:border-[#AA0033] focus-within:ring-2 focus-within:ring-[#AA0033]/20 transition-all"
           >
             <Input
               placeholder="Posez votre question à vos documents…"
@@ -508,7 +508,7 @@ export function ChatContent() {
               type="submit"
               size="icon"
               disabled={!kbId || isSending || !draft.trim()}
-              className="size-9 shrink-0 rounded-xl bg-[#3d4f7e] text-white hover:bg-[#262236] transition-all"
+              className="size-9 shrink-0 rounded-xl bg-[#AA0033] text-white hover:bg-[#880029] transition-all"
             >
               {isSending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
             </Button>
@@ -532,7 +532,7 @@ function MarkdownFormatted({ content }: { content: string }) {
           const lang = lines[0] || "text";
           const code = lines.slice(1).join("\n") || lines[0];
           return (
-            <div key={index} className="my-3 overflow-hidden rounded-xl border border-border bg-[#262236] text-[#fefef3] text-xs">
+            <div key={index} className="my-3 overflow-hidden rounded-xl border border-border bg-[#28264B] text-[#E8EAE7] text-xs">
               <div className="flex items-center justify-between bg-black/30 px-3 py-1.5 text-[11px] font-mono text-muted-foreground">
                 <span>{lang}</span>
                 <button
@@ -577,7 +577,7 @@ function MessageBubble({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl bg-gradient-to-r from-[#3d4f7e] to-[#262236] px-4 py-3 text-sm text-[#fefef3] shadow-md">
+        <div className="max-w-[80%] rounded-2xl bg-gradient-to-r from-[#28264B] to-[#1c1a35] px-4 py-3 text-sm text-[#E8EAE7] shadow-md">
           {message.content}
         </div>
       </div>
@@ -599,7 +599,7 @@ function MessageBubble({
         "rounded-2xl border p-5 shadow-sm transition-all",
         notFound
           ? "border-amber-500/40 bg-amber-500/5"
-          : "border-border/80 bg-card hover:border-[#3d4f7e]/30",
+          : "border-border/80 bg-card hover:border-[#AA0033]/30",
       )}
     >
       {notFound && (
@@ -628,15 +628,15 @@ function MessageBubble({
                   className={cn(
                     "flex items-start gap-2.5 rounded-xl border p-2.5 text-left text-xs transition-all",
                     isSelected
-                      ? "border-[#e18546] bg-[#e18546]/10 text-foreground ring-1 ring-[#e18546]"
-                      : "border-border/70 bg-surface-raised/60 hover:border-[#3d4f7e]/50 hover:bg-surface-raised",
+                      ? "border-[#AA0033] bg-[#AA0033]/10 text-foreground ring-1 ring-[#AA0033]"
+                      : "border-border/70 bg-surface-raised/60 hover:border-[#AA0033]/50 hover:bg-surface-raised",
                   )}
                 >
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded bg-[#3d4f7e]/15 font-mono text-[10px] font-bold text-[#3d4f7e] dark:text-[#e18546]">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded bg-[#28264B]/10 font-mono text-[10px] font-bold text-[#AA0033] dark:text-[#959EC9]">
                     {c.index}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold truncate text-[#262236] dark:text-[#fefef3]">
+                    <p className="font-semibold truncate text-[#28264B] dark:text-[#E8EAE7]">
                       {c.documentTitle}
                     </p>
                     <p className="line-clamp-1 text-[11px] text-muted-foreground">{c.excerpt}</p>

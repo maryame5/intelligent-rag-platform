@@ -62,3 +62,10 @@ def test_section_can_be_none_while_page_is_set():
     chunks = fixed_size_chunks([(3, None, "Texte de page 3 sans section.")])
     assert chunks[0].page == 3
     assert chunks[0].section is None
+
+def test_chunks_never_cut_words_in_half():
+    text = "mot " * 600
+    chunks = fixed_size_chunks([(1, None, text)], chunk_size=1000, overlap=200)
+    assert len(chunks) > 1
+    for c in chunks:
+        assert set(c.content.split()) == {"mot"}

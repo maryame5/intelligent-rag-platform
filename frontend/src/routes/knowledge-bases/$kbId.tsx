@@ -133,7 +133,7 @@ function KnowledgeBaseDetail() {
             <Button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadMutation.isPending}
-              className="bg-[#3d4f7e] text-white hover:bg-[#262236]"
+              className="bg-[#AA0033] text-white hover:bg-[#880029]"
             >
               {uploadMutation.isPending ? <Loader2 className="animate-spin mr-1.5 size-4" /> : <Upload className="mr-1.5 size-4" />}
               Importer un document
@@ -169,7 +169,7 @@ function KnowledgeBaseDetail() {
               onClick={() => setTab(t)}
               className={`-mb-px border-b-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
                 tab === t
-                  ? "border-[#3d4f7e] text-[#3d4f7e] dark:border-[#e18546] dark:text-[#e18546]"
+                  ? "border-[#AA0033] text-[#AA0033] dark:border-[#959EC9] dark:text-[#959EC9]"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -191,14 +191,14 @@ function KnowledgeBaseDetail() {
               onClick={() => fileInputRef.current?.click()}
               className={`panel flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all border-2 border-dashed ${
                 isDragging
-                  ? "border-[#e18546] bg-[#e18546]/10 scale-[1.01]"
-                  : "border-border/80 hover:border-[#3d4f7e]/50 hover:bg-surface-raised/40"
+                  ? "border-[#AA0033] bg-[#AA0033]/10 scale-[1.01]"
+                  : "border-border/80 hover:border-[#AA0033]/50 hover:bg-surface-raised/40"
               }`}
             >
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-[#3d4f7e]/15 text-[#3d4f7e] dark:text-[#e18546]">
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-[#28264B]/10 text-[#28264B] dark:text-[#959EC9]">
                 <Upload className="size-6" />
               </div>
-              <h3 className="mt-3 text-sm font-bold text-[#262236] dark:text-[#fefef3]">
+              <h3 className="mt-3 text-sm font-bold text-[#28264B] dark:text-[#E8EAE7]">
                 Glissez-déposez vos fichiers ici, ou cliquez pour parcourir
               </h3>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -222,7 +222,7 @@ function KnowledgeBaseDetail() {
                 title="Aucun document"
                 description="Importez des fichiers PDF, DOCX, HTML ou Markdown pour alimenter cette base."
                 action={
-                  <Button onClick={() => fileInputRef.current?.click()} className="bg-[#3d4f7e] text-white hover:bg-[#262236]">
+                  <Button onClick={() => fileInputRef.current?.click()} className="bg-[#AA0033] text-white hover:bg-[#880029]">
                     <Upload className="mr-1.5 size-4" />
                     Importer
                   </Button>
@@ -245,14 +245,14 @@ function KnowledgeBaseDetail() {
                       className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border/60 px-5 py-3.5 text-xs transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_100px_140px_120px_40px]"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#3d4f7e]/10 text-[#3d4f7e] dark:text-[#e18546]">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#28264B]/10 text-[#28264B] dark:text-[#959EC9]">
                           {d.status === "FAILED" ? (
                             <AlertCircle className="size-4 text-destructive" />
                           ) : (
                             <FileText className="size-4" />
                           )}
                         </div>
-                        <span className="truncate font-medium text-sm text-[#262236] dark:text-[#fefef3]">{d.title}</span>
+                        <span className="truncate font-medium text-sm text-[#28264B] dark:text-[#E8EAE7]">{d.title}</span>
                       </div>
                       <span className="hidden font-mono text-[11px] text-muted-foreground uppercase md:block">
                         {documentTypeLabel(d.mimeType)}
@@ -289,23 +289,23 @@ function KnowledgeBaseDetail() {
           <section className="panel max-w-3xl p-6 shadow-sm border-border/70">
             <div className="flex items-center justify-between border-b pb-3 mb-4">
               <div>
-                <h2 className="font-semibold text-[#262236] dark:text-[#fefef3]">Membres du workspace ayant accès</h2>
+                <h2 className="font-semibold text-[#28264B] dark:text-[#E8EAE7]">Membres du workspace ayant accès</h2>
                 <p className="text-xs text-muted-foreground">
                   Tous les collaborateurs de ce workspace peuvent interroger cette base documentaire.
                 </p>
               </div>
-              <span className="rounded-full bg-[#3d4f7e]/10 px-2.5 py-1 text-xs font-medium text-[#3d4f7e] dark:text-[#e18546]">
+              <span className="rounded-full bg-[#AA0033]/10 px-2.5 py-1 text-xs font-medium text-[#AA0033] dark:text-[#959EC9]">
                 {members.length} membre{members.length > 1 ? "s" : ""}
               </span>
             </div>
             <ul className="divide-y divide-border/60">
               {members.map((m) => (
                 <li key={m.id} className="flex items-center gap-3 py-3.5">
-                  <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#3d4f7e] to-[#262236] text-xs font-semibold text-[#fefef3]">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#28264B] to-[#1c1a35] text-xs font-semibold text-[#E8EAE7]">
                     {(m.displayName || m.email).slice(0, 2).toUpperCase()}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-[#262236] dark:text-[#fefef3]">
+                    <p className="text-sm font-medium text-[#28264B] dark:text-[#E8EAE7]">
                       {m.displayName || m.email.split("@")[0]}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">{m.email}</p>

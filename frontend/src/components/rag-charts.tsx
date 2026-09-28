@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { UsagePoint, RAGQualityMetrics } from "@/lib/api";
+import type { UsagePoint } from "@/lib/api";
 
 interface AreaChartProps {
   data: UsagePoint[];
@@ -51,13 +51,14 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
       >
         <defs>
           <linearGradient id="ragAreaGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3d4f7e" stopOpacity="0.35" />
-            <stop offset="60%" stopColor="#e18546" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#3d4f7e" stopOpacity="0" />
+            <stop offset="0%" stopColor="#AA0033" stopOpacity="0.25" />
+            <stop offset="60%" stopColor="#959EC9" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#28264B" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="ragLineGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#3d4f7e" />
-            <stop offset="100%" stopColor="#e18546" />
+            <stop offset="0%" stopColor="#AA0033" />
+            <stop offset="50%" stopColor="#959EC9" />
+            <stop offset="100%" stopColor="#28264B" />
           </linearGradient>
         </defs>
 
@@ -97,7 +98,7 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
               cx={p.x}
               cy={p.y}
               r={hoveredIdx === i ? 6 : 4}
-              className="fill-background stroke-[#e18546] stroke-2 transition-all"
+              className="fill-background stroke-[#AA0033] stroke-2 transition-all"
             />
             {/* Zone invisible large pour faciliter le hover */}
             <circle cx={p.x} cy={p.y} r={16} fill="transparent" />
@@ -121,10 +122,10 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
       {/* Tooltip flottant */}
       {hoveredPoint && (
         <div
-          className="pointer-events-none absolute -top-8 rounded-lg border border-border/80 bg-[#262236] px-2.5 py-1 text-xs text-[#fefef3] shadow-lg transition-all transform -translate-x-1/2"
+          className="pointer-events-none absolute -top-8 rounded-lg border border-[#4E5174]/40 bg-[#28264B] px-2.5 py-1 text-xs text-[#E8EAE7] shadow-lg transition-all transform -translate-x-1/2"
           style={{ left: `${(hoveredPoint.x / width) * 100}%` }}
         >
-          <span className="font-semibold text-[#e18546]">{hoveredPoint.queries} requêtes</span> ({hoveredPoint.date})
+          <span className="font-semibold text-[#959EC9]">{hoveredPoint.queries} requêtes</span> ({hoveredPoint.date})
         </div>
       )}
     </div>
@@ -167,15 +168,15 @@ export function RAGRadialGauge({ score, label, sublabel, size = 90 }: RadialGaug
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            className="stroke-[#3d4f7e] dark:stroke-[#e18546] transition-all duration-700"
+            className="stroke-[#AA0033] dark:stroke-[#959EC9] transition-all duration-700"
             fill="none"
           />
         </svg>
-        <span className="absolute text-sm font-bold font-mono text-[#262236] dark:text-[#fefef3]">
+        <span className="absolute text-sm font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
           {Math.round(percent * 100)}%
         </span>
       </div>
-      <p className="mt-2 text-xs font-semibold text-[#262236] dark:text-[#fefef3]">{label}</p>
+      <p className="mt-2 text-xs font-semibold text-[#28264B] dark:text-[#E8EAE7]">{label}</p>
       {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
     </div>
   );
