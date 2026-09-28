@@ -1185,7 +1185,7 @@ export function IntegrationsContent() {
                   className={`mt-6 w-full ${
                     isConnected
                       ? "border-border/80 hover:bg-destructive/10 hover:text-destructive"
-                        : "bg-marine text-papier hover:bg-nuit"
+                      : "bg-marine text-papier hover:bg-nuit"
                   }`}
                   variant={isConnected ? "outline" : "default"}
                   disabled={connectMutation.isPending}

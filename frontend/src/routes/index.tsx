@@ -58,7 +58,15 @@ export const Route = createFileRoute("/")({
  * Modern, Refined SmartRAG Brand Logo Mark
  */
 function SmartRAGLogoMark({ size = 42, className = "" }: { size?: number; className?: string }) {
-  return <img src="/logo.png" width={size} height={size} alt={`${APP_NAME} logo`} className={`shrink-0 rounded-xl ${className}`} />;
+  return (
+    <img
+      src="/logo.png"
+      width={size}
+      height={size}
+      alt={`${APP_NAME} logo`}
+      className={`shrink-0 rounded-xl ${className}`}
+    />
+  );
 }
 
 // Scénarios réels et concrets pour tout utilisateur (métier, RH, finance, technique)
@@ -76,7 +84,7 @@ interface DemoScenario {
   confidenceScore: string;
 }
 
-const DEMO_SCENARIOS: DemoScenario[] = [
+const DEMO_SCENARIOS: [DemoScenario, ...DemoScenario[]] = [
   {
     id: "legal",
     department: "Contrats & Juridique",

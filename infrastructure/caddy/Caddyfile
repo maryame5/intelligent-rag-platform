@@ -1,0 +1,16 @@
+# HTTPS automatique via Let's Encrypt.
+{$APP_DOMAIN} {
+	encode gzip
+	reverse_proxy frontend:3000
+}
+
+{$API_DOMAIN} {
+	encode gzip
+
+	@metrics path /metrics
+	respond @metrics 404
+
+	reverse_proxy backend:8000 {
+		flush_interval -1
+	}
+}

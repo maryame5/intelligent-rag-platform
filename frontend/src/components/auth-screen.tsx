@@ -56,9 +56,7 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
           <div className="flex size-9 items-center justify-center rounded-xl bg-orbite text-nuit font-bold shadow-sm">
             S
           </div>
-          <span className="tracking-tight font-extrabold text-white">
-            {APP_NAME}
-          </span>
+          <span className="tracking-tight font-extrabold text-white">{APP_NAME}</span>
         </div>
 
         <div className="relative z-10 my-auto max-w-xl">
@@ -98,9 +96,7 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
             <div className="flex size-9 items-center justify-center rounded-xl bg-orbite text-nuit font-bold">
               S
             </div>
-            <strong className="text-lg text-slate-900">
-              {APP_NAME}
-            </strong>
+            <strong className="text-lg text-slate-900">{APP_NAME}</strong>
           </div>
 
           <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-brume border border-marine/20 px-3 py-1 text-xs font-semibold text-marine">

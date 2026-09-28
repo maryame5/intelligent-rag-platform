@@ -127,9 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <SmartRAGBrandMark size={34} />
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-extrabold text-slate-900">
-                  {APP_NAME}
-                </p>
+                <p className="truncate text-sm font-extrabold text-slate-900">{APP_NAME}</p>
                 <p className="truncate text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                   Studio Documentaire
                 </p>

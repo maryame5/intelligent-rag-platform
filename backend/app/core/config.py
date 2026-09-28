@@ -1,3 +1,4 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -39,6 +40,18 @@ class Settings(BaseSettings):
     embedding_api_base_url: str = "https://openrouter.ai/api/v1"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    @model_validator(mode="after")
+    def _reject_weak_secret_outside_dev(self) -> "Settings":
+        """Reject the default or short JWT secret outside development."""
+        if self.environment.lower() not in {"development", "dev", "test", "testing"} and (
+            self.secret_key in {"", "change-me"} or len(self.secret_key) < 32
+        ):
+            raise ValueError(
+                "SECRET_KEY faible ou par défaut avec ENVIRONMENT != development : "
+                "générez-en une avec `openssl rand -hex 32`."
+            )
+        return self
 
 
 settings = Settings()
