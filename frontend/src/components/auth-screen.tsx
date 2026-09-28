@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/backend-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { APP_NAME } from "@/config";
 
 export function AuthScreen({ mode }: { mode: "login" | "register" }) {
   const navigate = useNavigate();
@@ -38,10 +39,10 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.1fr_0.9fr]">
       {/* ───── Left panel — Branding ───── */}
-      <section className="relative hidden overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-10 lg:flex lg:flex-col text-white">
+      <section className="relative hidden overflow-hidden bg-nuit p-10 lg:flex lg:flex-col text-papier">
         {/* Decorative blurs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/15 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-nuit-soft/60 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-marine/40 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4" />
         {/* Dot grid */}
         <div
           className="absolute inset-0"
@@ -52,16 +53,16 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
         />
 
         <div className="relative z-10 flex items-center gap-2.5 font-semibold text-lg">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold shadow-sm">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-orbite text-nuit font-bold shadow-sm">
             S
           </div>
           <span className="tracking-tight font-extrabold text-white">
-            Smart<span className="text-indigo-400">RAG</span>
+            {APP_NAME}
           </span>
         </div>
 
         <div className="relative z-10 my-auto max-w-xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-indigo-300">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-orbite">
             Plateforme RAG d'entreprise
           </p>
           <h1 className="mt-5 text-4xl font-extrabold leading-tight text-white">
@@ -94,16 +95,16 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-orbite text-nuit font-bold">
               S
             </div>
             <strong className="text-lg text-slate-900">
-              Smart<span className="text-indigo-600">RAG</span>
+              {APP_NAME}
             </strong>
           </div>
 
-          <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
-            <Brain className="size-3.5 text-indigo-600" />
+          <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-brume border border-marine/20 px-3 py-1 text-xs font-semibold text-marine">
+            <Brain className="size-3.5 text-marine" />
             {mode === "login" ? "Bon retour" : "Nouveau compte"}
           </div>
           <h2 className="mt-3 text-2xl font-extrabold text-slate-900">
@@ -119,7 +120,7 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
             <label className="block">
               <Label className="text-slate-700 font-semibold text-xs">Email</Label>
               <Input
-                className="mt-2 h-11 border-slate-200 bg-white focus-visible:border-indigo-600 focus-visible:ring-indigo-600/20"
+                className="mt-2 h-11 border-brume bg-white focus-visible:border-marine focus-visible:ring-marine/20"
                 name="email"
                 type="email"
                 required
@@ -129,7 +130,7 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
             <label className="block">
               <Label className="text-slate-700 font-semibold text-xs">Mot de passe</Label>
               <Input
-                className="mt-2 h-11 border-slate-200 bg-white focus-visible:border-indigo-600 focus-visible:ring-indigo-600/20"
+                className="mt-2 h-11 border-brume bg-white focus-visible:border-marine focus-visible:ring-marine/20"
                 name="password"
                 type="password"
                 minLength={8}
@@ -138,12 +139,12 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
               />
             </label>
             {message ? (
-              <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 font-medium">
+              <p className="rounded-lg border border-braise/30 bg-orbite-soft p-3 text-sm text-nuit font-medium">
                 {message}
               </p>
             ) : null}
             <Button
-              className="w-full h-11 rounded-xl bg-indigo-600 text-white font-bold shadow-md hover:bg-indigo-700 transition-all cursor-pointer"
+              className="w-full h-11 rounded-xl bg-orbite text-nuit font-bold hover:bg-braise transition-all cursor-pointer"
               disabled={loading}
             >
               {loading ? (
@@ -159,7 +160,7 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
             {mode === "login" ? "Nouveau ici ?" : "Déjà un compte ?"}{" "}
             <Link
               to={mode === "login" ? "/auth/register" : "/auth/login"}
-              className="font-bold text-indigo-600 hover:underline transition-colors"
+              className="font-bold text-marine hover:text-nuit hover:underline transition-colors"
             >
               {mode === "login" ? "Créer un compte" : "Se connecter"}
             </Link>

@@ -51,14 +51,14 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
       >
         <defs>
           <linearGradient id="ragAreaGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.25" />
-            <stop offset="60%" stopColor="#3b82f6" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+            <stop offset="0%" stopColor="#F5923F" stopOpacity="0.25" />
+            <stop offset="60%" stopColor="#3B4F86" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#3B4F86" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="ragLineGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#6366f1" />
-            <stop offset="50%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#0ea5e9" />
+            <stop offset="0%" stopColor="#3B4F86" />
+            <stop offset="50%" stopColor="#F5923F" />
+            <stop offset="100%" stopColor="#D9601F" />
           </linearGradient>
         </defs>
 
@@ -103,7 +103,7 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
               cx={p.x}
               cy={p.y}
               r={hoveredIdx === i ? 6 : 4}
-              className="fill-white stroke-indigo-600 stroke-2 transition-all shadow-sm"
+              className="fill-white stroke-marine stroke-2 transition-all shadow-sm"
             />
             {/* Zone invisible large pour faciliter le hover */}
             <circle cx={p.x} cy={p.y} r={16} fill="transparent" />
@@ -130,7 +130,7 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
           className="pointer-events-none absolute -top-8 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1 text-xs text-white shadow-lg transition-all transform -translate-x-1/2"
           style={{ left: `${(hoveredPoint.x / width) * 100}%` }}
         >
-          <span className="font-semibold text-indigo-300">{hoveredPoint.queries} questions</span> (
+          <span className="font-semibold text-orbite">{hoveredPoint.queries} questions</span> (
           {hoveredPoint.date})
         </div>
       )}
@@ -178,7 +178,7 @@ export function RAGRadialGauge({ score, label, sublabel, size = 90 }: RadialGaug
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
             className={
-              score == null ? "stroke-slate-200" : "stroke-indigo-600 transition-all duration-700"
+              score == null ? "stroke-slate-200" : "stroke-marine transition-all duration-700"
             }
             fill="none"
           />

@@ -39,6 +39,8 @@ import {
 } from "@/components/ui/select";
 import { api, type ChatCitation, type ChatMessage, type ConversationDetail } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { CitedText, SourceCard } from "@/components/Citation";
+import { APP_NAME } from "@/config";
 
 const SAMPLE_PROMPTS = [
   "Quelles sont les procédures et règles décrites dans ces documents ?",
@@ -55,7 +57,7 @@ export function ChatContent() {
   const [draft, setDraft] = useState("");
 
   // Contrôle de visibilité de l'historique latéral
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   // Inspecteur de source (volet tiroir non bloquant ou modal)
   const [selectedCitation, setSelectedCitation] = useState<ChatCitation | null>(null);
@@ -193,7 +195,7 @@ export function ChatContent() {
   const messages: ChatMessage[] = conversation?.messages ?? [];
 
   return (
-    <div className="relative flex h-[calc(100vh-3.5rem)] overflow-hidden bg-[#fafbfa] text-[#28264B]">
+    <div className="relative flex h-[calc(100vh-3.5rem)] overflow-hidden bg-papier text-nuit">
       {/* ───── 1. Collapsible Sidebar (Historique & Sélection de Base) ───── */}
       <aside
         className={cn(
@@ -236,14 +238,14 @@ export function ChatContent() {
                   setConversationId(null);
                 }}
               >
-                <SelectTrigger className="w-full bg-[#fafbfa] border-[#dcdfd9] text-xs font-semibold text-[#28264B] focus:ring-[#AA0033]">
+                <SelectTrigger className="w-full bg-papier border-brume text-xs font-semibold text-nuit focus:ring-marine">
                   <SelectValue placeholder="Choisir une base" />
                 </SelectTrigger>
                 <SelectContent>
                   {kbs.map((kb) => (
                     <SelectItem key={kb.id} value={kb.id}>
                       <div className="flex items-center gap-2">
-                        <BookOpen className="size-3.5 text-[#AA0033]" />
+                        <BookOpen className="size-3.5 text-marine" />
                         <span className="truncate">{kb.name}</span>
                       </div>
                     </SelectItem>
@@ -254,7 +256,7 @@ export function ChatContent() {
 
             {/* Bouton Nouvelle conversation */}
             <Button
-              className="mb-4 w-full bg-[#AA0033] text-white hover:bg-[#880029] shadow-xs transition-all text-xs font-bold h-9"
+              className="mb-4 w-full bg-marine text-papier hover:bg-nuit shadow-xs transition-all text-xs font-bold h-9"
               onClick={() => {
                 setConversationId(null);
                 setSelectedCitation(null);
@@ -320,7 +322,7 @@ export function ChatContent() {
                       }}
                       disabled={deleteMutation.isPending}
                       className={cn(
-                        "rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-400",
+                        "rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:text-braise",
                         isActive ? "text-white/70" : "text-[#4E5174]",
                       )}
                     >
@@ -341,7 +343,7 @@ export function ChatContent() {
       </aside>
 
       {/* ───── 2. Main Chat Area (Full Width & Spacious) ───── */}
-      <main className="relative flex flex-1 flex-col h-full min-w-0 overflow-hidden bg-[#fafbfa]">
+      <main className="relative flex flex-1 flex-col h-full min-w-0 overflow-hidden bg-papier">
         {/* Top Control Bar */}
         <header className="h-14 shrink-0 border-b border-[#dcdfd9] bg-white/90 backdrop-blur-md px-4 flex items-center justify-between gap-3 z-10">
           <div className="flex items-center gap-3 min-w-0">
@@ -353,7 +355,7 @@ export function ChatContent() {
                 className="h-8 gap-1.5 px-2.5 text-xs font-semibold text-[#28264B] border-[#dcdfd9] hover:bg-[#E8EAE7]"
                 title="Afficher l'historique"
               >
-                <PanelLeftOpen className="size-4 text-[#AA0033]" />
+                <PanelLeftOpen className="size-4 text-marine" />
                 <span className="hidden sm:inline">Historique</span>
               </Button>
             )}
@@ -364,7 +366,7 @@ export function ChatContent() {
               </span>
               {currentKb && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#E8EAE7] px-2.5 py-0.5 text-[11px] font-semibold text-[#28264B] border border-[#dcdfd9]">
-                  <Layers className="size-3 text-[#AA0033]" />
+                  <Layers className="size-3 text-marine" />
                   {currentKb.documentCount} docs
                 </span>
               )}
@@ -384,7 +386,7 @@ export function ChatContent() {
                 setSelectedCitation(null);
                 inputRef.current?.focus();
               }}
-              className="h-8 text-xs font-bold text-[#AA0033] border-[#AA0033]/30 hover:bg-[#AA0033]/10"
+              className="h-8 text-xs font-bold text-marine border-marine/30 hover:bg-brume"
             >
               <Plus className="size-3.5 mr-1" />
               Nouveau
@@ -398,7 +400,7 @@ export function ChatContent() {
             {messages.length === 0 && streamingUserMsg === null ? (
               <div className="my-12 flex flex-col items-center justify-center text-center">
                 <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#28264B] to-[#1c1a35] text-white shadow-lg">
-                  <Sparkles className="size-8 text-[#AA0033]" />
+                  <Sparkles className="size-8 text-orbite" />
                 </div>
                 <h3 className="mt-5 text-2xl font-extrabold text-[#28264B]">
                   Interrogez {currentKb?.name || "vos documents"}
@@ -413,10 +415,10 @@ export function ChatContent() {
                     <button
                       key={prompt}
                       onClick={() => handleSend(prompt)}
-                      className="group flex items-center justify-between rounded-xl border border-[#dcdfd9] bg-white p-4 text-xs font-semibold text-[#28264B] transition-all hover:border-[#AA0033] hover:shadow-sm"
+                      className="group flex items-center justify-between rounded-xl border border-brume bg-white p-4 text-xs font-semibold text-nuit transition-all hover:border-marine hover:shadow-sm"
                     >
                       <span className="line-clamp-2">{prompt}</span>
-                      <ArrowRight className="ml-2 size-4 shrink-0 text-[#959EC9] transition-transform group-hover:translate-x-1 group-hover:text-[#AA0033]" />
+                      <ArrowRight className="ml-2 size-4 shrink-0 text-marine transition-transform group-hover:translate-x-1 group-hover:text-braise" />
                     </button>
                   ))}
                 </div>
@@ -446,7 +448,7 @@ export function ChatContent() {
 
                 <div className="rounded-xl border border-[#dcdfd9] bg-white p-4 shadow-sm space-y-3">
                   <div className="flex items-center gap-2 text-xs font-bold text-[#28264B]">
-                    <Zap className="size-4 animate-pulse text-[#AA0033]" />
+                    <Zap className="size-4 animate-pulse text-orbite" />
                     Traitement RAG en direct
                   </div>
 
@@ -460,7 +462,7 @@ export function ChatContent() {
                       )}
                     >
                       {pipelineStep === 1 ? (
-                        <Loader2 className="size-3 animate-spin text-[#AA0033]" />
+                        <Loader2 className="size-3 animate-spin text-marine" />
                       ) : pipelineStep > 1 ? (
                         <Check className="size-3 text-emerald-600" />
                       ) : (
@@ -478,7 +480,7 @@ export function ChatContent() {
                       )}
                     >
                       {pipelineStep === 2 ? (
-                        <Loader2 className="size-3 animate-spin text-[#AA0033]" />
+                        <Loader2 className="size-3 animate-spin text-marine" />
                       ) : pipelineStep > 2 ? (
                         <Check className="size-3 text-emerald-600" />
                       ) : (
@@ -496,9 +498,9 @@ export function ChatContent() {
                       )}
                     >
                       {pipelineStep === 3 && !streamingContent ? (
-                        <Loader2 className="size-3 animate-spin text-[#AA0033]" />
+                        <Loader2 className="size-3 animate-spin text-marine" />
                       ) : pipelineStep >= 3 ? (
-                        <Sparkles className="size-3 text-[#AA0033]" />
+                        <Sparkles className="size-3 text-orbite" />
                       ) : (
                         <FileText className="size-3" />
                       )}
@@ -509,7 +511,7 @@ export function ChatContent() {
                   {streamingContent && (
                     <div className="pt-3 border-t border-[#dcdfd9] text-sm leading-relaxed text-[#28264B]">
                       <MarkdownFormatted content={streamingContent} />
-                      <span className="ml-1 inline-block size-2 rounded-full animate-ping bg-[#AA0033]" />
+                      <span className="ml-1 inline-block size-2 rounded-full animate-ping bg-orbite" />
                     </div>
                   )}
                 </div>
@@ -527,7 +529,7 @@ export function ChatContent() {
               e.preventDefault();
               handleSend();
             }}
-            className="mx-auto flex max-w-4xl items-center gap-2 rounded-xl border border-[#dcdfd9] bg-[#fafbfa] p-1.5 shadow-sm focus-within:border-[#AA0033] focus-within:ring-2 focus-within:ring-[#AA0033]/20 transition-all"
+            className="mx-auto flex max-w-4xl items-center gap-2 rounded-xl border border-brume bg-papier p-1.5 shadow-sm focus-within:border-marine focus-within:ring-2 focus-within:ring-marine/20 transition-all"
           >
             <Input
               ref={inputRef}
@@ -545,7 +547,7 @@ export function ChatContent() {
               type="submit"
               size="icon"
               disabled={!kbId || isSending || !draft.trim()}
-              className="size-9 shrink-0 rounded-lg bg-[#AA0033] text-white hover:bg-[#880029] transition-all cursor-pointer"
+              className="size-9 shrink-0 rounded-lg bg-orbite text-nuit hover:bg-braise transition-all cursor-pointer"
             >
               {isSending ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -571,7 +573,7 @@ export function ChatContent() {
                   {selectedCitation.index}
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#AA0033]">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-braise">
                     Source Citée #{selectedCitation.index}
                   </h4>
                   <p className="text-xs font-extrabold text-[#28264B] truncate max-w-[260px]">
@@ -602,7 +604,7 @@ export function ChatContent() {
                   )}
                 </div>
                 <p className="text-sm font-bold text-[#28264B] flex items-center gap-1.5">
-                  <FileText className="size-4 text-[#AA0033]" />
+                  <FileText className="size-4 text-marine" />
                   {selectedCitation.documentTitle}
                 </p>
               </div>
@@ -626,9 +628,11 @@ export function ChatContent() {
                     Copier
                   </Button>
                 </div>
-                <div className="rounded-xl border border-[#AA0033]/20 bg-[#fafbfa] p-4 text-xs font-mono text-[#28264B] leading-relaxed border-l-4 border-l-[#AA0033] shadow-2xs">
-                  {selectedCitation.excerpt}
-                </div>
+                <SourceCard
+                  index={selectedCitation.index}
+                  title={selectedCitation.documentTitle}
+                  excerpt={selectedCitation.excerpt}
+                />
               </div>
 
               {/* Grounding guarantee badge */}
@@ -648,7 +652,7 @@ export function ChatContent() {
             <div className="p-4 border-t border-[#dcdfd9] bg-[#fafbfa] flex justify-end">
               <Button
                 onClick={() => setSelectedCitation(null)}
-                className="bg-[#28264B] text-white hover:bg-[#34325a] text-xs font-bold"
+                className="bg-marine text-papier hover:bg-nuit text-xs font-bold"
               >
                 Fermer l'aperçu
               </Button>
@@ -720,7 +724,7 @@ function MessageBubble({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[#28264B] px-5 py-3.5 text-sm font-medium text-white shadow-md">
+        <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-nuit px-5 py-3.5 text-sm font-medium text-papier shadow-md">
           {message.content}
         </div>
       </div>
@@ -747,9 +751,9 @@ function MessageBubble({
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#dcdfd9]/60">
         <div className="flex items-center gap-2">
           <div className="flex size-6 items-center justify-center rounded-md bg-[#28264B] text-white">
-            <Sparkles className="size-3.5 text-[#AA0033]" />
+            <Sparkles className="size-3.5 text-orbite" />
           </div>
-          <span className="font-extrabold text-xs text-[#28264B]">SmartRAG Assistant</span>
+          <span className="font-extrabold text-xs text-nuit">{APP_NAME} Assistant</span>
         </div>
 
         {notFound && (
@@ -789,19 +793,19 @@ function MessageBubble({
                   className={cn(
                     "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-all cursor-pointer",
                     isSelected
-                      ? "border-[#AA0033] bg-[#AA0033] text-white font-bold shadow-xs"
-                      : "border-[#dcdfd9] bg-[#fafbfa] text-[#28264B] hover:border-[#AA0033] hover:bg-[#E8EAE7]/50 font-medium",
+                      ? "border-orbite bg-orbite text-nuit font-bold shadow-xs"
+                      : "border-brume bg-papier text-nuit hover:border-orbite hover:bg-brume font-medium",
                   )}
                 >
                   <span
                     className={cn(
                       "flex size-4.5 items-center justify-center rounded-full text-[10px] font-bold",
-                      isSelected ? "bg-white text-[#AA0033]" : "bg-[#28264B] text-white",
+                      isSelected ? "bg-papier text-braise" : "bg-nuit text-papier",
                     )}
                   >
                     {c.index}
                   </span>
-                  <span className="truncate max-w-[180px] sm:max-w-[240px]">{c.documentTitle}</span>
+                  <CitedText index={c.index}>{c.documentTitle}</CitedText>
                   {c.page && <span className="opacity-70 text-[10px]">p.{c.page}</span>}
                 </button>
               );
@@ -846,7 +850,7 @@ function MessageBubble({
               onClick={() => onFeedback("down")}
               className={cn(
                 "rounded p-1 transition-colors hover:bg-[#E8EAE7]",
-                message.feedback === "down" ? "text-red-600 font-bold" : "text-[#4E5174]",
+                message.feedback === "down" ? "text-braise font-bold" : "text-[#4E5174]",
               )}
             >
               <ThumbsDown className="size-3.5" />

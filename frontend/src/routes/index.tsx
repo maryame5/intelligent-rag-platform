@@ -37,11 +37,13 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { APP_NAME } from "@/config";
+import { CitedText, SourceCard } from "@/components/Citation";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SmartRAG — La mémoire intelligente de vos documents d'entreprise" },
+      { title: `${APP_NAME} — La mémoire intelligente de vos documents d'entreprise` },
       {
         name: "description",
         content:
@@ -56,25 +58,7 @@ export const Route = createFileRoute("/")({
  * Modern, Refined SmartRAG Brand Logo Mark
  */
 function SmartRAGLogoMark({ size = 42, className = "" }: { size?: number; className?: string }) {
-  return (
-    <div className={`relative flex items-center justify-center shrink-0 ${className}`}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 44 44"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 drop-shadow-sm"
-        aria-label="SmartRAG Logo"
-      >
-        <rect width="44" height="44" rx="12" fill="#1e1b4b" />
-        <rect x="10" y="27" width="16" height="4.5" rx="2.25" fill="#818cf8" fillOpacity="0.8" />
-        <rect x="10" y="19.5" width="24" height="4.5" rx="2.25" fill="#e0e7ff" fillOpacity="0.9" />
-        <rect x="10" y="12" width="18" height="4.5" rx="2.25" fill="#ffffff" />
-        <circle cx="31.5" cy="14.25" r="4" fill="#3b82f6" />
-      </svg>
-    </div>
-  );
+  return <img src="/logo.png" width={size} height={size} alt={`${APP_NAME} logo`} className={`shrink-0 rounded-xl ${className}`} />;
 }
 
 // Scénarios réels et concrets pour tout utilisateur (métier, RH, finance, technique)
@@ -156,105 +140,21 @@ const DEMO_SCENARIOS: DemoScenario[] = [
   },
 ];
 
-// Matrice claire et lisible des fonctionnalités
-interface FeatureItem {
-  title: string;
-  category: "utilisateurs" | "securite" | "technique";
-  status: "disponible" | "bientot";
-  simpleDesc: string;
-  benefit: string;
-}
-
-const FEATURE_ITEMS: FeatureItem[] = [
-  {
-    title: "Recherche en langage naturel",
-    category: "utilisateurs",
-    status: "disponible",
-    simpleDesc: "Posez vos questions comme vous parleriez à un collègue, sans mot-clé complexe.",
-    benefit: "Accessible à tous sans formation",
-  },
-  {
-    title: "Citations & Extraits vérifiables",
-    category: "utilisateurs",
-    status: "disponible",
-    simpleDesc:
-      "Chaque affirmation affiche le document d'origine, le numéro de page et le passage exact.",
-    benefit: "Zéro hallucination, confiance totale",
-  },
-  {
-    title: "Import multi-fichiers instantané",
-    category: "utilisateurs",
-    status: "disponible",
-    simpleDesc:
-      "Déposez vos PDF, fichiers Word (.docx), Markdown ou texte brut en un simple glisser-déposer.",
-    benefit: "Indexation automatique en arrière-plan",
-  },
-  {
-    title: "Bases documentaires compartimentées",
-    category: "securite",
-    status: "disponible",
-    simpleDesc:
-      "Créez des espaces séparés par équipe (RH, Juridique, Finance, Technique) avec droits d'accès.",
-    benefit: "Confidentialité garantie par service",
-  },
-  {
-    title: "Validation des réponses expertes",
-    category: "securite",
-    status: "disponible",
-    simpleDesc:
-      "Les experts peuvent marquer des réponses comme « Référence vérifiée » pour enrichir la mémoire interne.",
-    benefit: "Amélioration continue de la qualité",
-  },
-  {
-    title: "Données 100% privées & Isolées",
-    category: "securite",
-    status: "disponible",
-    simpleDesc: "Vos documents ne sont jamais envoyés pour entraîner des modèles publics d'IA.",
-    benefit: "Conformité RGPD et secret des affaires",
-  },
-  {
-    title: "Recherche hybride intelligente",
-    category: "technique",
-    status: "disponible",
-    simpleDesc:
-      "Combine la compréhension sémantique profonde (sens) et la recherche textuelle exacte (codes, références).",
-    benefit: "Précision maximale même sur les termes rares",
-  },
-  {
-    title: "Clés d'API & Intégrations REST",
-    category: "technique",
-    status: "disponible",
-    simpleDesc:
-      "Connectez SmartRAG à vos applications métiers grâce à notre API sécurisée haute performance.",
-    benefit: "Automatisation de vos flux de travail",
-  },
-];
-
 export function LandingPage() {
   const { session } = useAuth();
   const [activeScenarioId, setActiveScenarioId] = useState("legal");
-  const [filterCategory, setFilterCategory] = useState<
-    "all" | "utilisateurs" | "securite" | "technique"
-  >("all");
-  const [filterStatus, setFilterStatus] = useState<"all" | "disponible" | "bientot">("all");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const currentScenario =
     DEMO_SCENARIOS.find((s) => s.id === activeScenarioId) || DEMO_SCENARIOS[0];
 
-  const filteredFeatures = FEATURE_ITEMS.filter((f) => {
-    const matchCat = filterCategory === "all" || f.category === filterCategory;
-    const matchStat = filterStatus === "all" || f.status === filterStatus;
-    return matchCat && matchStat;
-  });
-
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] flex flex-col font-sans selection:bg-[#6366f1]/20 selection:text-[#1e1b4b] overflow-x-hidden antialiased">
       {/* ───── Subtle Brand Ambient Lighting ───── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[500px] bg-gradient-to-b from-indigo-200/40 via-blue-100/30 to-transparent blur-3xl opacity-70" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[500px] bg-brume/60 blur-3xl opacity-70" />
         <div className="absolute top-1/3 right-0 w-[450px] h-[450px] bg-sky-200/30 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 left-0 w-[450px] h-[450px] bg-indigo-200/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 left-0 w-[450px] h-[450px] bg-marine/10 rounded-full blur-[120px] pointer-events-none" />
       </div>
 
       {/* ───── Header / Navigation ───── */}
@@ -269,7 +169,7 @@ export function LandingPage() {
               />
               <div className="flex flex-col">
                 <span className="font-extrabold text-xl tracking-tight text-slate-900">
-                  Smart<span className="text-indigo-600">RAG</span>
+                  {APP_NAME}
                 </span>
                 <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
                   Assistant Documentaire Entreprise
@@ -278,19 +178,16 @@ export function LandingPage() {
             </Link>
 
             <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
-              <a href="#demo" className="hover:text-indigo-600 transition-colors">
+              <a href="#demo" className="hover:text-marine transition-colors">
                 Démonstration
               </a>
-              <a href="#how-it-works" className="hover:text-indigo-600 transition-colors">
+              <a href="#how-it-works" className="hover:text-marine transition-colors">
                 Comment ça marche
               </a>
-              <a href="#benefits" className="hover:text-indigo-600 transition-colors">
+              <a href="#benefits" className="hover:text-marine transition-colors">
                 Avantages Métier
               </a>
-              <a href="#features" className="hover:text-indigo-600 transition-colors">
-                Fonctionnalités
-              </a>
-              <a href="#faq" className="hover:text-indigo-600 transition-colors">
+              <a href="#faq" className="hover:text-marine transition-colors">
                 Questions Fréquentes
               </a>
             </nav>
@@ -301,7 +198,7 @@ export function LandingPage() {
             {session ? (
               <Link
                 to="/dashboard"
-                className="inline-flex h-10 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white transition-all duration-150 hover:bg-indigo-700 shadow-sm"
+                className="inline-flex h-10 items-center gap-2 rounded-xl bg-marine px-5 text-sm font-semibold text-papier transition-all duration-150 hover:bg-nuit"
               >
                 Mon espace <ArrowRight className="size-4" />
               </Link>
@@ -309,13 +206,13 @@ export function LandingPage() {
               <>
                 <Link
                   to="/auth"
-                  className="text-sm font-semibold text-slate-700 hover:text-indigo-600 px-3 py-2 transition-colors"
+                  className="text-sm font-semibold text-slate-700 hover:text-marine px-3 py-2 transition-colors"
                 >
                   Se connecter
                 </Link>
                 <Link
                   to="/auth"
-                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white transition-all duration-150 hover:bg-indigo-700 shadow-sm hover:shadow"
+                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-marine px-5 text-sm font-semibold text-papier transition-all duration-150 hover:bg-nuit"
                 >
                   Essayer maintenant <ArrowRight className="size-4" />
                 </Link>
@@ -329,17 +226,15 @@ export function LandingPage() {
         {/* ───── Hero Section ───── */}
         <section className="relative px-6 pt-16 pb-20 lg:pt-24 lg:pb-28 text-center max-w-5xl mx-auto">
           {/* Trust Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-200/80 px-4 py-1.5 text-xs font-semibold text-indigo-800 mb-8 shadow-2xs">
-            <span className="flex size-2 rounded-full bg-indigo-600 animate-pulse" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-brume border border-marine/20 px-4 py-1.5 text-xs font-semibold text-nuit mb-8">
+            <span className="flex size-2 rounded-full bg-orbite animate-pulse" />
             <span>La plateforme documentaire intelligente pour toute l'entreprise</span>
           </div>
 
           {/* Main Hero Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
             Trouvez la bonne information dans vos documents en{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 bg-clip-text text-transparent">
-              1 seconde chrono.
-            </span>
+            <mark className="rounded px-2 bg-orbite-soft text-nuit">1 seconde chrono.</mark>
           </h1>
 
           {/* Clear, Human Subtitle */}
@@ -353,7 +248,7 @@ export function LandingPage() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               to={session ? "/dashboard" : "/auth"}
-              className="inline-flex h-12 items-center justify-center gap-2.5 rounded-xl bg-indigo-600 px-8 text-base font-bold text-white shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all duration-200"
+              className="inline-flex h-12 items-center justify-center gap-2.5 rounded-xl bg-orbite px-8 text-base font-bold text-nuit hover:bg-braise transition-all duration-200"
             >
               <span>Accéder à la plateforme</span>
               <ArrowRight className="size-5" />
@@ -363,7 +258,7 @@ export function LandingPage() {
               href="#demo"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-7 text-base font-bold text-slate-800 shadow-2xs hover:bg-slate-50 hover:border-slate-400 transition-all duration-200"
             >
-              <Eye className="size-4 text-indigo-600" />
+              <Eye className="size-4 text-marine" />
               <span>Voir la démo interactive</span>
             </a>
           </div>
@@ -375,11 +270,11 @@ export function LandingPage() {
               <span>Zéro hallucination</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <CheckCircle2 className="size-4 text-indigo-600 shrink-0" />
+              <CheckCircle2 className="size-4 text-marine shrink-0" />
               <span>Citations de pages précises</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <CheckCircle2 className="size-4 text-blue-600 shrink-0" />
+              <CheckCircle2 className="size-4 text-marine shrink-0" />
               <span>100% Données privées</span>
             </div>
             <div className="flex items-center justify-center gap-2">
@@ -392,7 +287,7 @@ export function LandingPage() {
         {/* ───── Interactive Demo Showcase ───── */}
         <section id="demo" className="py-16 px-6 max-w-6xl mx-auto scroll-mt-24">
           <div className="text-center mb-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-marine">
               Démonstration Interactive
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
@@ -412,8 +307,8 @@ export function LandingPage() {
                 onClick={() => setActiveScenarioId(sc.id)}
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
                   activeScenarioId === sc.id
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-white text-slate-700 border border-slate-200 hover:border-indigo-300 hover:bg-slate-50"
+                    ? "bg-marine text-papier shadow-sm"
+                    : "bg-white text-slate-700 border border-brume hover:border-marine hover:bg-brume"
                 }`}
               >
                 {sc.id === "legal" && <Shield className="size-3.5" />}
@@ -432,7 +327,7 @@ export function LandingPage() {
               <div className="flex items-center gap-2">
                 <span className="flex size-2 rounded-full bg-emerald-500" />
                 <span className="font-semibold text-slate-700">Document actif :</span>
-                <span className="font-mono text-indigo-900 font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                <span className="font-mono text-nuit font-bold bg-brume px-2 py-0.5 rounded border border-marine/20">
                   {currentScenario.docTitle}
                 </span>
               </div>
@@ -458,14 +353,14 @@ export function LandingPage() {
                     Question de l'utilisateur
                   </span>
                   <div className="mt-2 rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm font-semibold text-slate-800 flex items-start gap-3">
-                    <MessageSquare className="size-4 text-indigo-600 shrink-0 mt-0.5" />
+                    <MessageSquare className="size-4 text-marine shrink-0 mt-0.5" />
                     <span>« {currentScenario.query} »</span>
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-marine flex items-center gap-1.5">
                       <Search className="size-3.5" />
                       Extrait source retrouvé automatiquement
                     </span>
@@ -473,9 +368,12 @@ export function LandingPage() {
                       {currentScenario.docLocation}
                     </span>
                   </div>
-                  <div className="rounded-xl bg-amber-50/60 border border-amber-200/80 p-4 text-xs font-normal text-slate-800 italic leading-relaxed">
-                    {currentScenario.docExcerpt}
-                  </div>
+                  <SourceCard
+                    index={1}
+                    title={currentScenario.docTitle}
+                    location={currentScenario.docLocation}
+                    excerpt={currentScenario.docExcerpt}
+                  />
                 </div>
 
                 <div className="pt-2 text-[11px] text-slate-500 flex items-center gap-2">
@@ -503,26 +401,26 @@ export function LandingPage() {
                       dangerouslySetInnerHTML={{
                         __html: currentScenario.answerSummary.replace(
                           /\*\*(.*?)\*\*/g,
-                          '<strong class="text-indigo-950 font-bold bg-indigo-50 px-1 py-0.5 rounded">$1</strong>',
+                          '<strong class="text-nuit font-bold bg-orbite-soft px-1 py-0.5 rounded">$1</strong>',
                         ),
                       }}
                     />
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-indigo-50/80 border border-indigo-100 p-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-900 block mb-1">
+                <div className="rounded-xl bg-brume border border-marine/20 p-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-nuit block mb-1">
                     Points clés retenus :
                   </span>
-                  <p className="text-xs font-semibold text-indigo-800">
-                    {currentScenario.keyTakeaway}
+                  <p className="text-xs font-semibold text-marine">
+                    <CitedText index={1}>{currentScenario.keyTakeaway}</CitedText>
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
                   <Link
                     to="/chat"
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                    className="text-xs font-bold text-marine hover:text-nuit flex items-center gap-1"
                   >
                     Tester avec vos propres documents →
                   </Link>
@@ -536,7 +434,7 @@ export function LandingPage() {
         <section id="how-it-works" className="py-16 px-6 bg-slate-100/60 border-y border-slate-200">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-14">
-              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-marine">
                 Simplicité & Rapidité
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
@@ -552,7 +450,7 @@ export function LandingPage() {
               {/* Step 1 */}
               <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-2xs relative flex flex-col justify-between">
                 <div>
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 font-extrabold text-lg mb-5 border border-indigo-100">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-brume text-marine font-extrabold text-lg mb-5 border border-marine/20">
                     1
                   </div>
                   <h3 className="font-bold text-base text-slate-900">Déposez vos documents</h3>
@@ -561,7 +459,7 @@ export function LandingPage() {
                     procédures ou notes textuelles dans vos bases dédiées.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-indigo-600 flex items-center gap-1">
+                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-marine flex items-center gap-1">
                   <FolderOpen className="size-3.5" /> Formats PDF, DOCX, TXT, MD
                 </div>
               </div>
@@ -569,7 +467,7 @@ export function LandingPage() {
               {/* Step 2 */}
               <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-2xs relative flex flex-col justify-between">
                 <div>
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 font-extrabold text-lg mb-5 border border-blue-100">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-brume text-marine font-extrabold text-lg mb-5 border border-marine/20">
                     2
                   </div>
                   <h3 className="font-bold text-base text-slate-900">L'IA organise et mémorise</h3>
@@ -578,7 +476,7 @@ export function LandingPage() {
                     recherche sans altérer vos fichiers d'origine.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-blue-600 flex items-center gap-1">
+                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-marine flex items-center gap-1">
                   <Cpu className="size-3.5" /> Traitement 100% automatique
                 </div>
               </div>
@@ -608,7 +506,7 @@ export function LandingPage() {
         {/* ───── Key Business Benefits ───── */}
         <section id="benefits" className="py-20 px-6 max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-marine">
               Pourquoi Choisir SmartRAG ?
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
@@ -622,7 +520,7 @@ export function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-4">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brume text-marine mb-4">
                 <Clock className="size-5" />
               </div>
               <h3 className="font-bold text-base text-slate-900">Fin des heures de recherche</h3>
@@ -644,7 +542,7 @@ export function LandingPage() {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 mb-4">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brume text-marine mb-4">
                 <Lock className="size-5" />
               </div>
               <h3 className="font-bold text-base text-slate-900">
@@ -657,7 +555,7 @@ export function LandingPage() {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600 mb-4">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brume text-marine mb-4">
                 <Users className="size-5" />
               </div>
               <h3 className="font-bold text-base text-slate-900">Cloisonnement par département</h3>
@@ -693,121 +591,10 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ───── Feature Matrix: Real & Clear ───── */}
-        <section id="features" className="py-16 px-6 bg-slate-50 border-t border-slate-200">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-10">
-              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
-                Transparence Totale
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
-                Fonctionnalités de la Plateforme
-              </h2>
-              <p className="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
-                Consultez ce qui est opérationnel immédiatement et ce qui est planifié dans notre
-                feuille de route.
-              </p>
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setFilterStatus("all")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    filterStatus === "all"
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  Toutes ({FEATURE_ITEMS.length})
-                </button>
-                <button
-                  onClick={() => setFilterStatus("disponible")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    filterStatus === "disponible"
-                      ? "bg-emerald-600 text-white"
-                      : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                  }`}
-                >
-                  <span className="size-1.5 rounded-full bg-current" />
-                  Disponible ({FEATURE_ITEMS.filter((f) => f.status === "disponible").length})
-                </button>
-                <button
-                  onClick={() => setFilterStatus("bientot")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    filterStatus === "bientot"
-                      ? "bg-amber-600 text-white"
-                      : "text-amber-700 bg-amber-50 hover:bg-amber-100"
-                  }`}
-                >
-                  <span className="size-1.5 rounded-full bg-current" />
-                  Bientôt ({FEATURE_ITEMS.filter((f) => f.status === "bientot").length})
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-400 font-semibold">Catégorie :</span>
-                <select
-                  value={filterCategory}
-                  onChange={(e) =>
-                    setFilterCategory(
-                      e.target.value as "all" | "utilisateurs" | "securite" | "technique",
-                    )
-                  }
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option value="all">Toutes les catégories</option>
-                  <option value="utilisateurs">Pour les utilisateurs</option>
-                  <option value="securite">Sécurité & Gouvernance</option>
-                  <option value="technique">Sous le capot / Technique</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Feature Cards Grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredFeatures.map((feat, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between hover:border-indigo-300 transition-all"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        {feat.category === "utilisateurs" && "Expérience Métier"}
-                        {feat.category === "securite" && "Sécurité & Contrôle"}
-                        {feat.category === "technique" && "Moteur & Performance"}
-                      </span>
-                      {feat.status === "disponible" ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
-                          <Check className="size-3" /> Disponible
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 text-[10px] font-bold">
-                          <Clock className="size-3" /> Roadmap
-                        </span>
-                      )}
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900">{feat.title}</h4>
-                    <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                      {feat.simpleDesc}
-                    </p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-700 font-semibold">
-                    <span>{feat.benefit}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ───── FAQ Section ───── */}
         <section id="faq" className="py-20 px-6 max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-marine">
               Questions Fréquentes
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
@@ -852,7 +639,7 @@ export function LandingPage() {
                   <span>{faq.q}</span>
                   <ChevronDown
                     className={`size-4 text-slate-400 transition-transform duration-200 shrink-0 ml-4 ${
-                      openFaq === i ? "rotate-180 text-indigo-600" : ""
+                      openFaq === i ? "rotate-180 text-marine" : ""
                     }`}
                   />
                 </button>
@@ -868,7 +655,7 @@ export function LandingPage() {
 
         {/* ───── Final CTA Banner ───── */}
         <section className="px-6 pb-20 max-w-6xl mx-auto">
-          <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-xl border border-indigo-900/40">
+          <div className="rounded-3xl bg-nuit p-8 sm:p-12 text-center text-papier relative overflow-hidden border border-nuit-soft">
             <div className="relative z-10 max-w-2xl mx-auto">
               <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
                 Prêt à libérer la connaissance de votre entreprise ?
@@ -880,7 +667,7 @@ export function LandingPage() {
               <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
                 <Link
                   to={session ? "/dashboard" : "/auth"}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 px-8 text-sm font-bold text-white shadow-md transition-all duration-200"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orbite hover:bg-braise px-8 text-sm font-bold text-nuit transition-all duration-200"
                 >
                   <span>Commencer gratuitement</span>
                   <ArrowRight className="size-4" />
@@ -889,7 +676,7 @@ export function LandingPage() {
                   to="/chat"
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-800 px-7 text-sm font-bold text-slate-200 transition-all duration-200"
                 >
-                  <MessageSquare className="size-4 text-indigo-400" />
+                  <MessageSquare className="size-4 text-orbite" />
                   <span>Tester le chat</span>
                 </Link>
               </div>
@@ -903,17 +690,17 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-slate-500">
           <div className="flex items-center gap-3">
             <SmartRAGLogoMark size={32} />
-            <span className="font-bold text-slate-800">SmartRAG</span>
+            <span className="font-bold text-slate-800">{APP_NAME}</span>
             <span>— Plateforme d'Assistance Documentaire Sécurisée</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link to="/chat" className="hover:text-indigo-600 transition-colors font-medium">
+            <Link to="/chat" className="hover:text-marine transition-colors font-medium">
               Chat Documentaire
             </Link>
-            <Link to="/dashboard" className="hover:text-indigo-600 transition-colors font-medium">
+            <Link to="/dashboard" className="hover:text-marine transition-colors font-medium">
               Tableau de bord
             </Link>
-            <Link to="/auth" className="hover:text-indigo-600 transition-colors font-medium">
+            <Link to="/auth" className="hover:text-marine transition-colors font-medium">
               Connexion
             </Link>
           </div>

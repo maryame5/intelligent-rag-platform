@@ -159,7 +159,7 @@ function KnowledgeBaseDetail() {
             <Button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadMutation.isPending}
-              className="bg-[#AA0033] text-white hover:bg-[#880029]"
+              className="bg-marine text-papier hover:bg-nuit"
             >
               {uploadMutation.isPending ? (
                 <Loader2 className="animate-spin mr-1.5 size-4" />
@@ -199,7 +199,7 @@ function KnowledgeBaseDetail() {
               onClick={() => setTab(t)}
               className={`-mb-px border-b-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
                 tab === t
-                  ? "border-[#AA0033] text-[#AA0033] dark:border-[#959EC9] dark:text-[#959EC9]"
+                  ? "border-marine text-marine dark:border-orbite dark:text-orbite"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -221,8 +221,8 @@ function KnowledgeBaseDetail() {
               onClick={() => fileInputRef.current?.click()}
               className={`panel flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all border-2 border-dashed ${
                 isDragging
-                  ? "border-[#AA0033] bg-[#AA0033]/10 scale-[1.01]"
-                  : "border-border/80 hover:border-[#AA0033]/50 hover:bg-surface-raised/40"
+                  ? "border-marine bg-brume scale-[1.01]"
+                  : "border-border/80 hover:border-marine/50 hover:bg-surface-raised/40"
               }`}
             >
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#28264B]/10 text-[#28264B] dark:text-[#959EC9]">
@@ -255,7 +255,7 @@ function KnowledgeBaseDetail() {
                 action={
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-[#AA0033] text-white hover:bg-[#880029]"
+                    className="bg-marine text-papier hover:bg-nuit"
                   >
                     <Upload className="mr-1.5 size-4" />
                     Importer
@@ -337,7 +337,7 @@ function KnowledgeBaseDetail() {
                   documentaire.
                 </p>
               </div>
-              <span className="rounded-full bg-[#AA0033]/10 px-2.5 py-1 text-xs font-medium text-[#AA0033] dark:text-[#959EC9]">
+              <span className="rounded-full bg-orbite-soft px-2.5 py-1 text-xs font-medium text-braise dark:text-orbite">
                 {members.length} membre{members.length > 1 ? "s" : ""}
               </span>
             </div>

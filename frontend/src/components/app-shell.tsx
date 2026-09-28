@@ -37,6 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { APP_NAME } from "@/config";
 
 function useTheme() {
   const [light, setLight] = useState(true);
@@ -58,22 +59,7 @@ function useTheme() {
 }
 
 function SmartRAGBrandMark({ size = 32 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 44 44"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0 drop-shadow-xs"
-    >
-      <rect width="44" height="44" rx="11" fill="#1e1b4b" />
-      <rect x="10" y="27" width="16" height="4.5" rx="2.25" fill="#818cf8" fillOpacity="0.8" />
-      <rect x="10" y="19.5" width="24" height="4.5" rx="2.25" fill="#e0e7ff" fillOpacity="0.9" />
-      <rect x="10" y="12" width="18" height="4.5" rx="2.25" fill="#ffffff" />
-      <circle cx="31.5" cy="14.25" r="4" fill="#3b82f6" />
-    </svg>
-  );
+  return <img src="/logo.png" width={size} height={size} alt="" className="shrink-0 rounded-lg" />;
 }
 
 const nav = [
@@ -142,7 +128,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-extrabold text-slate-900">
-                  Smart<span className="text-indigo-600">RAG</span>
+                  {APP_NAME}
                 </p>
                 <p className="truncate text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                   Studio Documentaire
@@ -170,7 +156,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       className={cn(
                         "flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer",
                         active
-                          ? "bg-indigo-600 text-white shadow-xs font-bold"
+                          ? "bg-marine text-papier shadow-xs font-bold"
                           : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                       )}
                       title={collapsed ? item.label : undefined}
@@ -195,7 +181,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </span>
                 <Link
                   to="/knowledge-bases"
-                  className="text-[10px] font-bold text-indigo-600 hover:underline"
+                  className="text-[10px] font-bold text-marine hover:underline"
                 >
                   Voir tout
                 </Link>
@@ -211,12 +197,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                         className={cn(
                           "flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
                           isCurrentKb
-                            ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200"
+                            ? "bg-brume text-marine font-bold border border-marine/20"
                             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                         )}
                       >
                         <div className="flex items-center gap-2 truncate">
-                          <BookOpen className="size-3.5 shrink-0 text-indigo-600" />
+                          <BookOpen className="size-3.5 shrink-0 text-marine" />
                           <span className="truncate">{kb.name}</span>
                         </div>
                         <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono text-slate-600">
@@ -243,12 +229,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all",
                   isActive("/admin")
-                    ? "bg-indigo-600 text-white shadow-xs font-bold"
+                    ? "bg-marine text-papier shadow-xs font-bold"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                 )}
                 title={collapsed ? "Observabilité" : undefined}
               >
-                <Gauge className="size-4 shrink-0 text-indigo-400" />
+                <Gauge className="size-4 shrink-0 text-orbite" />
                 {!collapsed ? "Observabilité" : null}
               </Link>
             </div>
@@ -276,7 +262,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             title={collapsed ? "Déplier" : "Replier"}
           >
             {collapsed ? (
-              <ChevronsRight className="size-4 text-indigo-600" />
+              <ChevronsRight className="size-4 text-marine" />
             ) : (
               <ChevronsLeft className="size-4" />
             )}
@@ -292,9 +278,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* Quick Search */}
           <button
             onClick={() => setPaletteOpen(true)}
-            className="flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs font-medium text-slate-500 transition-all hover:border-indigo-500 hover:bg-white cursor-pointer shadow-2xs"
+            className="flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl border border-brume bg-brume px-3.5 text-xs font-medium text-slate-500 transition-all hover:border-marine hover:bg-white cursor-pointer shadow-2xs"
           >
-            <Search className="size-4 text-indigo-600" />
+            <Search className="size-4 text-marine" />
             <span>Rechercher dans tout l'espace…</span>
             <kbd className="ml-auto rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[10px] text-slate-500 shadow-2xs">
               ⌘K
@@ -332,7 +318,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 >
                   <Bell className="size-4" />
                   {unread > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-indigo-600 font-mono text-[9px] font-bold text-white">
+                    <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-marine font-mono text-[9px] font-bold text-papier">
                       {unread}
                     </span>
                   )}
@@ -364,7 +350,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         }}
                         className={cn(
                           "cursor-pointer px-4 py-3 transition-colors hover:bg-slate-50",
-                          !n.read && "bg-indigo-50/40 font-medium",
+                          !n.read && "bg-brume/40 font-medium",
                         )}
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -388,7 +374,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 transition-all hover:bg-slate-100 cursor-pointer shadow-2xs">
-                  <span className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-marine text-xs font-bold text-papier">
                     {session.user.initials}
                   </span>
                   <span className="hidden sm:inline font-bold">{session.user.name}</span>
@@ -403,7 +389,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <p className="text-sm font-bold text-slate-900">{session.user.name}</p>
                   <p className="text-xs font-normal text-slate-500">{session.user.email}</p>
                   <div className="mt-2 flex items-center gap-1.5">
-                    <span className="rounded-md bg-indigo-50 border border-indigo-200 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                    <span className="rounded-md bg-brume border border-marine/20 px-2 py-0.5 text-[10px] font-bold text-marine">
                       Rôle : {session.user.role}
                     </span>
                   </div>
@@ -420,9 +406,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     signOut();
                     navigate({ to: "/auth", replace: true });
                   }}
-                  className="rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
+                  className="rounded-lg text-xs font-semibold text-braise hover:bg-orbite-soft cursor-pointer"
                 >
-                  <LogOut className="size-4 mr-2 text-red-600" /> Se déconnecter
+                  <LogOut className="size-4 mr-2 text-braise" /> Se déconnecter
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

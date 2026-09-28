@@ -49,12 +49,18 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-marine: #3b4f86;
+  --color-nuit: #1f2857;
+  --color-nuit-soft: #2a3570;
+  --color-orbite: #f5923f;
+  --color-orbite-soft: rgba(245, 146, 63, 0.28);
+  --color-braise: #d9601f;
+  --color-papier: #fdfcf3;
+  --color-brume: #e8ecf6;
+  --color-sauge: #2e9e7a;
 
   /* Modern, harmonious design tokens */
   --color-brand-navy: #0f172a;
-  --color-brand-indigo: #4338ca;
-  --color-brand-accent: #6366f1;
-  --color-brand-sapphire: #2563eb;
   --color-brand-pearl: #f8fafc;
   --color-brand-slate: #64748b;
   --color-brand-emerald: #059669;
@@ -62,40 +68,49 @@
 
 /* Light (default) */
 :root {
+  --marine: #3b4f86;
+  --nuit: #1f2857;
+  --nuit-soft: #2a3570;
+  --orbite: #f5923f;
+  --orbite-soft: rgba(245, 146, 63, 0.28);
+  --braise: #d9601f;
+  --papier: #fdfcf3;
+  --brume: #e8ecf6;
+  --sauge: #2e9e7a;
   --radius: 0.75rem;
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: var(--papier);
+  --foreground: var(--nuit);
   --surface: #ffffff;
   --surface-raised: #f1f5f9;
   --card: #ffffff;
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #4338ca;
-  --primary-foreground: #ffffff;
+  --primary: var(--marine);
+  --primary-foreground: var(--papier);
   --secondary: #e2e8f0;
   --secondary-foreground: #1e293b;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #eef2ff;
-  --accent-foreground: #4338ca;
-  --destructive: #ef4444;
+  --accent: var(--brume);
+  --accent-foreground: var(--nuit);
+  --destructive: var(--braise);
   --destructive-foreground: #ffffff;
   --success: #10b981;
   --warning: #f59e0b;
   --info: #3b82f6;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #6366f1;
+  --ring: var(--marine);
   
   --sidebar: #ffffff;
   --sidebar-foreground: #0f172a;
-  --sidebar-primary: #4338ca;
+  --sidebar-primary: var(--marine);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef2ff;
-  --sidebar-accent-foreground: #4338ca;
+  --sidebar-accent: var(--brume);
+  --sidebar-accent-foreground: var(--nuit);
   --sidebar-border: #e2e8f0;
-  --sidebar-ring: #6366f1;
+  --sidebar-ring: var(--marine);
   
   --chart-1: #4338ca;
   --chart-2: #3b82f6;
@@ -198,20 +213,6 @@
 }
 .glow-brand:hover::before {
   opacity: 0.6;
-}
-
-/* Template Gradient Presets */
-.bg-gradient-brand-primary {
-  background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
-}
-.bg-gradient-brand-dark {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-}
-.bg-gradient-brand-violet-cyan {
-  background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
-}
-.bg-gradient-brand-subtle {
-  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
 }
 
 @utility grid-lines {

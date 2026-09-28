@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "../lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { APP_NAME } from "@/config";
 
 function NotFoundComponent() {
   return (
@@ -75,14 +76,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SmartRAG — Plateforme RAG d'entreprise" },
+      { title: `${APP_NAME} — Plateforme RAG d'entreprise` },
       {
         name: "description",
         content:
           "Plateforme d'intelligence documentaire : bases de connaissance gouvernées, réponses citées et observabilité.",
       },
-      { name: "author", content: "SmartRAG" },
-      { property: "og:title", content: "SmartRAG — Plateforme RAG d'entreprise" },
+      { name: "author", content: APP_NAME },
+      { property: "og:title", content: `${APP_NAME} — Plateforme RAG d'entreprise` },
       {
         property: "og:description",
         content: "Bases de connaissance gouvernées, réponses citées et observabilité.",
@@ -95,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/logo.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,

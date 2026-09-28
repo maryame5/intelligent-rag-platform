@@ -93,13 +93,13 @@ export function DashboardContent() {
               className="border-slate-200 bg-white text-slate-800 hover:bg-slate-50 text-xs font-bold shadow-2xs"
             >
               <Link to="/chat">
-                <MessagesSquare className="mr-1.5 size-4 text-indigo-600" />
+                <MessagesSquare className="mr-1.5 size-4 text-marine" />
                 Ouvrir le Chat
               </Link>
             </Button>
             <Button
               asChild
-              className="bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-bold shadow-sm"
+              className="bg-marine text-papier hover:bg-nuit text-xs font-bold shadow-sm"
             >
               <Link to="/knowledge-bases">
                 <Plus className="mr-1.5 size-4" />
@@ -114,12 +114,12 @@ export function DashboardContent() {
         {/* Top KPI Metric Cards Grid */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {/* Card 1: Documents Indexés */}
-          <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
+          <div className="rounded-2xl border border-brume p-5 bg-white shadow-2xs hover:shadow-sm hover:border-marine transition-all duration-200">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Documents Indexés
               </span>
-              <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-brume text-marine border border-marine/20">
                 <BookOpen className="size-4" />
               </div>
             </div>
@@ -141,12 +141,12 @@ export function DashboardContent() {
           </div>
 
           {/* Card 2: Requêtes RAG */}
-          <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
+          <div className="rounded-2xl border border-brume p-5 bg-white shadow-2xs hover:shadow-sm hover:border-marine transition-all duration-200">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Questions Posées
               </span>
-              <div className="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-brume text-marine border border-marine/20">
                 <Search className="size-4" />
               </div>
             </div>
@@ -177,12 +177,12 @@ export function DashboardContent() {
           </div>
 
           {/* Card 4: Latence P95 */}
-          <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
+          <div className="rounded-2xl border border-brume p-5 bg-white shadow-2xs hover:shadow-sm hover:border-marine transition-all duration-200">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 Vitesse de Réponse
               </span>
-              <div className="flex size-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600 border border-violet-100">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-brume text-marine border border-marine/20">
                 <Zap className="size-4" />
               </div>
             </div>
@@ -269,7 +269,7 @@ export function DashboardContent() {
             </div>
             <Link
               to="/knowledge-bases"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+              className="text-xs font-bold text-marine hover:text-nuit flex items-center gap-1"
             >
               Gérer toutes les bases <ChevronRight className="size-3.5" />
             </Link>
@@ -279,11 +279,11 @@ export function DashboardContent() {
             {kbs.map((kb) => (
               <div
                 key={kb.id}
-                className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between hover:border-indigo-300 hover:bg-white hover:shadow-2xs transition-all"
+                className="rounded-xl border border-brume bg-brume/50 p-4 flex flex-col justify-between hover:border-marine hover:bg-white hover:shadow-2xs transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100">
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-brume text-marine border border-marine/20">
                       <BookOpen className="size-4" />
                     </div>
                     <span className="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
@@ -300,7 +300,7 @@ export function DashboardContent() {
                 <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
                   <Link
                     to="/chat"
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                    className="text-xs font-bold text-marine hover:text-nuit flex items-center gap-1"
                   >
                     <MessagesSquare className="size-3.5" /> Poser une question
                   </Link>
@@ -340,7 +340,7 @@ export function DashboardContent() {
                   <div className="min-w-0 flex-1">
                     <p className="text-[#28264B]">
                       <strong className="text-[#28264B] font-bold">{item.user}</strong>{" "}
-                      {item.action} <span className="font-bold text-[#AA0033]">{item.target}</span>
+                      {item.action} <span className="font-bold text-marine">{item.target}</span>
                     </p>
                   </div>
                   <span className="shrink-0 text-[11px] text-[#4E5174] font-mono">{item.time}</span>
@@ -563,7 +563,7 @@ export function VerifiedContent() {
         actions={
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#AA0033] text-white hover:bg-[#28264B]">
+              <Button className="bg-marine text-papier hover:bg-nuit">
                 <Plus className="mr-1.5 size-4" />
                 Certifier une réponse
               </Button>
@@ -571,7 +571,7 @@ export function VerifiedContent() {
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-[#28264B] dark:text-[#E8EAE7]">
-                  <ShieldCheck className="size-5 text-[#AA0033]" />
+                  <ShieldCheck className="size-5 text-marine" />
                   Nouvelle réponse de référence
                 </DialogTitle>
                 <DialogDescription>
@@ -642,7 +642,7 @@ export function VerifiedContent() {
                     disabled={
                       createMutation.isPending || !kbId || !question.trim() || !answer.trim()
                     }
-                    className="bg-[#AA0033] text-white hover:bg-[#28264B]"
+                    className="bg-marine text-papier hover:bg-nuit"
                   >
                     {createMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                     Enregistrer la réponse
@@ -657,12 +657,12 @@ export function VerifiedContent() {
       <div className="space-y-4 p-4 md:p-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="mr-2 size-5 animate-spin text-[#AA0033]" />
+            <Loader2 className="mr-2 size-5 animate-spin text-marine" />
             Chargement des réponses vérifiées...
           </div>
         ) : answers.length === 0 ? (
           <div className="panel flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-[#AA0033]/10 text-[#AA0033] dark:text-[#AA0033]">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-orbite-soft text-braise">
               <ShieldCheck className="size-7" />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-[#28264B] dark:text-[#E8EAE7]">
@@ -674,7 +674,7 @@ export function VerifiedContent() {
             </p>
             <Button
               onClick={() => setIsOpen(true)}
-              className="mt-5 bg-[#AA0033] text-white hover:bg-[#28264B]"
+              className="mt-5 bg-marine text-papier hover:bg-nuit"
             >
               <Plus className="mr-2 size-4" />
               Ajouter une première réponse
@@ -700,7 +700,7 @@ export function VerifiedContent() {
                         {a.answer}
                       </p>
                       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium text-[#AA0033] dark:text-[#E8EAE7]">
+                        <span className="font-medium text-marine dark:text-paper">
                           Vérifiée par {a.verifiedBy}
                         </span>
                         <span>·</span>
@@ -820,14 +820,14 @@ export function TeamContent() {
             <Dialog open={isCreateWsOpen} onOpenChange={setIsCreateWsOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="border-border/80 hover:bg-secondary">
-                  <Building2 className="mr-1.5 size-4 text-[#AA0033] dark:text-[#E8EAE7]" />
+                  <Building2 className="mr-1.5 size-4 text-marine dark:text-papier" />
                   Nouveau workspace
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-[#28264B] dark:text-[#E8EAE7]">
-                    <Building2 className="size-5 text-[#AA0033]" />
+                    <Building2 className="size-5 text-marine" />
                     Créer un nouvel espace de travail
                   </DialogTitle>
                   <DialogDescription>
@@ -860,7 +860,7 @@ export function TeamContent() {
                     <Button
                       type="submit"
                       disabled={createWsMutation.isPending || !newWsName.trim()}
-                      className="bg-[#AA0033] text-white hover:bg-[#28264B]"
+                      className="bg-marine text-papier hover:bg-nuit"
                     >
                       {createWsMutation.isPending && (
                         <Loader2 className="mr-2 size-4 animate-spin" />
@@ -875,15 +875,15 @@ export function TeamContent() {
             {currentWorkspace && (
               <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#AA0033] text-white hover:bg-[#28264B]">
-                    <UserPlus className="mr-1.5 size-4 text-[#AA0033]" />
+                  <Button className="bg-marine text-papier hover:bg-nuit">
+                    <UserPlus className="mr-1.5 size-4 text-marine" />
                     Ajouter un membre
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-[#28264B] dark:text-[#E8EAE7]">
-                      <UserPlus className="size-5 text-[#AA0033]" />
+                      <UserPlus className="size-5 text-marine" />
                       Ajouter un collaborateur
                     </DialogTitle>
                     <DialogDescription>
@@ -948,7 +948,7 @@ export function TeamContent() {
                       <Button
                         type="submit"
                         disabled={addMemberMutation.isPending || !memberEmail.trim()}
-                        className="bg-[#AA0033] text-white hover:bg-[#28264B]"
+                        className="bg-marine text-papier hover:bg-nuit"
                       >
                         {addMemberMutation.isPending && (
                           <Loader2 className="mr-2 size-4 animate-spin" />
@@ -968,7 +968,7 @@ export function TeamContent() {
         {/* Workspace Switcher Banner */}
         <div className="flex flex-col gap-4 rounded-xl border border-border/70 bg-gradient-to-r from-card to-surface-raised p-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-[#AA0033]/15 text-[#AA0033] dark:bg-[#AA0033]/30 dark:text-[#AA0033]">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-orbite-soft text-braise">
               <Building2 className="size-6" />
             </div>
             <div>
@@ -976,7 +976,7 @@ export function TeamContent() {
                 <h2 className="text-base font-semibold text-[#28264B] dark:text-[#E8EAE7]">
                   {currentWorkspace?.name || "Aucun workspace"}
                 </h2>
-                <span className="rounded-full bg-[#AA0033]/10 px-2 py-0.5 text-xs font-medium text-[#AA0033] dark:bg-[#AA0033]/30 dark:text-[#E8EAE7]">
+                <span className="rounded-full bg-orbite-soft px-2 py-0.5 text-xs font-medium text-braise">
                   {members.length} {members.length > 1 ? "membres" : "membre"}
                 </span>
               </div>
@@ -1010,7 +1010,7 @@ export function TeamContent() {
         {/* Member list / Empty State */}
         {workspaces.length === 0 && !isLoadingWs ? (
           <div className="panel flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex size-16 items-center justify-center rounded-2xl bg-[#AA0033]/10 text-[#AA0033] dark:text-[#AA0033]">
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-orbite-soft text-braise">
               <Building2 className="size-8" />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-[#28264B] dark:text-[#E8EAE7]">
@@ -1022,7 +1022,7 @@ export function TeamContent() {
             </p>
             <Button
               onClick={() => setIsCreateWsOpen(true)}
-              className="mt-6 bg-[#AA0033] text-white hover:bg-[#28264B]"
+              className="mt-6 bg-marine text-papier hover:bg-nuit"
             >
               <Plus className="mr-2 size-4" />
               Créer mon premier workspace
@@ -1039,7 +1039,7 @@ export function TeamContent() {
 
             {isLoadingMembers ? (
               <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                <Loader2 className="mr-2 size-5 animate-spin text-[#AA0033]" />
+                <Loader2 className="mr-2 size-5 animate-spin text-marine" />
                 Chargement des membres...
               </div>
             ) : members.length === 0 ? (
@@ -1055,7 +1055,7 @@ export function TeamContent() {
                     className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-5 py-4 transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_160px_160px_100px]"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#AA0033] to-[#28264B] text-xs font-semibold text-[#E8EAE7] shadow-sm">
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-marine text-xs font-semibold text-papier shadow-sm">
                         {initials}
                       </span>
                       <div>
@@ -1068,12 +1068,12 @@ export function TeamContent() {
 
                     <div className="hidden md:flex items-center gap-1.5">
                       {m.role === "ADMIN" ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-[#AA0033]/15 px-2.5 py-1 text-xs font-medium text-[#AA0033] border border-[#AA0033]/30">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-orbite-soft px-2.5 py-1 text-xs font-medium text-braise border border-braise/30">
                           <Crown className="size-3.5" />
                           Admin
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-[#AA0033]/15 px-2.5 py-1 text-xs font-medium text-[#AA0033] dark:text-[#E8EAE7] border border-[#AA0033]/30">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-orbite-soft px-2.5 py-1 text-xs font-medium text-braise border border-braise/30">
                           <Shield className="size-3.5" />
                           Membre
                         </span>
@@ -1148,7 +1148,7 @@ export function IntegrationsContent() {
       <div className="grid gap-5 p-4 md:grid-cols-2 md:p-6 xl:grid-cols-3">
         {isLoading ? (
           <div className="col-span-full flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="mr-2 size-5 animate-spin text-[#AA0033]" />
+            <Loader2 className="mr-2 size-5 animate-spin text-marine" />
             Chargement des intégrations...
           </div>
         ) : (
@@ -1161,7 +1161,7 @@ export function IntegrationsContent() {
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#AA0033] to-[#28264B] font-mono text-xs font-bold text-[#E8EAE7] shadow-sm">
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-marine font-mono text-xs font-bold text-papier shadow-sm">
                       {i.name.slice(0, 2).toUpperCase()}
                     </span>
                     <span
@@ -1185,7 +1185,7 @@ export function IntegrationsContent() {
                   className={`mt-6 w-full ${
                     isConnected
                       ? "border-border/80 hover:bg-destructive/10 hover:text-destructive"
-                      : "bg-[#AA0033] text-white hover:bg-[#28264B]"
+                        : "bg-marine text-papier hover:bg-nuit"
                   }`}
                   variant={isConnected ? "outline" : "default"}
                   disabled={connectMutation.isPending}
