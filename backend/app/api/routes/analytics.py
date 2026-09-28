@@ -1,18 +1,20 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
-from app.models.user import User
-from app.models.document import Document
 from app.models.chunk import Chunk
+from app.models.conversation import Conversation
+from app.models.document import Document
+from app.models.feedback import FeedbackRating, MessageFeedback
 from app.models.job import IngestionJob
 from app.models.knowledge_base import KnowledgeBase
 from app.models.message import Message, MessageRole
-from app.models.feedback import MessageFeedback, FeedbackRating
-from app.schemas.analytics import PlatformMetricsOut, UsagePoint, RAGQuality, ActivityItemOut
+from app.models.user import User
+from app.schemas.analytics import ActivityItemOut, PlatformMetricsOut, RAGQuality, UsagePoint
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -25,9 +27,6 @@ def get_metrics(
     # Documents count
     doc_count = db.query(func.count(Document.id)).scalar() or 0
     chunk_count = db.query(func.count(Chunk.id)).scalar() or 0
-
-    # Total queries (user messages)
-    total_queries = db.query(func.count(Message.id)).filter(Message.role == MessageRole.USER).scalar() or 0
 
     # Feedbacks
     total_feedbacks = db.query(func.count(MessageFeedback.id)).scalar() or 0

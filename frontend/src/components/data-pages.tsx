@@ -42,6 +42,7 @@ import { PageHeader } from "@/components/page-header";
 import { KPICard } from "@/components/kpi-card";
 import { StatusBadge } from "@/components/status-badge";
 import { RAGAreaChart, RAGRadialGauge } from "@/components/rag-charts";
+import { PreviewBadge } from "@/components/preview-badge";
 
 export function DashboardContent() {
   const { data: metrics } = useQuery({ queryKey: ["metrics"], queryFn: api.getMetrics });
@@ -132,9 +133,6 @@ export function DashboardContent() {
               <p className="text-3xl font-extrabold font-mono text-slate-900">
                 {metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "—"}
               </p>
-              <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
-                +14% cette semaine
-              </span>
             </div>
             <p className="mt-1.5 text-xs text-slate-500">Questions posées aux bases</p>
           </div>
@@ -151,9 +149,6 @@ export function DashboardContent() {
               <p className="text-3xl font-extrabold font-mono text-emerald-600">
                 {metrics?.answeredRate != null ? `${Math.round(metrics.answeredRate * 100)}%` : "—"}
               </p>
-              <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
-                Certifié sans hallucination
-              </span>
             </div>
             <p className="mt-1.5 text-xs text-slate-500">Sourcé à la ligne près</p>
           </div>
@@ -1310,17 +1305,21 @@ export function AdminContent() {
               <h2 className="font-semibold">Qualité RAG (historique)</h2>
               <PreviewBadge />
             </div>
-            {[metrics?.quality].filter(Boolean).map((quality) => (
-              <div key={q.experiment} className="mt-3">
-                <div className="flex justify-between text-sm">
-                  <span>{q.experiment}</span>
-                  <span className="font-mono">{Math.round(q.faithfulness * 100)}%</span>
+            <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+              {[
+                ["Faithfulness", metrics?.quality.faithfulness],
+                ["Pertinence", metrics?.quality.answerRelevance],
+                ["Recall contexte", metrics?.quality.contextRecall],
+                ["Precision contexte", metrics?.quality.contextPrecision],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-md bg-secondary/40 p-3">
+                  <div className="text-muted-foreground">{label}</div>
+                  <div className="mt-1 font-mono font-semibold">
+                    {typeof value === "number" ? `${Math.round(value * 100)}%` : "—"}
+                  </div>
                 </div>
-                <div className="mt-1 h-1.5 bg-secondary">
-                  <div className="h-full bg-primary" style={{ width: `${q.faithfulness * 100}%` }} />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </section>
           <section className="panel overflow-hidden">
             <div className="flex items-center justify-between border-b p-4">
