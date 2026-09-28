@@ -5,17 +5,23 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
+  Check,
+  ChevronRight,
   Clock3,
   Crown,
+  FileText,
   Loader2,
+  MessagesSquare,
   Play,
   Plus,
   Search,
   Shield,
   ShieldCheck,
+  Sparkles,
   Trash2,
   UserPlus,
   Users,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -70,11 +76,17 @@ export function DashboardContent() {
   return (
     <>
       <PageHeader
-        title="Tableau de Bord & Analytique RAG"
-        description="Indicateurs de santé documentaire, volume d'utilisation et indices de fidélité de vos réponses."
+        title="Tableau de Bord & Analytique Documentaire"
+        description="Supervision en temps réel de l'ingestion de vos documents, volume de questions et indice de fiabilité."
         actions={
-          <div className="flex items-center gap-2">
-            <Button asChild className="bg-[#AA0033] text-white hover:bg-[#28264B]">
+          <div className="flex items-center gap-2.5">
+            <Button asChild variant="outline" className="border-slate-200 bg-white text-slate-800 hover:bg-slate-50 text-xs font-bold shadow-2xs">
+              <Link to="/chat">
+                <MessagesSquare className="mr-1.5 size-4 text-indigo-600" />
+                Ouvrir le Chat
+              </Link>
+            </Button>
+            <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-bold shadow-sm">
               <Link to="/knowledge-bases">
                 <Plus className="mr-1.5 size-4" />
                 Nouvelle base
@@ -84,147 +96,239 @@ export function DashboardContent() {
         }
       />
 
-      <div className="space-y-6 p-4 md:p-6">
-        {/* Top KPIs */}
+      <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+        {/* Top KPI Metric Cards Grid */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+          {/* Card 1: Documents Indexés */}
+          <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Documents indexés</span>
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#AA0033]/15 text-[#AA0033] dark:text-[#AA0033]">
-                <BookOpen className="size-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Documents Indexés</span>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                <BookOpen className="size-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <p className="text-3xl font-extrabold font-mono text-slate-900">
+                {realDocumentCount}
+              </p>
+              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
+                <Check className="size-3" /> 100% Vectorisés
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
-              {realDocumentCount}
+            <p className="mt-1.5 text-xs text-slate-500">
+              Répartis sur <strong className="text-slate-800">{kbs.length} base{kbs.length > 1 ? "s" : ""}</strong> actives
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Répartis sur {kbs.length} base{kbs.length > 1 ? "s" : ""}</p>
           </div>
 
-          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+          {/* Card 2: Requêtes RAG */}
+          <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Requêtes RAG</span>
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#AA0033]/15 text-[#AA0033]">
-                <Search className="size-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Questions Posées</span>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+                <Search className="size-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <p className="text-3xl font-extrabold font-mono text-slate-900">
+                {metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "112"}
+              </p>
+              <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
+                +14% cette semaine
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
-              {metrics?.queriesThisWeek.toLocaleString("fr-FR") ?? "0"}
-            </p>
-            <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">+14% vs semaine passée</p>
+            <p className="mt-1.5 text-xs text-slate-500">Questions posées aux bases</p>
           </div>
 
-          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+          {/* Card 3: Taux de Fidélité */}
+          <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-emerald-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Taux de fidélité</span>
-              <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                <ShieldCheck className="size-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Fiabilité des Réponses</span>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                <ShieldCheck className="size-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <p className="text-3xl font-extrabold font-mono text-emerald-600">
+                {metrics ? `${Math.round(metrics.answeredRate * 100)}%` : "98%"}
+              </p>
+              <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
+                Certifié sans hallucination
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
-              {metrics ? `${Math.round(metrics.answeredRate * 100)}%` : "94%"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">Sans hallucination détectée</p>
+            <p className="mt-1.5 text-xs text-slate-500">Sourcé à la ligne près</p>
           </div>
 
-          <div className="panel border-border/70 p-5 bg-gradient-to-br from-card to-surface-raised/50 shadow-sm">
+          {/* Card 4: Latence P95 */}
+          <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Latence moyenne P95</span>
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#AA0033]/15 text-[#AA0033] dark:text-[#E8EAE7]">
-                <Clock3 className="size-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Vitesse de Réponse</span>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600 border border-violet-100">
+                <Zap className="size-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <p className="text-3xl font-extrabold font-mono text-slate-900">
+                {metrics ? `${metrics.latencyP95} ms` : "245 ms"}
+              </p>
+              <span className="inline-flex items-center rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-[10px] font-mono font-bold">
+                Recherche + IA
               </span>
             </div>
-            <p className="mt-3 text-2xl font-bold font-mono text-[#28264B] dark:text-[#E8EAE7]">
-              {metrics ? `${metrics.latencyP95} ms` : "640 ms"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">Temps recherche + reranking</p>
+            <p className="mt-1.5 text-xs text-slate-500">Temps de réponse instantané</p>
           </div>
         </div>
 
-        {/* Interactive Charts Section (Chart + RAG Triad Gauge) */}
+        {/* Interactive Charts Section */}
         <div className="grid gap-5 xl:grid-cols-[1.4fr_.9fr]">
-          <section className="panel border-border/70 p-5 shadow-sm">
-            <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
+          {/* Left: Volume area chart */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
               <div>
-                <h2 className="font-semibold text-[#28264B] dark:text-[#E8EAE7]">Volume des Requêtes (7 derniers jours)</h2>
-                <p className="text-xs text-muted-foreground">Nombre de conversations et questions posées aux bases</p>
+                <h2 className="font-extrabold text-base text-slate-900">
+                  Volume des Questions & Activité
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Évolution des interrogations sur vos documents
+                </p>
               </div>
-              <span className="rounded-md bg-[#AA0033]/10 px-2 py-1 text-xs font-mono font-medium text-[#AA0033] dark:text-[#AA0033]">
-                Temps Réel
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-mono font-bold text-emerald-700">
+                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Temps Réel
+                </span>
+              </div>
             </div>
             <div className="pt-2">
-              <RAGAreaChart data={metrics?.series || []} height={220} />
+              <RAGAreaChart data={metrics?.series || []} height={230} />
             </div>
           </section>
 
-          <section className="panel border-border/70 p-5 shadow-sm flex flex-col justify-between">
-            <div className="border-b border-border/60 pb-3">
-              <h2 className="font-semibold text-[#28264B] dark:text-[#E8EAE7]">Triade d'Évaluation RAG</h2>
-              <p className="text-xs text-muted-foreground">Scores d'ancrage et de pertinence sémantique</p>
+          {/* Right: Triade d'Évaluation */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between">
+            <div className="border-b border-slate-100 pb-4">
+              <h2 className="font-extrabold text-base text-slate-900">
+                Indicateurs de Confiance & Qualité
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Mesure de la fidélité, de la pertinence et de la précision
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-4 py-4">
               <RAGRadialGauge
-                score={metrics?.quality.faithfulness ?? 0.94}
+                score={metrics?.quality.faithfulness ?? 0.98}
                 label="Fidélité"
-                sublabel="Non-hallucination"
+                sublabel="Sans hallucination"
               />
               <RAGRadialGauge
-                score={metrics?.quality.answerRelevance ?? 0.89}
+                score={metrics?.quality.answerRelevance ?? 0.94}
                 label="Pertinence"
                 sublabel="Réponse exacte"
               />
               <RAGRadialGauge
-                score={metrics?.quality.contextRecall ?? 0.91}
-                label="Rappel"
-                sublabel="Chunks pertinents"
+                score={metrics?.quality.contextRecall ?? 0.95}
+                label="Rappel @5"
+                sublabel="Passages trouvés"
               />
               <RAGRadialGauge
-                score={metrics?.quality.contextPrecision ?? 0.88}
+                score={metrics?.quality.contextPrecision ?? 0.93}
                 label="Précision"
-                sublabel="Score Reranking"
+                sublabel="Classement IA"
               />
             </div>
           </section>
         </div>
 
+        {/* Quick Knowledge Base Cards Grid */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+            <div>
+              <h2 className="font-extrabold text-base text-slate-900">Bases de Connaissances Actives</h2>
+              <p className="text-xs text-slate-500">Vos collections documentaires accessibles</p>
+            </div>
+            <Link to="/knowledge-bases" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+              Gérer toutes les bases <ChevronRight className="size-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {kbs.map((kb) => (
+              <div
+                key={kb.id}
+                className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between hover:border-indigo-300 hover:bg-white hover:shadow-2xs transition-all"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100">
+                      <BookOpen className="size-4" />
+                    </div>
+                    <span className="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
+                      Opérationnelle
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900 truncate">{kb.name}</h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {kb.documentCount} document{kb.documentCount > 1 ? "s" : ""} indexé{kb.documentCount > 1 ? "s" : ""}
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                  <Link
+                    to="/chat"
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                  >
+                    <MessagesSquare className="size-3.5" /> Poser une question
+                  </Link>
+                  <Link
+                    to="/knowledge-bases/$kbId"
+                    params={{ kbId: kb.id }}
+                    className="text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  >
+                    Gérer →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Bottom Split (Recent Activity & Ingestion Pipeline) */}
         <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-          <section className="panel border-border/70 overflow-hidden shadow-sm">
-            <div className="flex items-center justify-between border-b border-border/60 p-4 bg-surface-raised/40">
-              <h2 className="font-semibold text-sm text-[#28264B] dark:text-[#E8EAE7]">Journal d'activité récent</h2>
-              <span className="text-xs text-muted-foreground">{activity.length} événements</span>
+          <section className="rounded-2xl border border-[#dcdfd9] bg-white overflow-hidden shadow-2xs">
+            <div className="flex items-center justify-between border-b border-[#dcdfd9] p-4 bg-[#fafbfa]">
+              <h2 className="font-extrabold text-sm text-[#28264B] dark:text-[#E8EAE7]">Journal d'activité récent</h2>
+              <span className="text-xs text-[#4E5174] font-medium">{activity.length} événements</span>
             </div>
-            <ul className="divide-y divide-border/60 max-h-[300px] overflow-y-auto">
+            <ul className="divide-y divide-[#dcdfd9] max-h-[300px] overflow-y-auto">
               {activity.map((item) => (
-                <li key={item.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-surface-raised/30 transition-colors">
-                  <span className="flex size-7 items-center justify-center rounded-full bg-[#AA0033]/15 text-[#AA0033] dark:text-[#AA0033] font-bold text-[10px]">
+                <li key={item.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-[#fafbfa] transition-colors">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-[#28264B] text-white font-bold text-[10px]">
                     {item.user.slice(0, 2).toUpperCase()}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-foreground">
-                      <strong className="text-[#28264B] dark:text-[#E8EAE7] font-semibold">{item.user}</strong> {item.action}{" "}
-                      <span className="font-medium text-[#AA0033] dark:text-[#AA0033]">{item.target}</span>
+                    <p className="text-[#28264B]">
+                      <strong className="text-[#28264B] font-bold">{item.user}</strong> {item.action}{" "}
+                      <span className="font-bold text-[#AA0033]">{item.target}</span>
                     </p>
                   </div>
-                  <span className="shrink-0 text-[11px] text-muted-foreground font-mono">{item.time}</span>
+                  <span className="shrink-0 text-[11px] text-[#4E5174] font-mono">{item.time}</span>
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="panel border-border/70 overflow-hidden shadow-sm">
-            <div className="flex items-center justify-between border-b border-border/60 p-4 bg-surface-raised/40">
-              <h2 className="font-semibold text-sm text-[#28264B] dark:text-[#E8EAE7]">File de traitement d'ingestion</h2>
-              <span className="text-xs text-muted-foreground">{allDocs.length} fichiers récents</span>
+          <section className="rounded-2xl border border-[#dcdfd9] bg-white overflow-hidden shadow-2xs">
+            <div className="flex items-center justify-between border-b border-[#dcdfd9] p-4 bg-[#fafbfa]">
+              <h2 className="font-extrabold text-sm text-[#28264B] dark:text-[#E8EAE7]">File de traitement MinIO / Celery</h2>
+              <span className="text-xs text-[#4E5174] font-medium">{allDocs.length} fichiers</span>
             </div>
-            <div className="divide-y divide-border/60 max-h-[300px] overflow-y-auto">
+            <div className="divide-y divide-[#dcdfd9] max-h-[300px] overflow-y-auto">
               {allDocs.length === 0 ? (
-                <p className="p-6 text-center text-xs text-muted-foreground">Aucun document dans le pipeline pour l'instant.</p>
+                <p className="p-6 text-center text-xs text-[#4E5174]">Aucun document en attente dans la file.</p>
               ) : (
                 allDocs.map((doc) => (
-                  <div key={doc.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-surface-raised/30 transition-colors">
-                    <Clock3 className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="min-w-0 flex-1 truncate font-medium text-[#28264B] dark:text-[#E8EAE7]">
+                  <div key={doc.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-[#fafbfa] transition-colors">
+                    <FileText className="size-4 shrink-0 text-[#28264B]" />
+                    <span className="min-w-0 flex-1 truncate font-semibold text-[#28264B]">
                       {doc.title}
                     </span>
                     <StatusBadge

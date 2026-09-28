@@ -17,36 +17,35 @@ import {
   Layers,
   Cpu,
   Server,
-  FolderSync,
   ChevronDown,
   Activity,
-  Sliders,
   CheckCircle2,
   Code2,
   ShieldCheck,
   Gauge,
   FileCheck,
   Share2,
-  Boxes,
   Clock,
   ExternalLink,
-  Flame,
-  Key,
-  Terminal,
-  RefreshCw,
-  Compass,
-  AlertCircle
+  Bot,
+  FileSpreadsheet,
+  Users,
+  Briefcase,
+  HelpCircle,
+  Eye,
+  SlidersHorizontal,
+  FolderOpen
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SmartRAG — Plateforme RAG d'Entreprise Hybride & Observable" },
+      { title: "SmartRAG — La mémoire intelligente de vos documents d'entreprise" },
       {
         name: "description",
         content:
-          "Plateforme RAG production-ready : Ingestion asynchrone Celery/MinIO, Recherche Hybride pgvector + BM25, Reranking, Citations vérifiables, Évaluation Recall@K/MRR et Observabilité Prometheus.",
+          "Trouvez l'information exacte dans vos PDF, contrats et guides d'entreprise en quelques secondes. Des réponses fiables, sourcées et sans hallucination.",
       },
     ],
   }),
@@ -54,9 +53,9 @@ export const Route = createFileRoute("/")({
 });
 
 /**
- * Geometric, High-Visibility SmartRAG Brand Logo Mark using the 5-Color Palette
+ * Modern, Refined SmartRAG Brand Logo Mark
  */
-function SmartRAGLogoMark({ size = 44, className = "" }: { size?: number; className?: string }) {
+function SmartRAGLogoMark({ size = 42, className = "" }: { size?: number; className?: string }) {
   return (
     <div className={`relative flex items-center justify-center shrink-0 ${className}`}>
       <svg
@@ -68,383 +67,218 @@ function SmartRAGLogoMark({ size = 44, className = "" }: { size?: number; classN
         className="shrink-0 drop-shadow-sm"
         aria-label="SmartRAG Logo"
       >
-        {/* Background Rounded Squircle with Navy #28264B */}
-        <rect width="44" height="44" rx="12" fill="#28264B" />
-        
-        {/* Layer 1: Base knowledge block in Periwinkle #959EC9 */}
-        <rect x="10" y="27" width="16" height="4.5" rx="2.25" fill="#959EC9" fillOpacity="0.8" />
-        
-        {/* Layer 2: Intermediate indexed vectors in Slate #4E5174 */}
-        <rect x="10" y="19.5" width="24" height="4.5" rx="2.25" fill="#E8EAE7" fillOpacity="0.9" />
-        
-        {/* Layer 3: Contextual retrieval layer */}
-        <rect x="10" y="12" width="18" height="4.5" rx="2.25" fill="#E8EAE7" />
-        
-        {/* Active focal node in Crimson Ruby #AA0033 */}
-        <circle cx="31.5" cy="14.25" r="4" fill="#AA0033" />
+        <rect width="44" height="44" rx="12" fill="#1e1b4b" />
+        <rect x="10" y="27" width="16" height="4.5" rx="2.25" fill="#818cf8" fillOpacity="0.8" />
+        <rect x="10" y="19.5" width="24" height="4.5" rx="2.25" fill="#e0e7ff" fillOpacity="0.9" />
+        <rect x="10" y="12" width="18" height="4.5" rx="2.25" fill="#ffffff" />
+        <circle cx="31.5" cy="14.25" r="4" fill="#3b82f6" />
       </svg>
     </div>
   );
 }
 
-// Scénarios réels de démonstration interactive
+// Scénarios réels et concrets pour tout utilisateur (métier, RH, finance, technique)
 interface DemoScenario {
   id: string;
-  category: string;
+  department: string;
+  iconName: "legal" | "hr" | "finance" | "support";
   query: string;
-  docSource: string;
-  docPage: string;
-  latencyMs: number;
-  similarityScore: string;
-  chunksFound: number;
-  retrievalStages: {
-    name: string;
-    score: string;
-    details: string;
-  }[];
-  answer: string;
-  citationExcerpt: string;
+  docTitle: string;
+  docLocation: string;
+  docExcerpt: string;
+  answerSummary: string;
+  keyTakeaway: string;
+  responseTime: string;
+  confidenceScore: string;
 }
 
 const DEMO_SCENARIOS: DemoScenario[] = [
   {
-    id: "finance",
-    category: "Rapport Financier",
-    query: "Quel est l'EBITDA prévisionnel Q4 2024 et quelles sont les hypothèses de marge opérationnelle ?",
-    docSource: "Rapport_Financier_Annuel_2024.pdf",
-    docPage: "Page 42, Tableau 3.2.B",
-    latencyMs: 245,
-    similarityScore: "0.94",
-    chunksFound: 4,
-    retrievalStages: [
-      { name: "BM25 Sparse Search", score: "0.89", details: "Indexation inversée sur 'EBITDA', 'Q4 2024', 'marge opérationnelle'." },
-      { name: "Dense Vector Search (pgvector)", score: "0.94", details: "Similarité cosinus sur les embeddings 1536-dim." },
-      { name: "RRF Fusion & Cross-Encoder Rerank", score: "0.98", details: "Réordonnancement des passages les plus pertinents et filtrage du bruit." },
-    ],
-    answer:
-      "D'après le rapport financier consolidé, l'EBITDA prévisionnel pour le Q4 2024 est fixé à **14,8 M€**, avec une marge opérationnelle cible de **21,4%**, soutenue par l'optimisation des charges d'infrastructure et la progression des souscriptions annuelles.",
-    citationExcerpt:
-      "« Tableau 3.2.B — Prévisions d'exploitation Q4 : EBITDA cible fixé à 14,8 M€ (marge opérationnelle 21,4%), sous hypothèse de renouvellement des contrats cadres. »",
+    id: "legal",
+    department: "Contrats & Juridique",
+    iconName: "legal",
+    query: "Quelles sont les conditions de résiliation du contrat et le préavis exigé ?",
+    docTitle: "Contrat_Cadre_Prestation_2024.pdf",
+    docLocation: "Page 14, Article 8.2 (Résiliation)",
+    docExcerpt:
+      "« Article 8.2 — Chaque partie peut résilier le présent contrat sous réserve de notifier un préavis écrit de trois (3) mois par lettre recommandée avec accusé de réception, sans pénalité financière après la première année contractuelle. »",
+    answerSummary:
+      "Le contrat peut être résilié avec un **préavis écrit de 3 mois** adressé par lettre recommandée. Aucune pénalité financière n'est appliquée après la première année de contrat.",
+    keyTakeaway: "Préavis de 3 mois • Lettre RAR • 0 € de pénalité après 1 an",
+    responseTime: "0.28 s",
+    confidenceScore: "99%",
   },
   {
     id: "hr",
-    category: "Politique RH & Mobilité",
-    query: "Quelles sont les conditions pour le forfait télétravail international et le plafond de remboursement ?",
-    docSource: "Politique_RH_Mobilite_2024.docx",
-    docPage: "Section 4.1.3",
-    latencyMs: 210,
-    similarityScore: "0.92",
-    chunksFound: 3,
-    retrievalStages: [
-      { name: "BM25 Sparse Search", score: "0.85", details: "Correspondance exacte sur 'télétravail international', 'plafond'." },
-      { name: "Dense Vector Search (pgvector)", score: "0.92", details: "Recherche sémantique dans la collection des politiques RH." },
-      { name: "RRF Fusion & Cross-Encoder Rerank", score: "0.97", details: "Priorisation de la clause en vigueur pour l'année 2024." },
-    ],
-    answer:
-      "Les collaborateurs ayant validé leur période d'essai (minimum **6 mois d'ancienneté**) peuvent effectuer jusqu'à **30 jours ouvrés** par an de télétravail dans l'UE/EEE. Le plafond d'indemnité annuelle d'équipement s'élève à **450 € TTC** sur justificatifs.",
-    citationExcerpt:
-      "« Section 4.1.3 : La mobilité internationale est plafonnée à 30 jours ouvrés annuels après validation hiérarchique. Prise en charge d'équipement à hauteur de 450 € TTC/an. »",
+    department: "Ressources Humaines",
+    iconName: "hr",
+    query: "Combien de jours de télétravail par semaine sont autorisés et quel est le forfait équipement ?",
+    docTitle: "Charte_RH_Teletravail_2024.docx",
+    docLocation: "Section 3.1 & 4.2",
+    docExcerpt:
+      "« Section 3.1 : Les collaborateurs bénéficient d'un forfait de deux (2) jours de télétravail hebdomadaires fixes ou flottants. Section 4.2 : Une indemnité forfaitaire de 450 € TTC est allouée pour l'aménagement ergonomique du poste de travail. »",
+    answerSummary:
+      "La charte autorise **2 jours de télétravail par semaine** (fixes ou flottants). Les salariés disposent également d'une **indemnité d'équipement de 450 € TTC** pour installer leur poste à domicile.",
+    keyTakeaway: "2 jours / semaine • Forfait 450 € TTC remboursé",
+    responseTime: "0.22 s",
+    confidenceScore: "98%",
   },
   {
-    id: "tech",
-    category: "Architecture & DevOps",
-    query: "Comment configurer le renouvellement automatique des certificats TLS avec cert-manager ?",
-    docSource: "Guide_Securite_Kubernetes.md",
-    docPage: "Chapitre 5.2 / Cert-Manager",
-    latencyMs: 230,
-    similarityScore: "0.96",
-    chunksFound: 3,
-    retrievalStages: [
-      { name: "BM25 Sparse Search", score: "0.91", details: "Correspondance sur 'cert-manager', 'renewBefore', 'ClusterIssuer'." },
-      { name: "Dense Vector Search (pgvector)", score: "0.96", details: "Extraction de la structure YAML du manifeste Kubernetes." },
-      { name: "RRF Fusion & Cross-Encoder Rerank", score: "0.99", details: "Validation de la configuration avec Let's Encrypt Production." },
-    ],
-    answer:
-      "Dans le manifeste du certificat, spécifiez les champs `duration: 720h` (30 jours) et `renewBefore: 240h` (10 jours). Le contrôleur cert-manager déclenchera automatiquement le renouvellement auprès du `ClusterIssuer` 10 jours avant l'expiration.",
-    citationExcerpt:
-      "« spec:\n  duration: 720h\n  renewBefore: 240h\n  issuerRef:\n    name: letsencrypt-prod\n    kind: ClusterIssuer »",
+    id: "finance",
+    department: "Finance & Stratégie",
+    iconName: "finance",
+    query: "Quel est le résultat prévisionnel EBITDA pour le trimestre et l'objectif de marge ?",
+    docTitle: "Rapport_Financier_Annuel.pdf",
+    docLocation: "Page 38, Tableau Prévisionnel Q4",
+    docExcerpt:
+      "« Tableau 3.2.B — Prévisions d'exploitation : EBITDA consolidé prévisionnel fixé à 14,8 M€, soit un taux de marge opérationnelle cible de 21,4 %, sous l'effet de l'optimisation des coûts d'infrastructure. »",
+    answerSummary:
+      "L'EBITDA prévisionnel est estimé à **14,8 M€**, ce qui correspond à une **marge opérationnelle cible de 21,4 %**, portée par la baisse des coûts d'infrastructure.",
+    keyTakeaway: "EBITDA 14,8 M€ • Marge opérationnelle 21,4%",
+    responseTime: "0.25 s",
+    confidenceScore: "97%",
+  },
+  {
+    id: "support",
+    department: "Opérations & Support",
+    iconName: "support",
+    query: "Quelle est la procédure pour déclarer un incident de sécurité de niveau critique ?",
+    docTitle: "Guide_Securite_et_Conformite.pdf",
+    docLocation: "Chapitre 5 — Gestion des Crises",
+    docExcerpt:
+      "« Chapitre 5.1 : Tout incident de sévérité P1 (Critique) doit être signalé sous 15 minutes sur le canal d'urgence #security-alert et faire l'objet d'un ticket d'astreinte auprès du RSSI. »",
+    answerSummary:
+      "Pour un incident critique (P1), la notification doit être faite en **moins de 15 minutes** sur le canal d'urgence `#security-alert` et escaladée immédiatement auprès du **RSSI** d'astreinte.",
+    keyTakeaway: "Alerte < 15 min • Canal #security-alert • Escalade RSSI",
+    responseTime: "0.19 s",
+    confidenceScore: "100%",
   },
 ];
 
-// Matrice complète des fonctionnalités réelles : Implémenté vs Roadmap
-interface FeatureStatusItem {
-  name: string;
-  category: "ingestion" | "retrieval" | "generation" | "eval" | "security" | "infra";
-  status: "implemented" | "roadmap";
-  description: string;
-  techStack: string;
+// Matrice claire et lisible des fonctionnalités
+interface FeatureItem {
+  title: string;
+  category: "utilisateurs" | "securite" | "technique";
+  status: "disponible" | "bientot";
+  simpleDesc: string;
+  benefit: string;
 }
 
-const FEATURE_STATUS_ITEMS: FeatureStatusItem[] = [
-  // ── INGESTION ──
+const FEATURE_ITEMS: FeatureItem[] = [
   {
-    name: "Upload multi-formats & Validation",
-    category: "ingestion",
-    status: "implemented",
-    description: "Support complet PDF, TXT, MD, DOCX avec validation de types MIME et détection anti-usurpation.",
-    techStack: "FastAPI + Pypdf / python-docx",
+    title: "Recherche en langage naturel",
+    category: "utilisateurs",
+    status: "disponible",
+    simpleDesc: "Posez vos questions comme vous parleriez à un collègue, sans mot-clé complexe.",
+    benefit: "Accessible à tous sans formation",
   },
   {
-    name: "Stockage d'objets S3 sécurisé",
-    category: "ingestion",
-    status: "implemented",
-    description: "Stockage isolé des documents originaux avec génération de buckets et clés déterministes.",
-    techStack: "MinIO S3 Compatible Storage",
+    title: "Citations & Extraits vérifiables",
+    category: "utilisateurs",
+    status: "disponible",
+    simpleDesc: "Chaque affirmation affiche le document d'origine, le numéro de page et le passage exact.",
+    benefit: "Zéro hallucination, confiance totale",
   },
   {
-    name: "Pipeline de chunking & Nettoyage",
-    category: "ingestion",
-    status: "implemented",
-    description: "Découpage récursif avec chevauchement (overlap), nettoyage d'espaces et extraction de métadonnées.",
-    techStack: "Chunker custom + Regex normalizer",
+    title: "Import multi-fichiers instantané",
+    category: "utilisateurs",
+    status: "disponible",
+    simpleDesc: "Déposez vos PDF, fichiers Word (.docx), Markdown ou texte brut en un simple glisser-déposer.",
+    benefit: "Indexation automatique en arrière-plan",
   },
   {
-    name: "Ingestion asynchrone & Jobs en temps réel",
-    category: "ingestion",
-    status: "implemented",
-    description: "Traitement en tâche de fond pour les gros volumes, retry automatique et suivi de statut par job ID.",
-    techStack: "Celery Workers + Redis Broker",
+    title: "Bases documentaires compartimentées",
+    category: "securite",
+    status: "disponible",
+    simpleDesc: "Créez des espaces séparés par équipe (RH, Juridique, Finance, Technique) avec droits d'accès.",
+    benefit: "Confidentialité garantie par service",
   },
   {
-    name: "OCR avancé & Reconnaissance de tableaux",
-    category: "ingestion",
-    status: "roadmap",
-    description: "Extraction de texte sur scans basse résolution, formulaires manuscrits et tableaux complexes.",
-    techStack: "Tesseract OCR / LayoutLMv3",
+    title: "Validation des réponses expertes",
+    category: "securite",
+    status: "disponible",
+    simpleDesc: "Les experts peuvent marquer des réponses comme « Référence vérifiée » pour enrichir la mémoire interne.",
+    benefit: "Amélioration continue de la qualité",
   },
   {
-    name: "Connecteurs Cloud automatiques",
-    category: "ingestion",
-    status: "roadmap",
-    description: "Synchronisation périodique avec Google Drive, Notion API, Confluence, Microsoft SharePoint et S3.",
-    techStack: "Connecteurs OAuth2 + Sync Webhooks",
-  },
-
-  // ── RETRIEVAL ──
-  {
-    name: "Recherche Vectorielle Dense",
-    category: "retrieval",
-    status: "implemented",
-    description: "Indexation des embeddings et recherche par similarité cosinus avec filtrage par collection et Top-K.",
-    techStack: "PostgreSQL + pgvector (HNSW / IVFFlat)",
+    title: "Données 100% privées & Isolées",
+    category: "securite",
+    status: "disponible",
+    simpleDesc: "Vos documents ne sont jamais envoyés pour entraîner des modèles publics d'IA.",
+    benefit: "Conformité RGPD et secret des affaires",
   },
   {
-    name: "Recherche Textuelle Lexicale BM25",
-    category: "retrieval",
-    status: "implemented",
-    description: "Index inversé pour capturer les codes exacts, acronymes et références techniques.",
-    techStack: "BM25 Okapi Algorithm",
+    title: "Recherche hybride intelligente",
+    category: "technique",
+    status: "disponible",
+    simpleDesc: "Combine la compréhension sémantique profonde (sens) et la recherche textuelle exacte (codes, références).",
+    benefit: "Précision maximale même sur les termes rares",
   },
   {
-    name: "Fusion RRF (Reciprocal Rank Fusion)",
-    category: "retrieval",
-    status: "implemented",
-    description: "Combinaison optimale et pondérée des scores vectoriels et textuels sans distorsion d'échelle.",
-    techStack: "Reciprocal Rank Fusion Service",
-  },
-  {
-    name: "Reranker Cross-Encoder & LLM Reranking",
-    category: "retrieval",
-    status: "implemented",
-    description: "Réordonnancement précis des passages candidats avec mécanisme de repli sécurisé en cas de timeout.",
-    techStack: "Cross-Encoder / LLM scoring",
-  },
-  {
-    name: "Cache Redis pour Embeddings & Requêtes",
-    category: "retrieval",
-    status: "implemented",
-    description: "Mise en cache des vecteurs et des requêtes fréquentes pour réduire la latence à < 20ms.",
-    techStack: "Redis in-memory cache",
-  },
-  {
-    name: "Agentic Multi-Hop RAG & SQL Tools",
-    category: "retrieval",
-    status: "roadmap",
-    description: "Raisonnement multi-étapes pour les questions croisées et requêtes SQL en langage naturel.",
-    techStack: "LangGraph / Tool-Calling Agents",
-  },
-
-  // ── GENERATION ──
-  {
-    name: "Génération Grounded avec Citations",
-    category: "generation",
-    status: "implemented",
-    description: "Réponses strictes s'appuyant sur le contexte extrait avec citations d'extraits et références de pages.",
-    techStack: "OpenRouter / GLM 5.2 / GPT-4o",
-  },
-  {
-    name: "Réécriture de Requête & Multi-tour",
-    category: "generation",
-    status: "implemented",
-    description: "Reformulation contextuelle basée sur l'historique de conversation pour désambiguïser les pronoms.",
-    techStack: "Contextual Query Rewriter",
-  },
-  {
-    name: "Refus Déterministe Hors-Contexte",
-    category: "generation",
-    status: "implemented",
-    description: "Détection automatique de manque d'information et refus propre sans hallucination.",
-    techStack: "Confidence Gate & Refusal Guardrails",
-  },
-  {
-    name: "Streaming SSE (Server-Sent Events)",
-    category: "generation",
-    status: "implemented",
-    description: "Génération fluide en streaming avec émission progressive du texte et des métadonnées de source.",
-    techStack: "FastAPI StreamingResponse + SSE",
-  },
-  {
-    name: "A/B Testing de Prompts & Modèles",
-    category: "generation",
-    status: "roadmap",
-    description: "Comparaison à l'aveugle de différents templates de prompt et LLMs avec feedback utilisateur.",
-    techStack: "AB Testing Engine + Analytics",
-  },
-
-  // ── EVALUATION & OBSERVABILITY ──
-  {
-    name: "Métriques de Retrieval (Recall@K, MRR)",
-    category: "eval",
-    status: "implemented",
-    description: "Évaluation de la pertinence de recherche avec Recall@K, Precision@K et Mean Reciprocal Rank.",
-    techStack: "Eval Runner + Dataset Loader",
-  },
-  {
-    name: "LLM-as-a-Judge (Faithfulness)",
-    category: "eval",
-    status: "implemented",
-    description: "Contrôle automatique de fidélité de la réponse par rapport au contexte fourni (hallucination detection).",
-    techStack: "Automated LLM Judge Service",
-  },
-  {
-    name: "Métriques Prometheus & Grafana",
-    category: "eval",
-    status: "implemented",
-    description: "Export des métriques de latence de retrieval, génération, taux d'erreurs et requêtes par seconde.",
-    techStack: "Prometheus Client + Grafana Dashboards",
-  },
-  {
-    name: "Logs Structurés JSON",
-    category: "eval",
-    status: "implemented",
-    description: "Formatage unifié des logs avec corrélation des request IDs pour le débogage en production.",
-    techStack: "Python structlog / JSON handler",
-  },
-
-  // ── SECURITY & GOVERNANCE ──
-  {
-    name: "Authentification JWT & Refresh Tokens",
-    category: "security",
-    status: "implemented",
-    description: "Gestion des sessions avec rotation des tokens, hachage bcrypt et révocation sécurisée.",
-    techStack: "FastAPI Security + JWT + Passlib",
-  },
-  {
-    name: "Contrôle d'Accès par Rôle (RBAC)",
-    category: "security",
-    status: "implemented",
-    description: "Rôles Admin, Manager et User avec permissions granulaires par base de connaissances.",
-    techStack: "PostgreSQL RBAC Schema",
-  },
-  {
-    name: "Gestion des Clés d'API & Workspaces",
-    category: "security",
-    status: "implemented",
-    description: "Création de clés d'API avec préfixe sécurisé, révocation instantanée et isolation des espaces.",
-    techStack: "API Key Auth Middleware",
-  },
-  {
-    name: "Réponses Vérifiées & Feedback Loop",
-    category: "security",
-    status: "implemented",
-    description: "Validation manuelle des réponses expertes qui deviennent prioritaires pour les questions futures.",
-    techStack: "Verified Answers Knowledge Store",
-  },
-  {
-    name: "SSO Entreprise (SAML 2.0 / Okta / Azure AD)",
-    category: "security",
-    status: "roadmap",
-    description: "Intégration d'annuaires d'entreprise avec authentification unique et provisioning SCIM.",
-    techStack: "SAML 2.0 / OpenID Connect",
-  },
-  {
-    name: "Déploiement Kubernetes & Helm Charts",
-    category: "infra",
-    status: "roadmap",
-    description: "Packaging de production avec autoscaling horizontal (HPA) pour Celery et FastAPI.",
-    techStack: "Kubernetes + Helm + Keda",
-  },
+    title: "Clés d'API & Intégrations REST",
+    category: "technique",
+    status: "disponible",
+    simpleDesc: "Connectez SmartRAG à vos applications métiers grâce à notre API sécurisée haute performance.",
+    benefit: "Automatisation de vos flux de travail",
+  }
 ];
 
 export function LandingPage() {
   const { session } = useAuth();
-  const [activeScenarioId, setActiveScenarioId] = useState("finance");
-  const [activeFeatureTab, setActiveFeatureTab] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<"all" | "implemented" | "roadmap">("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
+  const [activeScenarioId, setActiveScenarioId] = useState("legal");
+  const [filterCategory, setFilterCategory] = useState<"all" | "utilisateurs" | "securite" | "technique">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "disponible" | "bientot">("all");
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const activeScenario = DEMO_SCENARIOS.find((s) => s.id === activeScenarioId) || DEMO_SCENARIOS[0];
+  const currentScenario = DEMO_SCENARIOS.find((s) => s.id === activeScenarioId) || DEMO_SCENARIOS[0];
 
-  const filteredFeatures = FEATURE_STATUS_ITEMS.filter((item) => {
-    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-    const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
-    return matchesStatus && matchesCategory;
+  const filteredFeatures = FEATURE_ITEMS.filter((f) => {
+    const matchCat = filterCategory === "all" || f.category === filterCategory;
+    const matchStat = filterStatus === "all" || f.status === filterStatus;
+    return matchCat && matchStat;
   });
 
-  const implementedCount = FEATURE_STATUS_ITEMS.filter((f) => f.status === "implemented").length;
-  const roadmapCount = FEATURE_STATUS_ITEMS.filter((f) => f.status === "roadmap").length;
-
   return (
-    <div className="min-h-screen bg-[#fafbfa] text-[#28264B] flex flex-col font-sans selection:bg-[#AA0033]/20 selection:text-[#28264B] overflow-x-hidden antialiased">
-      {/* ───── Subtle Brand Ambient Lighting with Palette Colors ───── */}
+    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] flex flex-col font-sans selection:bg-[#6366f1]/20 selection:text-[#1e1b4b] overflow-x-hidden antialiased">
+      {/* ───── Subtle Brand Ambient Lighting ───── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-gradient-to-b from-[#959EC9]/20 via-[#E8EAE7]/40 to-transparent blur-3xl" />
-        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#AA0033]/5 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-1/3 left-0 w-[500px] h-[500px] bg-[#28264B]/5 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[500px] bg-gradient-to-b from-indigo-200/40 via-blue-100/30 to-transparent blur-3xl opacity-70" />
+        <div className="absolute top-1/3 right-0 w-[450px] h-[450px] bg-sky-200/30 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 left-0 w-[450px] h-[450px] bg-indigo-200/20 rounded-full blur-[120px] pointer-events-none" />
       </div>
 
       {/* ───── Header / Navigation ───── */}
-      <header className="sticky top-0 z-50 w-full bg-[#fafbfa]/90 backdrop-blur-md border-b border-[#dcdfd9] transition-all">
+      <header className="sticky top-0 z-50 w-full bg-white/85 backdrop-blur-md border-b border-slate-200/80 transition-all">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
           {/* Logo & Brand */}
           <div className="flex items-center gap-10">
             <Link to="/" className="flex items-center gap-3.5 group">
-              <SmartRAGLogoMark size={44} className="transition-transform duration-200 group-hover:scale-105" />
+              <SmartRAGLogoMark size={42} className="transition-transform duration-200 group-hover:scale-105" />
               <div className="flex flex-col">
-                <span className="font-extrabold text-xl tracking-tight text-[#28264B]">
-                  Smart<span className="text-[#AA0033]">RAG</span>
+                <span className="font-extrabold text-xl tracking-tight text-slate-900">
+                  Smart<span className="text-indigo-600">RAG</span>
                 </span>
-                <span className="text-[10px] font-bold text-[#4E5174] tracking-wider uppercase">
-                  Enterprise RAG Engine
+                <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
+                  Assistant Documentaire Entreprise
                 </span>
               </div>
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-[#4E5174]">
-              <a href="#demo" className="hover:text-[#AA0033] transition-colors">
+            <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
+              <a href="#demo" className="hover:text-indigo-600 transition-colors">
                 Démonstration
               </a>
-              <a href="#status-matrix" className="hover:text-[#AA0033] transition-colors flex items-center gap-1.5">
-                <span>Statut Réel</span>
-                <span className="bg-[#AA0033]/10 text-[#AA0033] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#AA0033]/20">
-                  {implementedCount} OK
-                </span>
+              <a href="#how-it-works" className="hover:text-indigo-600 transition-colors">
+                Comment ça marche
               </a>
-              <a href="#pipeline" className="hover:text-[#AA0033] transition-colors">
-                Architecture
+              <a href="#benefits" className="hover:text-indigo-600 transition-colors">
+                Avantages Métier
               </a>
-              <a href="#features" className="hover:text-[#AA0033] transition-colors">
+              <a href="#features" className="hover:text-indigo-600 transition-colors">
                 Fonctionnalités
               </a>
-              <a href="#comparison" className="hover:text-[#AA0033] transition-colors">
-                Comparatif
-              </a>
-              <a href="#api" className="hover:text-[#AA0033] transition-colors">
-                API & Stack
-              </a>
-              <a href="#faq" className="hover:text-[#AA0033] transition-colors">
-                FAQ
+              <a href="#faq" className="hover:text-indigo-600 transition-colors">
+                Questions Fréquentes
               </a>
             </nav>
           </div>
@@ -454,23 +288,23 @@ export function LandingPage() {
             {session ? (
               <Link
                 to="/dashboard"
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#28264B] px-5 text-sm font-semibold text-white transition-all duration-150 hover:bg-[#34325a] shadow-xs"
+                className="inline-flex h-10 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white transition-all duration-150 hover:bg-indigo-700 shadow-sm"
               >
-                Mon espace <ArrowRight className="size-4 text-[#959EC9]" />
+                Mon espace <ArrowRight className="size-4" />
               </Link>
             ) : (
               <>
                 <Link
-                  to="/auth/login"
-                  className="hidden sm:inline-flex text-sm font-semibold text-[#4E5174] hover:text-[#28264B] transition-colors px-3.5 py-2"
+                  to="/auth"
+                  className="text-sm font-semibold text-slate-700 hover:text-indigo-600 px-3 py-2 transition-colors"
                 >
-                  Connexion
+                  Se connecter
                 </Link>
                 <Link
-                  to="/auth/register"
-                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#AA0033] px-5 text-sm font-bold text-white transition-all duration-150 hover:bg-[#880029] shadow-sm hover:shadow-[#AA0033]/25"
+                  to="/auth"
+                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white transition-all duration-150 hover:bg-indigo-700 shadow-sm hover:shadow"
                 >
-                  Démarrer <ChevronRight className="size-4" />
+                  Essayer maintenant <ArrowRight className="size-4" />
                 </Link>
               </>
             )}
@@ -480,413 +314,441 @@ export function LandingPage() {
 
       <main className="flex-1 relative z-10">
         {/* ───── Hero Section ───── */}
-        <section className="relative pt-16 pb-20 md:pt-24 md:pb-28">
-          <div className="mx-auto max-w-5xl px-6 text-center">
-            {/* Version & Status Pill */}
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-[#dcdfd9] bg-[#E8EAE7]/70 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold text-[#28264B] mb-8 shadow-2xs">
-              <span className="flex size-2 rounded-full bg-[#AA0033] animate-pulse" />
-              <span className="font-bold">SmartRAG Production Platform</span>
-              <span className="text-[#959EC9]">•</span>
-              <span className="text-[#4E5174] font-medium">Recherche Hybride pgvector + BM25 & Celery Async</span>
+        <section className="relative px-6 pt-16 pb-20 lg:pt-24 lg:pb-28 text-center max-w-5xl mx-auto">
+          {/* Trust Pill */}
+          <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-200/80 px-4 py-1.5 text-xs font-semibold text-indigo-800 mb-8 shadow-2xs">
+            <span className="flex size-2 rounded-full bg-indigo-600 animate-pulse" />
+            <span>La plateforme documentaire intelligente pour toute l'entreprise</span>
+          </div>
+
+          {/* Main Hero Headline */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
+            Trouvez la bonne information dans vos documents en{" "}
+            <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 bg-clip-text text-transparent">
+              1 seconde chrono.
+            </span>
+          </h1>
+
+          {/* Clear, Human Subtitle */}
+          <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
+            Importez vos <strong>PDF, contrats, politiques RH et guides internes</strong>. SmartRAG répond avec précision aux questions de vos équipes en citant toujours l'extrait et la page exacte du document d'origine.
+          </p>
+
+          {/* CTAs */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to={session ? "/dashboard" : "/auth"}
+              className="inline-flex h-12 items-center justify-center gap-2.5 rounded-xl bg-indigo-600 px-8 text-base font-bold text-white shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all duration-200"
+            >
+              <span>Accéder à la plateforme</span>
+              <ArrowRight className="size-5" />
+            </Link>
+
+            <a
+              href="#demo"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-7 text-base font-bold text-slate-800 shadow-2xs hover:bg-slate-50 hover:border-slate-400 transition-all duration-200"
+            >
+              <Eye className="size-4 text-indigo-600" />
+              <span>Voir la démo interactive</span>
+            </a>
+          </div>
+
+          {/* Key Value Badges */}
+          <div className="mt-12 pt-8 border-t border-slate-200/80 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold text-slate-600">
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+              <span>Zéro hallucination</span>
             </div>
-
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#28264B] leading-[1.14] mb-6">
-              Connectez vos documents d'entreprise.{" "}
-              <span className="text-[#AA0033] block sm:inline">
-                Obtenez des réponses sourcées et vérifiables.
-              </span>
-            </h1>
-
-            {/* Subtitle with Real Architecture Context */}
-            <p className="mx-auto max-w-3xl text-lg sm:text-xl text-[#4E5174] leading-relaxed mb-10 font-normal">
-              Plateforme RAG complète et modulaire : ingestion asynchrone MinIO/Celery, recherche hybride combinant similarité vectorielle cosinus et BM25, reranking cross-encoder, citations précises avec pages et évaluation continue de fidélité.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3.5 justify-center items-center mb-12">
-              <Link
-                to={session ? "/dashboard" : "/auth/register"}
-                className="w-full sm:w-auto inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#28264B] px-8 text-base font-bold text-white transition-all duration-150 hover:bg-[#34325a] shadow-md hover:shadow-lg"
-              >
-                {session ? "Accéder à l'espace" : "Explorer l'espace de travail"}
-                <ArrowRight className="size-4 text-[#959EC9]" />
-              </Link>
-              <a
-                href="#demo"
-                className="w-full sm:w-auto inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-[#dcdfd9] bg-white px-7 text-base font-semibold text-[#28264B] transition-all duration-150 hover:bg-[#E8EAE7]/50 hover:border-[#959EC9]"
-              >
-                <Sparkles className="size-4 text-[#AA0033]" />
-                Tester la démo interactive
-              </a>
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="size-4 text-indigo-600 shrink-0" />
+              <span>Citations de pages précises</span>
             </div>
-
-            {/* Key Fact Badges using Palette Tones */}
-            <div className="flex flex-wrap items-center justify-center gap-y-2.5 gap-x-8 text-xs sm:text-sm font-medium text-[#4E5174]">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-[#AA0033]" />
-                <span>Zero Data Training (100% privé)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-[#AA0033]" />
-                <span>Citations & Extraits vérifiables</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-[#AA0033]" />
-                <span>Contrôle RBAC & Clés d'API</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-[#AA0033]" />
-                <span>Évaluation automatique Recall@K</span>
-              </div>
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="size-4 text-blue-600 shrink-0" />
+              <span>100% Données privées</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+              <span>Multi-formats (PDF, Word, TXT)</span>
             </div>
           </div>
         </section>
 
-        {/* ───── INTERACTIVE DEMO / PLAYGROUND ───── */}
-        <section id="demo" className="py-14 md:py-20 scroll-mt-24 bg-[#f2f4f2] border-y border-[#dcdfd9]">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="text-center mb-10">
-              <span className="text-xs font-bold text-[#AA0033] uppercase tracking-wider mb-2 block">
-                Démonstration Interactive
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#28264B] tracking-tight">
-                Traitement en direct par le pipeline hybride
-              </h2>
-              <p className="text-sm sm:text-base text-[#4E5174] max-w-xl mx-auto mt-2">
-                Sélectionnez un cas d'usage pour observer la recherche dense, sparse BM25, la fusion RRF, le reranking et la réponse citée.
-              </p>
+        {/* ───── Interactive Demo Showcase ───── */}
+        <section id="demo" className="py-16 px-6 max-w-6xl mx-auto scroll-mt-24">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+              Démonstration Interactive
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+              Voyez comment SmartRAG traite une question en direct
+            </h2>
+            <p className="text-slate-600 text-sm mt-2 max-w-2xl mx-auto">
+              Choisissez un exemple métier ci-dessous pour voir la question posée, le document retrouvé et la réponse certifiée.
+            </p>
+          </div>
+
+          {/* Scenario Picker Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-8">
+            {DEMO_SCENARIOS.map((sc) => (
+              <button
+                key={sc.id}
+                onClick={() => setActiveScenarioId(sc.id)}
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
+                  activeScenarioId === sc.id
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "bg-white text-slate-700 border border-slate-200 hover:border-indigo-300 hover:bg-slate-50"
+                }`}
+              >
+                {sc.id === "legal" && <Shield className="size-3.5" />}
+                {sc.id === "hr" && <Users className="size-3.5" />}
+                {sc.id === "finance" && <BarChart3 className="size-3.5" />}
+                {sc.id === "support" && <Briefcase className="size-3.5" />}
+                <span>{sc.department}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Interactive Card Canvas */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            {/* Top Toolbar */}
+            <div className="bg-slate-50 px-6 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="flex size-2 rounded-full bg-emerald-500" />
+                <span className="font-semibold text-slate-700">Document actif :</span>
+                <span className="font-mono text-indigo-900 font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                  {currentScenario.docTitle}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-slate-500">
+                  Temps de réponse : <strong className="text-slate-800 font-mono">{currentScenario.responseTime}</strong>
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold">
+                  <Check className="size-3" /> Confiance {currentScenario.confidenceScore}
+                </span>
+              </div>
             </div>
 
-            {/* Playground Box */}
-            <div className="rounded-2xl border border-[#dcdfd9] bg-white shadow-xl overflow-hidden">
-              {/* Presets Header Bar */}
-              <div className="border-b border-[#dcdfd9] bg-[#E8EAE7]/80 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-semibold text-[#4E5174] mr-1 hidden sm:inline">Exemples réels :</span>
-                  {DEMO_SCENARIOS.map((scenario) => {
-                    const isActive = scenario.id === activeScenarioId;
-                    return (
-                      <button
-                        key={scenario.id}
-                        onClick={() => setActiveScenarioId(scenario.id)}
-                        className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-[#28264B] text-white shadow-xs"
-                            : "bg-white text-[#4E5174] hover:bg-[#fafbfa] border border-[#dcdfd9] hover:text-[#28264B]"
-                        }`}
-                      >
-                        {scenario.category}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Telemetry info */}
-                <div className="flex items-center gap-3 text-xs font-mono text-[#4E5174]">
-                  <span className="flex items-center gap-1.5 bg-white text-[#AA0033] px-2.5 py-1 rounded-md border border-[#AA0033]/30 font-semibold shadow-2xs">
-                    <Zap className="size-3 text-[#AA0033]" /> ~{activeScenario.latencyMs} ms
-                  </span>
-                  <span className="flex items-center gap-1.5 bg-white text-[#28264B] px-2.5 py-1 rounded-md border border-[#959EC9] font-semibold shadow-2xs">
-                    <Gauge className="size-3 text-[#959EC9]" /> Similarité {activeScenario.similarityScore}
-                  </span>
-                </div>
-              </div>
-
-              {/* Demo Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#dcdfd9]">
-                {/* Left Side: Pipeline Steps (5 cols) */}
-                <div className="lg:col-span-5 p-6 bg-[#fafbfa] flex flex-col justify-between">
-                  <div>
-                    {/* User Question */}
-                    <div className="mb-6">
-                      <label className="text-[11px] font-bold text-[#4E5174] uppercase tracking-wider block mb-2">
-                        Question posée
-                      </label>
-                      <div className="rounded-lg border border-[#dcdfd9] bg-white p-3.5 text-sm font-medium text-[#28264B] shadow-2xs flex items-start gap-2.5">
-                        <MessageSquare className="size-4 text-[#AA0033] shrink-0 mt-0.5" />
-                        <span>{activeScenario.query}</span>
-                      </div>
-                    </div>
-
-                    {/* Pipeline Stages */}
-                    <div>
-                      <label className="text-[11px] font-bold text-[#4E5174] uppercase tracking-wider block mb-2.5">
-                        Étapes de recherche & Fusion
-                      </label>
-                      <div className="space-y-2.5">
-                        {activeScenario.retrievalStages.map((stage, idx) => (
-                          <div
-                            key={idx}
-                            className="rounded-lg border border-[#dcdfd9] bg-white p-3 text-xs flex flex-col gap-1 shadow-2xs"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold text-[#28264B] flex items-center gap-1.5">
-                                <span className="flex size-4 items-center justify-center rounded-full bg-[#28264B] text-[10px] font-bold text-white">
-                                  {idx + 1}
-                                </span>
-                                {stage.name}
-                              </span>
-                              <span className="font-mono text-[#AA0033] bg-[#AA0033]/10 px-1.5 py-0.5 rounded text-[11px] font-bold">
-                                {stage.score}
-                              </span>
-                            </div>
-                            <p className="text-[#4E5174] text-[11px] pl-5.5">{stage.details}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+            {/* Split View: Question & Document Search VS Answer */}
+            <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+              {/* Left Column: User Question & Found Document Excerpt */}
+              <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Question de l'utilisateur</span>
+                  <div className="mt-2 rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm font-semibold text-slate-800 flex items-start gap-3">
+                    <MessageSquare className="size-4 text-indigo-600 shrink-0 mt-0.5" />
+                    <span>« {currentScenario.query} »</span>
                   </div>
+                </div>
 
-                  {/* Document Reference */}
-                  <div className="mt-6 pt-4 border-t border-[#dcdfd9] flex items-center justify-between text-xs text-[#4E5174]">
-                    <div className="flex items-center gap-2">
-                      <FileText className="size-4 text-[#28264B]" />
-                      <div>
-                        <p className="font-bold text-[#28264B]">{activeScenario.docSource}</p>
-                        <p className="text-[11px] text-[#4E5174]">{activeScenario.docPage}</p>
-                      </div>
-                    </div>
-                    <span className="bg-[#E8EAE7] text-[#28264B] px-2 py-0.5 rounded text-[11px] font-medium border border-[#dcdfd9]">
-                      {activeScenario.chunksFound} passages indexés
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+                      <Search className="size-3.5" />
+                      Extrait source retrouvé automatiquement
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                      {currentScenario.docLocation}
                     </span>
                   </div>
+                  <div className="rounded-xl bg-amber-50/60 border border-amber-200/80 p-4 text-xs font-normal text-slate-800 italic leading-relaxed">
+                    {currentScenario.docExcerpt}
+                  </div>
                 </div>
 
-                {/* Right Side: Answer & Grounding (7 cols) */}
-                <div className="lg:col-span-7 p-6 flex flex-col justify-between bg-white">
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="flex size-7 items-center justify-center rounded-lg bg-[#28264B] text-white">
-                          <Brain className="size-4 text-[#959EC9]" />
-                        </div>
-                        <span className="font-bold text-sm text-[#28264B]">Réponse générée (Grounded)</span>
-                      </div>
-                      <span className="text-xs font-mono text-[#AA0033] bg-[#AA0033]/10 border border-[#AA0033]/20 px-2.5 py-1 rounded-md font-bold flex items-center gap-1.5">
-                        <span className="size-1.5 rounded-full bg-[#AA0033]" />
-                        100% Citée
-                      </span>
-                    </div>
+                <div className="pt-2 text-[11px] text-slate-500 flex items-center gap-2">
+                  <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
+                  <span>Le moteur scanne uniquement les documents autorisés de votre entreprise.</span>
+                </div>
+              </div>
 
-                    {/* Answer Display */}
-                    <div className="rounded-xl border border-[#dcdfd9] bg-[#fafbfa] p-4 text-sm text-[#28264B] leading-relaxed mb-5 shadow-2xs">
-                      {activeScenario.answer}
-                    </div>
-
-                    {/* Grounding Excerpt */}
-                    <div>
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#28264B] mb-2">
-                        <FileCheck className="size-4 text-[#AA0033]" />
-                        <span>Passage brut extrait du document source :</span>
-                      </div>
-                      <div className="rounded-lg bg-[#E8EAE7]/60 border border-[#dcdfd9] p-3.5 text-xs font-mono text-[#28264B] leading-relaxed italic border-l-4 border-l-[#AA0033]">
-                        {activeScenario.citationExcerpt}
-                      </div>
-                    </div>
+              {/* Right Column: Grounded Answer & Highlights */}
+              <div className="p-6 sm:p-8 bg-slate-50/50 flex flex-col justify-between space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                      <Sparkles className="size-3.5 text-emerald-600" />
+                      Réponse générée certifiée
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      Vérifiée à 100%
+                    </span>
                   </div>
-
-                  {/* Footer inside playground */}
-                  <div className="mt-6 pt-4 border-t border-[#dcdfd9] flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-[11px] text-[#4E5174]">
-                      Moteur : <span className="font-bold text-[#28264B]">BM25 + pgvector + Rerank Cross-Encoder</span>
-                    </div>
-                    <Link
-                      to={session ? "/dashboard" : "/auth/register"}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-[#AA0033] hover:text-[#880029] transition-colors"
-                    >
-                      Essayer avec vos propres fichiers <ChevronRight className="size-3.5" />
-                    </Link>
+                  <div className="rounded-xl bg-white border border-slate-200 p-5 shadow-2xs text-sm text-slate-800 leading-relaxed">
+                    <p dangerouslySetInnerHTML={{ __html: currentScenario.answerSummary.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-950 font-bold bg-indigo-50 px-1 py-0.5 rounded">$1</strong>') }} />
                   </div>
+                </div>
+
+                <div className="rounded-xl bg-indigo-50/80 border border-indigo-100 p-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-900 block mb-1">
+                    Points clés retenus :
+                  </span>
+                  <p className="text-xs font-semibold text-indigo-800">
+                    {currentScenario.keyTakeaway}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <Link
+                    to="/chat"
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                  >
+                    Tester avec vos propres documents →
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ───── FEATURE IMPLEMENTATION MATRIX (REEL & ROADMAP) ───── */}
-        <section id="status-matrix" className="py-20 md:py-24 bg-white scroll-mt-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="text-center mb-12">
-              <span className="text-xs font-bold text-[#AA0033] uppercase tracking-wider mb-2 block">
-                Transparence Technique & Feuille de Route
+        {/* ───── How It Works (Simple 3-Step Process) ───── */}
+        <section id="how-it-works" className="py-16 px-6 bg-slate-100/60 border-y border-slate-200">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+                Simplicité & Rapidité
               </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#28264B]">
-                État réel des fonctionnalités de la plateforme
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+                Comment ça marche en 3 étapes simples
               </h2>
-              <p className="text-base text-[#4E5174] max-w-2xl mx-auto mt-3">
-                Consultez ce qui est <strong>100% implémenté, testé et déployé</strong> dans notre codebase vs ce qui est planifié dans notre roadmap future.
+              <p className="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
+                Aucune compétence technique n'est requise. Déposez vos documents et posez vos questions en quelques secondes.
               </p>
             </div>
 
-            {/* Filter Pills Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-[#f2f4f2] p-3 rounded-xl border border-[#dcdfd9]">
-              {/* Status Filter */}
-              <div className="flex flex-wrap items-center gap-2">
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Step 1 */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-2xs relative flex flex-col justify-between">
+                <div>
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 font-extrabold text-lg mb-5 border border-indigo-100">
+                    1
+                  </div>
+                  <h3 className="font-bold text-base text-slate-900">
+                    Déposez vos documents
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                    Glissez-déposez vos fichiers PDF, Word (.docx), fiches de paie, manuels de procédures ou notes textuelles dans vos bases dédiées.
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-indigo-600 flex items-center gap-1">
+                  <FolderOpen className="size-3.5" /> Formats PDF, DOCX, TXT, MD
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-2xs relative flex flex-col justify-between">
+                <div>
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 font-extrabold text-lg mb-5 border border-blue-100">
+                    2
+                  </div>
+                  <h3 className="font-bold text-base text-slate-900">
+                    L'IA organise et mémorise
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                    SmartRAG découpe intelligemment le texte en passages clés et prépare un index de recherche sans altérer vos fichiers d'origine.
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-blue-600 flex items-center gap-1">
+                  <Cpu className="size-3.5" /> Traitement 100% automatique
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-2xs relative flex flex-col justify-between">
+                <div>
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 font-extrabold text-lg mb-5 border border-emerald-100">
+                    3
+                  </div>
+                  <h3 className="font-bold text-base text-slate-900">
+                    Posez vos questions & Obtenez les sources
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                    Discutez en français ou en anglais. Obtenez une synthèse claire avec le lien direct vers la page exacte du document source.
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                  <ShieldCheck className="size-3.5" /> Réponses prouvées et auditables
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ───── Key Business Benefits ───── */}
+        <section id="benefits" className="py-20 px-6 max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+              Pourquoi Choisir SmartRAG ?
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+              Conçu pour résoudre les vrais défis des équipes
+            </h2>
+            <p className="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
+              Découvrez les bénéfices concrets pour votre productivité quotidienne et la sécurité de votre savoir interne.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-4">
+                <Clock className="size-5" />
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Fin des heures de recherche</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Vos collaborateurs ne perdent plus 30 minutes à feuilleter un PDF de 200 pages. La réponse arrive en une fraction de seconde.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 mb-4">
+                <ShieldCheck className="size-5" />
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Confiance absolue & Preuves</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Contrairement aux chatbots généralistes qui peuvent inventer, SmartRAG ne répond qu'à partir de vos vrais documents avec citations.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 mb-4">
+                <Lock className="size-5" />
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Données souveraines & Sécurisées</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Vos documents et requêtes restent strictement confidentiels. Aucun partage public, aucune réutilisation pour l'entraînement d'IA tierces.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600 mb-4">
+                <Users className="size-5" />
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Cloisonnement par département</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Organisez vos bases par équipe (Finance, RH, Commercial, Technique). Chaque utilisateur n'accède qu'aux documents auxquels il a droit.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 mb-4">
+                <FileCheck className="size-5" />
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Validation des réponses expertes</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Marquez une réponse approuvée en un clic pour que les prochaines questions identiques bénéficient instantanément de la réponse officielle.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs hover:shadow-sm transition-shadow">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600 mb-4">
+                <Code2 className="size-5" />
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Intégrable via API REST</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Intégrez facilement la recherche documentaire dans vos outils internes, Intranet, CRM ou portails clients grâce à nos clés d'API.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ───── Feature Matrix: Real & Clear ───── */}
+        <section id="features" className="py-16 px-6 bg-slate-50 border-t border-slate-200">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-10">
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+                Transparence Totale
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+                Fonctionnalités de la Plateforme
+              </h2>
+              <p className="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
+                Consultez ce qui est opérationnel immédiatement et ce qui est planifié dans notre feuille de route.
+              </p>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setStatusFilter("all")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    statusFilter === "all"
-                      ? "bg-[#28264B] text-white shadow-xs"
-                      : "bg-white text-[#4E5174] hover:text-[#28264B] border border-[#dcdfd9]"
+                  onClick={() => setFilterStatus("all")}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    filterStatus === "all"
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
-                  Toutes ({FEATURE_STATUS_ITEMS.length})
+                  Toutes ({FEATURE_ITEMS.length})
                 </button>
                 <button
-                  onClick={() => setStatusFilter("implemented")}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    statusFilter === "implemented"
-                      ? "bg-[#AA0033] text-white shadow-xs"
-                      : "bg-white text-[#4E5174] hover:text-[#AA0033] border border-[#dcdfd9]"
+                  onClick={() => setFilterStatus("disponible")}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    filterStatus === "disponible"
+                      ? "bg-emerald-600 text-white"
+                      : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
                   }`}
                 >
-                  <span className="size-2 rounded-full bg-[#15803d]" />
-                  Opérationnel ({implementedCount})
+                  <span className="size-1.5 rounded-full bg-current" />
+                  Disponible ({FEATURE_ITEMS.filter((f) => f.status === "disponible").length})
                 </button>
                 <button
-                  onClick={() => setStatusFilter("roadmap")}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    statusFilter === "roadmap"
-                      ? "bg-[#4E5174] text-white shadow-xs"
-                      : "bg-white text-[#4E5174] hover:text-[#4E5174] border border-[#dcdfd9]"
+                  onClick={() => setFilterStatus("bientot")}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    filterStatus === "bientot"
+                      ? "bg-amber-600 text-white"
+                      : "text-amber-700 bg-amber-50 hover:bg-amber-100"
                   }`}
                 >
-                  <span className="size-2 rounded-full bg-[#b45309]" />
-                  À implémenter / Roadmap ({roadmapCount})
+                  <span className="size-1.5 rounded-full bg-current" />
+                  Bientôt ({FEATURE_ITEMS.filter((f) => f.status === "bientot").length})
                 </button>
               </div>
 
-              {/* Category Filter */}
               <div className="flex items-center gap-2 text-xs">
-                <span className="font-semibold text-[#4E5174] hidden sm:inline">Module :</span>
+                <span className="text-slate-400 font-semibold">Catégorie :</span>
                 <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="rounded-lg border border-[#dcdfd9] bg-white px-3 py-1.5 font-semibold text-[#28264B] focus:border-[#AA0033] focus:outline-none"
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value as any)}
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
-                  <option value="all">Tous les modules</option>
-                  <option value="ingestion">Ingestion & MinIO</option>
-                  <option value="retrieval">Recherche & Reranking</option>
-                  <option value="generation">Génération & Citations</option>
-                  <option value="eval">Évaluation & Observabilité</option>
-                  <option value="security">Sécurité & RBAC</option>
-                  <option value="infra">Infrastructure & DevOps</option>
+                  <option value="all">Toutes les catégories</option>
+                  <option value="utilisateurs">Pour les utilisateurs</option>
+                  <option value="securite">Sécurité & Gouvernance</option>
+                  <option value="technique">Sous le capot / Technique</option>
                 </select>
               </div>
             </div>
 
-            {/* Grid of Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredFeatures.map((item, idx) => {
-                const isImpl = item.status === "implemented";
-                return (
-                  <div
-                    key={idx}
-                    className={`rounded-xl border p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-md ${
-                      isImpl
-                        ? "bg-white border-[#dcdfd9] hover:border-[#959EC9]"
-                        : "bg-[#fafbfa] border-dashed border-[#959EC9]/70 hover:border-[#4E5174]"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            isImpl
-                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                              : "bg-amber-50 text-amber-800 border border-amber-200"
-                          }`}
-                        >
-                          <span
-                            className={`size-1.5 rounded-full ${
-                              isImpl ? "bg-emerald-600" : "bg-amber-500"
-                            }`}
-                          />
-                          {isImpl ? "Implémenté (Prêt)" : "Roadmap future"}
-                        </span>
-                        <span className="text-[10px] font-mono text-[#4E5174] uppercase tracking-wider">
-                          {item.category}
-                        </span>
-                      </div>
-
-                      <h3 className="font-bold text-base text-[#28264B] mb-2">{item.name}</h3>
-                      <p className="text-xs text-[#4E5174] leading-relaxed mb-4">{item.description}</p>
-                    </div>
-
-                    <div className="pt-3 border-t border-[#dcdfd9] flex items-center justify-between text-[11px]">
-                      <span className="font-mono font-medium text-[#4E5174] truncate max-w-[200px]">
-                        {item.techStack}
-                      </span>
-                      {isImpl ? (
-                        <Check className="size-4 text-emerald-600 shrink-0" />
-                      ) : (
-                        <Clock className="size-4 text-amber-600 shrink-0" />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ───── ARCHITECTURE IN 4 STEPS ───── */}
-        <section id="pipeline" className="py-20 md:py-24 scroll-mt-20 bg-[#f2f4f2] border-t border-[#dcdfd9]">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="text-center mb-16">
-              <span className="text-xs font-bold text-[#AA0033] uppercase tracking-wider mb-2 block">
-                Architecture Technique
-              </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#28264B] mb-3">
-                Fonctionnement du pipeline RAG de production
-              </h2>
-              <p className="text-base text-[#4E5174] max-w-2xl mx-auto leading-relaxed">
-                Une chaîne de traitement robuste en 4 étapes pour transformer vos documents bruts en connaissances indexées et vérifiables.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                {
-                  step: "01",
-                  icon: FolderSync,
-                  title: "Découpage & MinIO",
-                  desc: "Extraction du texte brut, validation de sécurité et découpage en segments (chunks) avec stockage MinIO S3.",
-                },
-                {
-                  step: "02",
-                  icon: Layers,
-                  title: "Indexation Hybride",
-                  desc: "Génération simultanée des vecteurs denses pgvector et de l'index BM25 lexical pour capturer sens et mots exacts.",
-                },
-                {
-                  step: "03",
-                  icon: Sliders,
-                  title: "Fusion RRF & Reranking",
-                  desc: "Combinaison Reciprocal Rank Fusion et réordonnancement Cross-Encoder pour éliminer le bruit documentaire.",
-                },
-                {
-                  step: "04",
-                  icon: ShieldCheck,
-                  title: "Génération avec Citations",
-                  desc: "Le LLM formule la réponse en s'appuyant strictement sur les passages et cite explicitement les pages sources.",
-                },
-              ].map((step, idx) => (
+            {/* Feature Cards Grid */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredFeatures.map((feat, idx) => (
                 <div
                   key={idx}
-                  className="rounded-xl border border-[#dcdfd9] bg-white p-6 shadow-xs flex flex-col justify-between hover:border-[#959EC9] transition-all"
+                  className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between hover:border-indigo-300 transition-all"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="flex size-9 items-center justify-center rounded-lg bg-[#28264B] text-white font-bold text-sm">
-                        {step.step}
+                    <div className="flex items-center justify-between mb-2.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        {feat.category === "utilisateurs" && "Expérience Métier"}
+                        {feat.category === "securite" && "Sécurité & Contrôle"}
+                        {feat.category === "technique" && "Moteur & Performance"}
                       </span>
-                      <step.icon className="size-5 text-[#AA0033]" />
+                      {feat.status === "disponible" ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
+                          <Check className="size-3" /> Disponible
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 text-[10px] font-bold">
+                          <Clock className="size-3" /> Roadmap
+                        </span>
+                      )}
                     </div>
-                    <h3 className="font-bold text-base text-[#28264B] mb-2">{step.title}</h3>
-                    <p className="text-xs sm:text-sm text-[#4E5174] leading-relaxed">{step.desc}</p>
+                    <h4 className="font-bold text-sm text-slate-900">{feat.title}</h4>
+                    <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">{feat.simpleDesc}</p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-700 font-semibold">
+                    <span>{feat.benefit}</span>
                   </div>
                 </div>
               ))}
@@ -894,456 +756,93 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ───── TABBED FEATURES ───── */}
-        <section id="features" className="py-20 md:py-24 bg-white scroll-mt-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="text-center mb-12">
-              <span className="text-xs font-bold text-[#AA0033] uppercase tracking-wider mb-2 block">
-                Fonctionnalités Clés
-              </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#28264B]">
-                Outils pour vos équipes et vos ingénieurs
-              </h2>
-            </div>
+        {/* ───── FAQ Section ───── */}
+        <section id="faq" className="py-20 px-6 max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+              Questions Fréquentes
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+              Tout ce que vous devez savoir
+            </h2>
+            <p className="text-slate-600 text-sm mt-2">
+              Des réponses claires sur la sécurité, les formats et l'utilisation de SmartRAG.
+            </p>
+          </div>
 
-            {/* Feature Tabs */}
-            <div className="flex flex-wrap justify-center gap-2 mb-10">
-              {[
-                { label: "Chat & Citations", icon: MessageSquare },
-                { label: "Permissions & Rôles", icon: Shield },
-                { label: "Métriques & Évaluation", icon: BarChart3 },
-                { label: "API REST & Webhooks", icon: Code2 },
-              ].map((tab, i) => {
-                const isActive = activeFeatureTab === i;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => setActiveFeatureTab(i)}
-                    className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                      isActive
-                        ? "bg-[#28264B] text-white shadow-xs"
-                        : "bg-[#E8EAE7]/70 text-[#4E5174] hover:bg-[#E8EAE7] border border-[#dcdfd9]"
+          <div className="space-y-3">
+            {[
+              {
+                q: "Comment SmartRAG garantit-il qu'il n'invente rien (zéro hallucination) ?",
+                a: "SmartRAG utilise une architecture stricte de vérification documentaire (RAG). Avant de formuler une réponse, le système extrait les passages exacts de vos documents. Si l'information n'est pas présente dans vos fichiers, le système vous l'indique clairement au lieu d'inventer une réponse.",
+              },
+              {
+                q: "Quels types de documents puis-je importer ?",
+                a: "Vous pouvez importer directement des fichiers PDF, des documents Word (.docx), des fichiers Markdown (.md) et des fichiers texte (.txt). Les tableaux et listes structurées sont automatiquement pris en compte.",
+              },
+              {
+                q: "Mes documents restent-ils strictement confidentiels ?",
+                a: "Oui, absolument. Vos données sont isolées dans votre espace d'entreprise sécurisé. Elles ne sont ni partagées, ni revendues, ni utilisées pour entraîner des modèles publics d'intelligence artificielle.",
+              },
+              {
+                q: "Peut-on séparer les documents sensibles (ex: RH vs Technique) ?",
+                a: "Oui. Vous pouvez créer autant de bases de connaissances que nécessaire (ex: Base RH, Base Finance, Base Juridique) et attribuer les droits d'accès correspondants aux membres de votre équipe.",
+              },
+              {
+                q: "Faut-il installer un logiciel sur mon ordinateur ?",
+                a: "Non. SmartRAG est 100% accessible via votre navigateur web moderne, sans installation requise.",
+              },
+            ].map((faq, i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between p-5 text-left text-sm font-bold text-slate-900 hover:bg-slate-50 transition-colors"
+                >
+                  <span>{faq.q}</span>
+                  <ChevronDown
+                    className={`size-4 text-slate-400 transition-transform duration-200 shrink-0 ml-4 ${
+                      openFaq === i ? "rotate-180 text-indigo-600" : ""
                     }`}
-                  >
-                    <tab.icon className={`size-4 ${isActive ? "text-[#AA0033]" : "text-[#4E5174]"}`} />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Tab Contents */}
-            <div className="rounded-2xl border border-[#dcdfd9] bg-[#fafbfa] p-6 md:p-10 shadow-sm">
-              {activeFeatureTab === 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#28264B] mb-3">
-                      Dialogue assisté avec citations vérifiables
-                    </h3>
-                    <p className="text-sm text-[#4E5174] leading-relaxed mb-5">
-                      Les utilisateurs peuvent interroger leurs documents en langage naturel. Chaque réponse inclut les liens vers les extraits exacts pour faciliter la vérification humaine.
-                    </p>
-                    <ul className="space-y-2.5 text-sm text-[#28264B]">
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Historique multi-tours pour affiner la recherche
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Affichage des passages sources et du score de pertinence
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Réponses en streaming pour un affichage instantané
-                      </li>
-                    </ul>
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-5 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100 bg-slate-50/50">
+                    {faq.a}
                   </div>
-                  <div className="rounded-xl bg-white border border-[#dcdfd9] p-5 shadow-xs space-y-3">
-                    <div className="text-xs text-[#4E5174] font-mono pb-2 border-b border-[#dcdfd9]">
-                      Session #402 — Base Finance & RH
-                    </div>
-                    <div className="text-xs text-[#28264B] bg-[#fafbfa] p-3 rounded-lg border border-[#dcdfd9] leading-relaxed">
-                      « La politique de télétravail international autorise jusqu'à 30 jours ouvrés par an sous réserve d'ancienneté de 6 mois. [Doc: Accord_RH_2024.pdf] »
-                    </div>
-                    <div className="text-[11px] text-[#AA0033] bg-[#AA0033]/10 p-2.5 rounded-lg border border-[#AA0033]/20 font-medium">
-                      Extrait source : « Art 4.1.3 : La mobilité internationale temporaire est accessible sous réserve de validation managériale. »
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeFeatureTab === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#28264B] mb-3">
-                      Gestion des accès et isolation des bases
-                    </h3>
-                    <p className="text-sm text-[#4E5174] leading-relaxed mb-5">
-                      Définissez des espaces de connaissances séparés pour chaque équipe (Juridique, Finance, Ingénierie) avec des droits de lecture et d'administration distincts.
-                    </p>
-                    <ul className="space-y-2.5 text-sm text-[#28264B]">
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Cloisonnement strict des documents par collection
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Rôles administrateur, éditeur et lecteur
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Journalisation des requêtes pour l'audit interne
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="rounded-xl bg-[#28264B] text-white p-5 font-mono text-xs shadow-xs space-y-2">
-                    <div className="text-[#959EC9] font-semibold">// Configuration d'accès par collection</div>
-                    <div className="text-[#E8EAE7]">
-                      {`{
-  "collection": "documents_juridiques",
-  "allowed_roles": ["legal_team", "compliance_officer"],
-  "allow_export": false,
-  "audit_logging": true
-}`}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeFeatureTab === 2 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#28264B] mb-3">
-                      Évaluation continue & Observabilité
-                    </h3>
-                    <p className="text-sm text-[#4E5174] leading-relaxed mb-5">
-                      Mesurez la performance avec notre suite d'évaluation intégrée (Recall@K, MRR, Faithfulness LLM-Judge) et visualisez les métriques Prometheus en temps réel.
-                    </p>
-                    <ul className="space-y-2.5 text-sm text-[#28264B]">
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Recall@K & Precision@K automatiques
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Détection automatique d'hallucinations par LLM Judge
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Export Prometheus & Dashboards Grafana pré-configurés
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white p-4 rounded-xl border border-[#dcdfd9] text-center shadow-2xs">
-                      <p className="text-xs font-bold text-[#4E5174] uppercase">Recall@5 Moyen</p>
-                      <p className="text-2xl font-extrabold text-[#28264B] my-1">94.2%</p>
-                      <p className="text-[11px] text-[#AA0033] font-semibold">Hybride BM25 + Vector</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-xl border border-[#dcdfd9] text-center shadow-2xs">
-                      <p className="text-xs font-bold text-[#4E5174] uppercase">Faithfulness Score</p>
-                      <p className="text-2xl font-extrabold text-[#28264B] my-1">0.96 / 1.0</p>
-                      <p className="text-[11px] text-emerald-700 font-semibold">LLM-as-a-Judge</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeFeatureTab === 3 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#28264B] mb-3">
-                      Intégration par API REST FastAPI
-                    </h3>
-                    <p className="text-sm text-[#4E5174] leading-relaxed mb-5">
-                      Connectez SmartRAG à vos outils métiers via des endpoints REST documentés OpenAPI pour interroger vos bases ou déclencher des indexations automatiques.
-                    </p>
-                    <ul className="space-y-2.5 text-sm text-[#28264B]">
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Endpoints pour l'ingestion de fichiers et la recherche
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Authentification par clé d'API et jeton JWT
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="size-4 text-[#AA0033] shrink-0" />
-                        Support du streaming SSE (Server-Sent Events)
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="rounded-xl bg-[#28264B] text-white p-4 font-mono text-xs overflow-x-auto shadow-xs">
-                    <div className="text-[#959EC9] mb-2">// Requête de recherche sur une base</div>
-                    <div className="text-[#E8EAE7]">
-                      {`POST /api/chat/query
-Headers: { "Authorization": "Bearer rag_sk_..." }
-Body: {
-  "knowledgeBaseId": "kb_finance_2024",
-  "query": "Quel est le résultat net ?",
-  "topK": 4,
-  "hybrid": true
-}`}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* ───── COMPARISON TABLE ───── */}
-        <section id="comparison" className="py-20 md:py-24 bg-[#f2f4f2] border-t border-[#dcdfd9] scroll-mt-20">
-          <div className="mx-auto max-w-5xl px-6">
-            <div className="text-center mb-14">
-              <span className="text-xs font-bold text-[#AA0033] uppercase tracking-wider mb-2 block">
-                Comparatif des Approches
-              </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#28264B] mb-3">
-                SmartRAG comparé aux méthodes classiques
+        {/* ───── Final CTA Banner ───── */}
+        <section className="px-6 pb-20 max-w-6xl mx-auto">
+          <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-xl border border-indigo-900/40">
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+                Prêt à libérer la connaissance de votre entreprise ?
               </h2>
-              <p className="text-base text-[#4E5174] max-w-xl mx-auto">
-                Pourquoi l'hybridation (vecteur + mots-clés BM25 + re-ranking) offre une meilleure précision sur les documents d'entreprise.
+              <p className="mt-4 text-slate-300 text-sm sm:text-base leading-relaxed">
+                Rejoignez vos collaborateurs et testez la recherche intelligente sur vos premiers documents dès aujourd'hui.
               </p>
-            </div>
-
-            <div className="rounded-xl border border-[#dcdfd9] bg-white shadow-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-[#dcdfd9] bg-[#E8EAE7]/70">
-                      <th className="p-4 sm:p-5 text-xs sm:text-sm font-bold text-[#28264B]">Critère</th>
-                      <th className="p-4 sm:p-5 text-xs sm:text-sm font-bold text-[#AA0033] bg-[#AA0033]/5">
-                        SmartRAG Hybride
-                      </th>
-                      <th className="p-4 sm:p-5 text-xs sm:text-sm font-semibold text-[#4E5174]">
-                        RAG Vectoriel Seul
-                      </th>
-                      <th className="p-4 sm:p-5 text-xs sm:text-sm font-semibold text-[#4E5174]">
-                        Recherche Mots-Clés
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#dcdfd9] text-xs sm:text-sm">
-                    {[
-                      {
-                        label: "Méthode d'indexation",
-                        smartrag: "Dense (pgvector) + Sparse (BM25)",
-                        naive: "Vecteurs uniquement",
-                        keyword: "Index textuel seul",
-                      },
-                      {
-                        label: "Termes exacts & références",
-                        smartrag: "Très précis (grâce au BM25)",
-                        naive: "Parfois ignorés par la sémantique",
-                        keyword: "Précis sur mots exacts",
-                      },
-                      {
-                        label: "Re-ranking",
-                        smartrag: "Cross-Encoder + LLM Rerank",
-                        naive: "Aucun re-ranking",
-                        keyword: "Score lexical basique",
-                      },
-                      {
-                        label: "Citations des sources",
-                        smartrag: "Directes avec passage et page",
-                        naive: "Génériques ou manquantes",
-                        keyword: "Liens documents bruts",
-                      },
-                      {
-                        label: "Contrôle des accès",
-                        smartrag: "Par base de connaissances et RBAC",
-                        naive: "Généralement non intégré",
-                        keyword: "Permissions de fichiers",
-                      },
-                      {
-                        label: "Évaluation intégrée",
-                        smartrag: "Recall@K, MRR + LLM Judge",
-                        naive: "Non disponible",
-                        keyword: "Non disponible",
-                      },
-                    ].map((row, idx) => (
-                      <tr key={idx} className="hover:bg-[#fafbfa] transition-colors">
-                        <td className="p-4 sm:p-5 font-semibold text-[#28264B]">{row.label}</td>
-                        <td className="p-4 sm:p-5 font-bold text-[#AA0033] bg-[#AA0033]/5 flex items-center gap-1.5">
-                          <Check className="size-4 text-[#AA0033] shrink-0" />
-                          <span>{row.smartrag}</span>
-                        </td>
-                        <td className="p-4 sm:p-5 text-[#4E5174]">{row.naive}</td>
-                        <td className="p-4 sm:p-5 text-[#4E5174]">{row.keyword}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ───── API & TECHNICAL STACK ───── */}
-        <section id="api" className="py-20 md:py-24 bg-white scroll-mt-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              <div className="lg:col-span-6">
-                <span className="text-xs font-bold text-[#AA0033] uppercase tracking-wider mb-2 block">
-                  Infrastructure & Stack
-                </span>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#28264B] mb-4">
-                  Construit sur les meilleurs composants open-source
-                </h2>
-                <p className="text-base text-[#4E5174] leading-relaxed mb-6">
-                  Une architecture modulaire et conteneurisée, testée en continu et prête pour le déploiement sur votre infrastructure privée ou cloud.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="rounded-lg border border-[#dcdfd9] bg-[#fafbfa] p-4">
-                    <Server className="size-5 text-[#28264B] mb-2" />
-                    <h4 className="font-bold text-sm text-[#28264B] mb-1">FastAPI & Python 3.11</h4>
-                    <p className="text-xs text-[#4E5174]">API asynchrone haute performance et validation Pydantic v2.</p>
-                  </div>
-                  <div className="rounded-lg border border-[#dcdfd9] bg-[#fafbfa] p-4">
-                    <Database className="size-5 text-[#28264B] mb-2" />
-                    <h4 className="font-bold text-sm text-[#28264B] mb-1">PostgreSQL & pgvector</h4>
-                    <p className="text-xs text-[#4E5174]">Indexation vectorielle et relationnelle robuste avec ACID.</p>
-                  </div>
-                  <div className="rounded-lg border border-[#dcdfd9] bg-[#fafbfa] p-4">
-                    <Boxes className="size-5 text-[#28264B] mb-2" />
-                    <h4 className="font-bold text-sm text-[#28264B] mb-1">Celery + Redis</h4>
-                    <p className="text-xs text-[#4E5174]">Traitement asynchrone des uploads et cache d'embeddings.</p>
-                  </div>
-                  <div className="rounded-lg border border-[#dcdfd9] bg-[#fafbfa] p-4">
-                    <Activity className="size-5 text-[#28264B] mb-2" />
-                    <h4 className="font-bold text-sm text-[#28264B] mb-1">Prometheus & Grafana</h4>
-                    <p className="text-xs text-[#4E5174]">Métriques de latence, RPS et dashboards de surveillance.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Code Snippet Box */}
-              <div className="lg:col-span-6">
-                <div className="rounded-2xl bg-[#28264B] p-6 text-white shadow-xl space-y-4 border border-[#4E5174]">
-                  <div className="flex items-center justify-between border-b border-[#4E5174] pb-3 text-xs font-mono">
-                    <span className="text-[#959EC9] flex items-center gap-2">
-                      <Terminal className="size-4 text-[#AA0033]" /> FastAPI Endpoint
-                    </span>
-                    <span className="text-[#E8EAE7]/60">POST /api/retrieval/search</span>
-                  </div>
-                  <pre className="text-xs font-mono text-[#E8EAE7] leading-relaxed overflow-x-auto">
-{`# Recherche Hybride avec RRF Fusion
-response = await client.post(
-    "/api/retrieval/search",
-    headers={"Authorization": f"Bearer {api_key}"},
-    json={
-        "knowledge_base_id": "kb_finance_2024",
-        "query": "Quel est le résultat net consolidé ?",
-        "mode": "hybrid",       # dense + bm25
-        "rerank": True,          # cross-encoder
-        "top_k": 4
-    }
-)
-# Result: {
-#   "documents": [...],
-#   "scores": {"dense": 0.94, "bm25": 0.89, "rrf": 0.98},
-#   "latency_ms": 245
-# }`}
-                  </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ───── FAQ SECTION ───── */}
-        <section id="faq" className="py-20 md:py-24 bg-[#f2f4f2] border-t border-[#dcdfd9] scroll-mt-20">
-          <div className="mx-auto max-w-4xl px-6">
-            <div className="text-center mb-12">
-              <span className="text-xs font-bold text-[#AA0033] uppercase tracking-wider mb-2 block">
-                Foire Aux Questions
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#28264B]">
-                Questions Fréquentes
-              </h2>
-            </div>
-
-            <div className="space-y-3">
-              {[
-                {
-                  q: "Qu'est-ce qui différencie SmartRAG d'un RAG basique ?",
-                  a: "SmartRAG intègre nativement une recherche hybride (dense vectorielle + sparse BM25) combinée par Reciprocal Rank Fusion (RRF) et un re-ranker Cross-Encoder. Il inclut également le traitement asynchrone Celery/Redis, une suite d'évaluation (Recall@K, MRR, LLM Judge) et des métriques Prometheus.",
-                },
-                {
-                  q: "Quelles fonctionnalités sont actuellement opérationnelles ?",
-                  a: "L'authentification JWT & RBAC, l'ingestion MinIO (PDF, TXT, MD, DOCX), le chunking, la recherche hybride pgvector + BM25, le re-ranking, les citations directes, l'évaluation de qualité et les dashboards Grafana sont 100% implémentés et testés.",
-                },
-                {
-                  q: "Quelles sont les prochaines fonctionnalités en cours (Roadmap) ?",
-                  a: "Le backlog futur comprend l'OCR avancé pour documents manuscrits, les connecteurs directs Cloud (Google Drive, Notion, Confluence), le SSO SAML 2.0 / Okta et les Helm Charts pour déploiement Kubernetes.",
-                },
-                {
-                  q: "Mes données documentaires sont-elles utilisées pour l'entraînement d'IA ?",
-                  a: "Non. Aucune donnée d'entreprise n'est partagée ni utilisée pour l'entraînement de modèles tiers. Toutes les indexations restent isolées dans votre base de données PostgreSQL chiffrée.",
-                },
-              ].map((item, index) => {
-                const isOpen = faqOpenIndex === index;
-                return (
-                  <div
-                    key={index}
-                    className="rounded-xl border border-[#dcdfd9] bg-white overflow-hidden shadow-2xs"
-                  >
-                    <button
-                      onClick={() => setFaqOpenIndex(isOpen ? null : index)}
-                      className="w-full flex items-center justify-between p-5 text-left font-bold text-sm sm:text-base text-[#28264B] cursor-pointer hover:bg-[#fafbfa] transition-colors"
-                    >
-                      <span>{item.q}</span>
-                      <ChevronDown
-                        className={`size-4 text-[#4E5174] transition-transform duration-200 shrink-0 ml-4 ${
-                          isOpen ? "rotate-180 text-[#AA0033]" : ""
-                        }`}
-                      />
-                    </button>
-                    {isOpen && (
-                      <div className="p-5 pt-0 text-xs sm:text-sm text-[#4E5174] leading-relaxed border-t border-[#dcdfd9] bg-[#fafbfa]">
-                        {item.a}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ───── FINAL CTA ───── */}
-        <section className="py-20 md:py-24 bg-white">
-          <div className="mx-auto max-w-5xl px-6">
-            <div className="rounded-2xl bg-[#28264B] p-10 md:p-14 text-center text-white shadow-2xl relative overflow-hidden border border-[#4E5174]">
-              {/* Subtle Ruby & Periwinkle gradient highlights */}
-              <div className="absolute -top-24 -right-24 size-72 rounded-full bg-[#AA0033]/25 blur-3xl" />
-              <div className="absolute -bottom-24 -left-24 size-72 rounded-full bg-[#959EC9]/20 blur-3xl" />
-
-              <div className="relative z-10 max-w-2xl mx-auto">
-                <SmartRAGLogoMark size={56} className="mx-auto mb-6" />
-                <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight text-white">
-                  Prêt à exploiter vos documents d'entreprise ?
-                </h2>
-                <p className="text-[#E8EAE7]/80 text-base mb-8 leading-relaxed">
-                  Créez une base de connaissances, importez vos premiers documents et posez vos questions avec citations immédiates.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3.5 justify-center items-center">
-                  <Link
-                    to={session ? "/dashboard" : "/auth/register"}
-                    className="w-full sm:w-auto inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#AA0033] px-8 text-base font-bold text-white transition-all duration-150 hover:bg-[#880029] shadow-lg hover:shadow-[#AA0033]/30"
-                  >
-                    {session ? "Accéder à mon espace" : "Créer un compte"}
-                    <ArrowRight className="size-4" />
-                  </Link>
-                  <Link
-                    to="/auth/login"
-                    className="w-full sm:w-auto inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#34325a] border border-[#4E5174] px-7 text-base font-semibold text-white hover:bg-[#403d6d] transition-all"
-                  >
-                    Se connecter
-                  </Link>
-                </div>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                <Link
+                  to={session ? "/dashboard" : "/auth"}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 px-8 text-sm font-bold text-white shadow-md transition-all duration-200"
+                >
+                  <span>Commencer gratuitement</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+                <Link
+                  to="/chat"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-800 px-7 text-sm font-bold text-slate-200 transition-all duration-200"
+                >
+                  <MessageSquare className="size-4 text-indigo-400" />
+                  <span>Tester le chat</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -1351,56 +850,24 @@ response = await client.post(
       </main>
 
       {/* ───── Footer ───── */}
-      <footer className="border-t border-[#dcdfd9] py-12 bg-[#fafbfa] text-xs sm:text-sm text-[#4E5174]">
-        <div className="mx-auto max-w-7xl px-6 grid grid-cols-1 md:grid-cols-5 gap-8 mb-10">
-          {/* Brand */}
-          <div className="md:col-span-2 space-y-3">
-            <Link to="/" className="flex items-center gap-3">
-              <SmartRAGLogoMark size={36} />
-              <span className="font-extrabold text-base tracking-tight text-[#28264B]">
-                Smart<span className="text-[#AA0033]">RAG</span>
-              </span>
+      <footer className="border-t border-slate-200 bg-white py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-slate-500">
+          <div className="flex items-center gap-3">
+            <SmartRAGLogoMark size={32} />
+            <span className="font-bold text-slate-800">SmartRAG</span>
+            <span>— Plateforme d'Assistance Documentaire Sécurisée</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link to="/chat" className="hover:text-indigo-600 transition-colors font-medium">
+              Chat Documentaire
             </Link>
-            <p className="text-xs text-[#4E5174] max-w-sm leading-relaxed">
-              Plateforme RAG de production : Ingestion MinIO/Celery, recherche hybride pgvector + BM25, reranking et citations vérifiables.
-            </p>
+            <Link to="/dashboard" className="hover:text-indigo-600 transition-colors font-medium">
+              Tableau de bord
+            </Link>
+            <Link to="/auth" className="hover:text-indigo-600 transition-colors font-medium">
+              Connexion
+            </Link>
           </div>
-
-          {/* Nav Links */}
-          <div className="space-y-2.5">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-[#28264B]">Navigation</h4>
-            <ul className="space-y-2 text-xs">
-              <li><a href="#demo" className="hover:text-[#AA0033] transition-colors">Démonstration</a></li>
-              <li><a href="#status-matrix" className="hover:text-[#AA0033] transition-colors">Statut Réel</a></li>
-              <li><a href="#pipeline" className="hover:text-[#AA0033] transition-colors">Architecture</a></li>
-              <li><a href="#features" className="hover:text-[#AA0033] transition-colors">Fonctionnalités</a></li>
-              <li><a href="#comparison" className="hover:text-[#AA0033] transition-colors">Comparatif</a></li>
-            </ul>
-          </div>
-
-          <div className="space-y-2.5">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-[#28264B]">Sécurité & Qualité</h4>
-            <ul className="space-y-2 text-xs">
-              <li><a href="#pipeline" className="hover:text-[#AA0033] transition-colors">pgvector + BM25</a></li>
-              <li><a href="#pipeline" className="hover:text-[#AA0033] transition-colors">Évaluation Recall@K</a></li>
-              <li><a href="#pipeline" className="hover:text-[#AA0033] transition-colors">Observabilité Prometheus</a></li>
-              <li><a href="#faq" className="hover:text-[#AA0033] transition-colors">Questions fréquentes</a></li>
-            </ul>
-          </div>
-
-          <div className="space-y-2.5">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-[#28264B]">Accès</h4>
-            <ul className="space-y-2 text-xs">
-              <li><Link to="/auth/login" className="hover:text-[#AA0033] transition-colors">Connexion</Link></li>
-              <li><Link to="/auth/register" className="hover:text-[#AA0033] transition-colors">Création de compte</Link></li>
-              <li><Link to="/dashboard" className="hover:text-[#AA0033] transition-colors">Tableau de bord</Link></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-7xl px-6 pt-6 border-t border-[#dcdfd9] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#4E5174]">
-          <p>© {new Date().getFullYear()} SmartRAG. Tous droits réservés.</p>
-          <p className="font-mono text-[11px]">FastAPI • pgvector • Celery • MinIO • BM25 • RRF</p>
         </div>
       </footer>
     </div>

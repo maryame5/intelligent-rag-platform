@@ -17,6 +17,9 @@ import {
   ShieldCheck,
   Sun,
   Users,
+  Database,
+  Sparkles,
+  Layers,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { CommandPalette } from "@/components/command-palette";
@@ -52,6 +55,25 @@ function useTheme() {
     });
   };
   return { light, toggle };
+}
+
+function SmartRAGBrandMark({ size = 32 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 44 44"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="shrink-0 drop-shadow-xs"
+    >
+      <rect width="44" height="44" rx="11" fill="#1e1b4b" />
+      <rect x="10" y="27" width="16" height="4.5" rx="2.25" fill="#818cf8" fillOpacity="0.8" />
+      <rect x="10" y="19.5" width="24" height="4.5" rx="2.25" fill="#e0e7ff" fillOpacity="0.9" />
+      <rect x="10" y="12" width="18" height="4.5" rx="2.25" fill="#ffffff" />
+      <circle cx="31.5" cy="14.25" r="4" fill="#3b82f6" />
+    </svg>
+  );
 }
 
 const nav = [
@@ -101,158 +123,216 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isActive = (to: string, exact?: boolean) => (exact ? pathname === to : pathname.startsWith(to));
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+      {/* ───── Left Enterprise Sidebar ───── */}
       <aside
         className={cn(
-          "sticky top-0 flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-200",
-          collapsed ? "w-[62px]" : "w-64",
+          "sticky top-0 flex h-screen shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-200 z-30 shadow-xs",
+          collapsed ? "w-[68px]" : "w-64",
         )}
       >
-        <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-3">
-          <img src="/icon.png" alt="Logo" className="size-7 shrink-0 rounded-md object-contain" />
-          {!collapsed ? (
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">SmartRAG</p>
-              <p className="truncate text-[11px] text-muted-foreground">Plateforme RAG</p>
-            </div>
-          ) : null}
+        {/* Brand Header */}
+        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-4">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <SmartRAGBrandMark size={34} />
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-extrabold text-slate-900">
+                  Smart<span className="text-indigo-600">RAG</span>
+                </p>
+                <p className="truncate text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+                  Studio Documentaire
+                </p>
+              </div>
+            )}
+          </Link>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2 py-3">
-          <ul className="space-y-0.5">
-            {nav.map((item) => (
-              <li key={item.to}>
-                <Link
-                  to={item.to as never}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
-                    isActive(item.to, item.exact)
-                      ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent/60",
-                  )}
-                >
-                  <item.icon className="size-4 shrink-0" />
-                  {!collapsed ? item.label : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {!collapsed ? (
-            <div className="mt-5">
-              <div className="flex items-center justify-between px-2.5 pb-1.5">
-                <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-                  Knowledge bases
-                </span>
-                <Link to="/knowledge-bases" className="text-[11px] text-muted-foreground hover:text-foreground">
-                  Tout voir
-                </Link>
-              </div>
-              <ul className="space-y-0.5">
-                {kbs.map((kb) => (
-                  <li key={kb.id}>
+        {/* Navigation links */}
+        <nav className="flex-1 overflow-y-auto px-2.5 py-4 space-y-6">
+          <div>
+            {!collapsed && (
+              <p className="px-2 pb-2 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                Navigation
+              </p>
+            )}
+            <ul className="space-y-1">
+              {nav.map((item) => {
+                const active = isActive(item.to, item.exact);
+                return (
+                  <li key={item.to}>
                     <Link
-                      to="/knowledge-bases/$kbId"
-                      params={{ kbId: kb.id }}
+                      to={item.to as never}
                       className={cn(
-                        "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
-                        pathname.includes(kb.id)
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent/60",
+                        "flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer",
+                        active
+                          ? "bg-indigo-600 text-white shadow-xs font-bold"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                       )}
+                      title={collapsed ? item.label : undefined}
                     >
-                      <BookOpen className="size-3.5 shrink-0 opacity-70" />
-                      <span className="truncate">{kb.name}</span>
+                      <item.icon className={cn("size-4 shrink-0", active ? "text-white" : "text-slate-500")} />
+                      {!collapsed ? <span>{item.label}</span> : null}
                     </Link>
                   </li>
-                ))}
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* Knowledge Bases Section */}
+          {!collapsed && (
+            <div>
+              <div className="flex items-center justify-between px-2 pb-2">
+                <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                  Bases de Connaissances
+                </span>
+                <Link to="/knowledge-bases" className="text-[10px] font-bold text-indigo-600 hover:underline">
+                  Voir tout
+                </Link>
+              </div>
+              <ul className="space-y-1">
+                {kbs.map((kb) => {
+                  const isCurrentKb = pathname.includes(kb.id);
+                  return (
+                    <li key={kb.id}>
+                      <Link
+                        to="/knowledge-bases/$kbId"
+                        params={{ kbId: kb.id }}
+                        className={cn(
+                          "flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
+                          isCurrentKb
+                            ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200"
+                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                        )}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <BookOpen className="size-3.5 shrink-0 text-indigo-600" />
+                          <span className="truncate">{kb.name}</span>
+                        </div>
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono text-slate-600">
+                          {kb.documentCount}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
-          ) : null}
+          )}
 
-          {isAdmin ? (
-            <div className="mt-5">
-              {!collapsed ? (
-                <p className="px-2.5 pb-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+          {/* Administration */}
+          {isAdmin && (
+            <div>
+              {!collapsed && (
+                <p className="px-2 pb-2 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                   Administration
                 </p>
-              ) : null}
+              )}
               <Link
                 to="/admin"
                 className={cn(
-                  "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
+                  "flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all",
                   isActive("/admin")
-                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/60",
+                    ? "bg-indigo-600 text-white shadow-xs font-bold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                 )}
+                title={collapsed ? "Observabilité" : undefined}
               >
-                <Gauge className="size-4 shrink-0" />
+                <Gauge className="size-4 shrink-0 text-indigo-400" />
                 {!collapsed ? "Observabilité" : null}
               </Link>
             </div>
-          ) : null}
+          )}
         </nav>
 
-        <div className="border-t border-sidebar-border p-2">
+        {/* Bottom Sidebar Footer */}
+        <div className="border-t border-slate-200 p-2 space-y-1">
           <Link
             to="/settings"
             className={cn(
-              "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
+              "flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all",
               isActive("/settings")
-                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                : "text-sidebar-foreground hover:bg-sidebar-accent/60",
+                ? "bg-slate-900 text-white shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
             )}
+            title={collapsed ? "Paramètres" : undefined}
           >
             <Settings className="size-4 shrink-0" />
             {!collapsed ? "Paramètres" : null}
           </Link>
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="mt-1 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent/60"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+            title={collapsed ? "Déplier" : "Replier"}
           >
-            {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
-            {!collapsed ? "Replier" : null}
+            {collapsed ? <ChevronsRight className="size-4 text-indigo-600" /> : <ChevronsLeft className="size-4" />}
+            {!collapsed ? "Replier le menu" : null}
           </button>
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur">
+      {/* ───── Main App Container ───── */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Top App Header */}
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-slate-200 bg-white/95 px-6 backdrop-blur-md shadow-2xs">
+          {/* Quick Search */}
           <button
             onClick={() => setPaletteOpen(true)}
-            className="flex h-9 w-full max-w-md items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40"
+            className="flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs font-medium text-slate-500 transition-all hover:border-indigo-500 hover:bg-white cursor-pointer shadow-2xs"
           >
-            <Search className="size-4" />
-            Rechercher dans tout le workspace…
-            <kbd className="ml-auto rounded border border-border bg-surface-raised px-1.5 py-0.5 font-mono text-[10px]">
+            <Search className="size-4 text-indigo-600" />
+            <span>Rechercher dans tout l'espace…</span>
+            <kbd className="ml-auto rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[10px] text-slate-500 shadow-2xs">
               ⌘K
             </kbd>
           </button>
 
-          <div className="ml-auto flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={toggle} aria-label="Changer de thème">
+          {/* Engine Status Badge */}
+          <div className="hidden lg:flex items-center gap-2 ml-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-[11px] font-bold text-emerald-700 shadow-2xs">
+              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              Moteur Hybride RAG Actif
+            </span>
+          </div>
+
+          {/* Right Header Actions */}
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggle}
+              aria-label="Changer de thème"
+              className="size-9 text-slate-600 hover:bg-slate-100 rounded-lg"
+            >
               {light ? <Moon className="size-4" /> : <Sun className="size-4" />}
             </Button>
 
+            {/* Notifications Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative size-9 text-slate-600 hover:bg-slate-100 rounded-lg"
+                  aria-label="Notifications"
+                >
                   <Bell className="size-4" />
-                  {unread > 0 ? (
-                    <span className="absolute top-1.5 right-1.5 flex size-3.5 items-center justify-center rounded-full bg-primary font-mono text-[9px] text-primary-foreground">
+                  {unread > 0 && (
+                    <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-indigo-600 font-mono text-[9px] font-bold text-white">
                       {unread}
                     </span>
-                  ) : null}
+                  )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-88 p-0">
-                <div className="flex items-center justify-between border-b border-border px-3 py-2">
-                  <span className="text-sm font-medium">Notifications</span>
-                  <span className="text-xs text-muted-foreground">{unread} non lue{unread > 1 ? "s" : ""}</span>
+              <PopoverContent align="end" className="w-88 p-0 bg-white border border-slate-200 shadow-xl rounded-xl">
+                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-slate-50">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">Notifications</span>
+                  <span className="text-xs text-slate-500">{unread} non lue{unread > 1 ? "s" : ""}</span>
                 </div>
-                <ul className="max-h-80 divide-y divide-border overflow-y-auto">
+                <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <li className="px-4 py-6 text-center text-xs text-muted-foreground">
+                    <li className="px-4 py-6 text-center text-xs text-slate-500">
                       Aucune notification
                     </li>
                   ) : (
@@ -263,20 +343,20 @@ export function AppShell({ children }: { children: ReactNode }) {
                           if (!n.read) markReadMutation.mutate(n.id);
                         }}
                         className={cn(
-                          "cursor-pointer px-3 py-2.5 transition-colors hover:bg-secondary/60",
-                          !n.read && "bg-primary/5 font-medium"
+                          "cursor-pointer px-4 py-3 transition-colors hover:bg-slate-50",
+                          !n.read && "bg-indigo-50/40 font-medium"
                         )}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-medium">{n.title}</p>
-                          <span className="shrink-0 text-[11px] text-muted-foreground">
+                          <p className="text-xs font-bold text-slate-900">{n.title}</p>
+                          <span className="shrink-0 text-[10px] text-slate-500">
                             {new Date(n.createdAt).toLocaleDateString("fr-FR", {
                               day: "numeric",
                               month: "short",
                             })}
                           </span>
                         </div>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{n.description}</p>
+                        <p className="mt-0.5 text-xs text-slate-600">{n.description}</p>
                       </li>
                     ))
                   )}
@@ -284,41 +364,56 @@ export function AppShell({ children }: { children: ReactNode }) {
               </PopoverContent>
             </Popover>
 
+            {/* User Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-secondary">
-                  <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-xs font-medium text-primary">
+                <button className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 transition-all hover:bg-slate-100 cursor-pointer shadow-2xs">
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">
                     {session.user.initials}
                   </span>
-                  <span className="hidden sm:inline">{session.user.name}</span>
-                  <ChevronDown className="size-3.5 text-muted-foreground" />
+                  <span className="hidden sm:inline font-bold">{session.user.name}</span>
+                  <ChevronDown className="size-3.5 text-slate-500" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                <DropdownMenuLabel>
-                  <p className="text-sm">{session.user.name}</p>
-                  <p className="text-xs font-normal text-muted-foreground">{session.user.email}</p>
-                  <StatusBadge status="role" label={session.user.role} tone="accent" className="mt-2" />
+              <DropdownMenuContent align="end" className="w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-1.5">
+                <DropdownMenuLabel className="p-2.5">
+                  <p className="text-sm font-bold text-slate-900">{session.user.name}</p>
+                  <p className="text-xs font-normal text-slate-500">{session.user.email}</p>
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <span className="rounded-md bg-indigo-50 border border-indigo-200 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                      Rôle : {session.user.role}
+                    </span>
+                  </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}>
-                  <Settings className="size-4" /> Paramètres
+                <DropdownMenuSeparator className="bg-slate-100" />
+                <DropdownMenuItem
+                  onSelect={() => navigate({ to: "/settings" })}
+                  className="rounded-lg text-xs font-semibold text-slate-800 hover:bg-slate-100 cursor-pointer"
+                >
+                  <Settings className="size-4 mr-2 text-slate-500" /> Paramètres du compte
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
                     signOut();
                     navigate({ to: "/auth", replace: true });
                   }}
+                  className="rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
                 >
-                  <LogOut className="size-4" /> Se déconnecter
+                  <LogOut className="size-4 mr-2 text-red-600" /> Se déconnecter
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
 
-        <main className="min-w-0 flex-1">{children}</main>
+        {/* Content Body */}
+        <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
       </div>
+
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+    </div>
+  );
+}
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
