@@ -37,7 +37,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/page-header";
 import { KPICard } from "@/components/kpi-card";
 import { StatusBadge } from "@/components/status-badge";
@@ -81,13 +87,20 @@ export function DashboardContent() {
         description="Supervision en temps réel de l'ingestion de vos documents, volume de questions et indice de fiabilité."
         actions={
           <div className="flex items-center gap-2.5">
-            <Button asChild variant="outline" className="border-slate-200 bg-white text-slate-800 hover:bg-slate-50 text-xs font-bold shadow-2xs">
+            <Button
+              asChild
+              variant="outline"
+              className="border-slate-200 bg-white text-slate-800 hover:bg-slate-50 text-xs font-bold shadow-2xs"
+            >
               <Link to="/chat">
                 <MessagesSquare className="mr-1.5 size-4 text-indigo-600" />
                 Ouvrir le Chat
               </Link>
             </Button>
-            <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-bold shadow-sm">
+            <Button
+              asChild
+              className="bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-bold shadow-sm"
+            >
               <Link to="/knowledge-bases">
                 <Plus className="mr-1.5 size-4" />
                 Nouvelle base
@@ -103,7 +116,9 @@ export function DashboardContent() {
           {/* Card 1: Documents Indexés */}
           <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Documents Indexés</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Documents Indexés
+              </span>
               <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
                 <BookOpen className="size-4" />
               </div>
@@ -117,14 +132,20 @@ export function DashboardContent() {
               </span>
             </div>
             <p className="mt-1.5 text-xs text-slate-500">
-              Répartis sur <strong className="text-slate-800">{kbs.length} base{kbs.length > 1 ? "s" : ""}</strong> actives
+              Répartis sur{" "}
+              <strong className="text-slate-800">
+                {kbs.length} base{kbs.length > 1 ? "s" : ""}
+              </strong>{" "}
+              actives
             </p>
           </div>
 
           {/* Card 2: Requêtes RAG */}
           <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Questions Posées</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Questions Posées
+              </span>
               <div className="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
                 <Search className="size-4" />
               </div>
@@ -137,10 +158,12 @@ export function DashboardContent() {
             <p className="mt-1.5 text-xs text-slate-500">Questions posées aux bases</p>
           </div>
 
-          {/* Card 3: Taux de Fidélité */}
+          {/* Card 3: Satisfaction */}
           <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-emerald-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Fiabilité des Réponses</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Satisfaction
+              </span>
               <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
                 <ShieldCheck className="size-4" />
               </div>
@@ -150,13 +173,15 @@ export function DashboardContent() {
                 {metrics?.answeredRate != null ? `${Math.round(metrics.answeredRate * 100)}%` : "—"}
               </p>
             </div>
-            <p className="mt-1.5 text-xs text-slate-500">Sourcé à la ligne près</p>
+            <p className="mt-1.5 text-xs text-slate-500">Basée sur les retours 👍</p>
           </div>
 
           {/* Card 4: Latence P95 */}
           <div className="rounded-2xl border border-slate-200 p-5 bg-white shadow-2xs hover:shadow-sm hover:border-indigo-300 transition-all duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Vitesse de Réponse</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Vitesse de Réponse
+              </span>
               <div className="flex size-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600 border border-violet-100">
                 <Zap className="size-4" />
               </div>
@@ -237,10 +262,15 @@ export function DashboardContent() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <h2 className="font-extrabold text-base text-slate-900">Bases de Connaissances Actives</h2>
+              <h2 className="font-extrabold text-base text-slate-900">
+                Bases de Connaissances Actives
+              </h2>
               <p className="text-xs text-slate-500">Vos collections documentaires accessibles</p>
             </div>
-            <Link to="/knowledge-bases" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+            <Link
+              to="/knowledge-bases"
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+            >
               Gérer toutes les bases <ChevronRight className="size-3.5" />
             </Link>
           </div>
@@ -262,7 +292,8 @@ export function DashboardContent() {
                   </div>
                   <h3 className="font-bold text-sm text-slate-900 truncate">{kb.name}</h3>
                   <p className="text-xs text-slate-500 mt-1">
-                    {kb.documentCount} document{kb.documentCount > 1 ? "s" : ""} indexé{kb.documentCount > 1 ? "s" : ""}
+                    {kb.documentCount} document{kb.documentCount > 1 ? "s" : ""} indexé
+                    {kb.documentCount > 1 ? "s" : ""}
                   </p>
                 </div>
 
@@ -290,19 +321,26 @@ export function DashboardContent() {
         <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
           <section className="rounded-2xl border border-[#dcdfd9] bg-white overflow-hidden shadow-2xs">
             <div className="flex items-center justify-between border-b border-[#dcdfd9] p-4 bg-[#fafbfa]">
-              <h2 className="font-extrabold text-sm text-[#28264B] dark:text-[#E8EAE7]">Journal d'activité récent</h2>
-              <span className="text-xs text-[#4E5174] font-medium">{activity.length} événements</span>
+              <h2 className="font-extrabold text-sm text-[#28264B] dark:text-[#E8EAE7]">
+                Journal d'activité récent
+              </h2>
+              <span className="text-xs text-[#4E5174] font-medium">
+                {activity.length} événements
+              </span>
             </div>
             <ul className="divide-y divide-[#dcdfd9] max-h-[300px] overflow-y-auto">
               {activity.map((item) => (
-                <li key={item.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-[#fafbfa] transition-colors">
+                <li
+                  key={item.id}
+                  className="flex items-center gap-3 p-3.5 text-xs hover:bg-[#fafbfa] transition-colors"
+                >
                   <span className="flex size-7 items-center justify-center rounded-full bg-[#28264B] text-white font-bold text-[10px]">
                     {item.user.slice(0, 2).toUpperCase()}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-[#28264B]">
-                      <strong className="text-[#28264B] font-bold">{item.user}</strong> {item.action}{" "}
-                      <span className="font-bold text-[#AA0033]">{item.target}</span>
+                      <strong className="text-[#28264B] font-bold">{item.user}</strong>{" "}
+                      {item.action} <span className="font-bold text-[#AA0033]">{item.target}</span>
                     </p>
                   </div>
                   <span className="shrink-0 text-[11px] text-[#4E5174] font-mono">{item.time}</span>
@@ -313,15 +351,22 @@ export function DashboardContent() {
 
           <section className="rounded-2xl border border-[#dcdfd9] bg-white overflow-hidden shadow-2xs">
             <div className="flex items-center justify-between border-b border-[#dcdfd9] p-4 bg-[#fafbfa]">
-              <h2 className="font-extrabold text-sm text-[#28264B] dark:text-[#E8EAE7]">File de traitement MinIO / Celery</h2>
+              <h2 className="font-extrabold text-sm text-[#28264B] dark:text-[#E8EAE7]">
+                File de traitement MinIO / Celery
+              </h2>
               <span className="text-xs text-[#4E5174] font-medium">{allDocs.length} fichiers</span>
             </div>
             <div className="divide-y divide-[#dcdfd9] max-h-[300px] overflow-y-auto">
               {allDocs.length === 0 ? (
-                <p className="p-6 text-center text-xs text-[#4E5174]">Aucun document en attente dans la file.</p>
+                <p className="p-6 text-center text-xs text-[#4E5174]">
+                  Aucun document en attente dans la file.
+                </p>
               ) : (
                 allDocs.map((doc) => (
-                  <div key={doc.id} className="flex items-center gap-3 p-3.5 text-xs hover:bg-[#fafbfa] transition-colors">
+                  <div
+                    key={doc.id}
+                    className="flex items-center gap-3 p-3.5 text-xs hover:bg-[#fafbfa] transition-colors"
+                  >
                     <FileText className="size-4 shrink-0 text-[#28264B]" />
                     <span className="min-w-0 flex-1 truncate font-semibold text-[#28264B]">
                       {doc.title}
@@ -347,7 +392,10 @@ export function KnowledgeBasesContent() {
   const [name, setName] = useState("");
   const [search, setSearch] = useState("");
 
-  const { data: bases = [], isLoading } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: bases = [], isLoading } = useQuery({
+    queryKey: ["kbs"],
+    queryFn: api.getKnowledgeBases,
+  });
 
   const createMutation = useMutation({
     mutationFn: (kbName: string) => api.createKnowledgeBase(kbName),
@@ -378,7 +426,9 @@ export function KnowledgeBasesContent() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Nouvelle knowledge base</DialogTitle>
-                <DialogDescription>Elle sera vide — vous pourrez y importer des documents ensuite.</DialogDescription>
+                <DialogDescription>
+                  Elle sera vide — vous pourrez y importer des documents ensuite.
+                </DialogDescription>
               </DialogHeader>
               <form
                 onSubmit={(e) => {
@@ -420,7 +470,9 @@ export function KnowledgeBasesContent() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Chargement…</p>
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Aucune base pour l’instant — créez la première.</p>
+          <p className="text-sm text-muted-foreground">
+            Aucune base pour l’instant — créez la première.
+          </p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filtered.map((kb) => (
@@ -440,7 +492,9 @@ export function KnowledgeBasesContent() {
                   Créée le {new Date(kb.createdAt).toLocaleDateString("fr-FR")}
                 </p>
                 <div className="mt-5 flex items-center justify-between border-t pt-3 text-xs text-muted-foreground">
-                  <span>{kb.documentCount} document{kb.documentCount === 1 ? "" : "s"}</span>
+                  <span>
+                    {kb.documentCount} document{kb.documentCount === 1 ? "" : "s"}
+                  </span>
                   <ArrowRight className="size-4" />
                 </div>
               </Link>
@@ -521,7 +575,8 @@ export function VerifiedContent() {
                   Nouvelle réponse de référence
                 </DialogTitle>
                 <DialogDescription>
-                  Ajoutez une question fréquente et sa réponse officielle certifiée liée à une base de connaissances.
+                  Ajoutez une question fréquente et sa réponse officielle certifiée liée à une base
+                  de connaissances.
                 </DialogDescription>
               </DialogHeader>
               <form
@@ -584,7 +639,9 @@ export function VerifiedContent() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={createMutation.isPending || !kbId || !question.trim() || !answer.trim()}
+                    disabled={
+                      createMutation.isPending || !kbId || !question.trim() || !answer.trim()
+                    }
                     className="bg-[#AA0033] text-white hover:bg-[#28264B]"
                   >
                     {createMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -612,7 +669,8 @@ export function VerifiedContent() {
               Aucune réponse certifiée pour le moment
             </h3>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
-              Les réponses certifiées servent de vérité terrain (Gold Standard) pour alimenter vos agents RAG avec des faits immuables.
+              Les réponses certifiées servent de vérité terrain (Gold Standard) pour alimenter vos
+              agents RAG avec des faits immuables.
             </p>
             <Button
               onClick={() => setIsOpen(true)}
@@ -635,10 +693,16 @@ export function VerifiedContent() {
                       <ShieldCheck className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <h2 className="font-semibold text-base text-[#28264B] dark:text-[#E8EAE7]">{a.question}</h2>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.answer}</p>
+                      <h2 className="font-semibold text-base text-[#28264B] dark:text-[#E8EAE7]">
+                        {a.question}
+                      </h2>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {a.answer}
+                      </p>
                       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium text-[#AA0033] dark:text-[#E8EAE7]">Vérifiée par {a.verifiedBy}</span>
+                        <span className="font-medium text-[#AA0033] dark:text-[#E8EAE7]">
+                          Vérifiée par {a.verifiedBy}
+                        </span>
                         <span>·</span>
                         <span>{a.uses} utilisations</span>
                         {a.tags.map((t) => (
@@ -767,7 +831,8 @@ export function TeamContent() {
                     Créer un nouvel espace de travail
                   </DialogTitle>
                   <DialogDescription>
-                    Créez un workspace dédié à votre équipe ou votre projet pour cloisonner la connaissance.
+                    Créez un workspace dédié à votre équipe ou votre projet pour cloisonner la
+                    connaissance.
                   </DialogDescription>
                 </DialogHeader>
                 <form
@@ -789,11 +854,7 @@ export function TeamContent() {
                     />
                   </div>
                   <DialogFooter className="mt-4">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => setIsCreateWsOpen(false)}
-                    >
+                    <Button type="button" variant="ghost" onClick={() => setIsCreateWsOpen(false)}>
                       Annuler
                     </Button>
                     <Button
@@ -801,7 +862,9 @@ export function TeamContent() {
                       disabled={createWsMutation.isPending || !newWsName.trim()}
                       className="bg-[#AA0033] text-white hover:bg-[#28264B]"
                     >
-                      {createWsMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+                      {createWsMutation.isPending && (
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                      )}
                       Créer le workspace
                     </Button>
                   </DialogFooter>
@@ -824,7 +887,8 @@ export function TeamContent() {
                       Ajouter un collaborateur
                     </DialogTitle>
                     <DialogDescription>
-                      Ajoutez un utilisateur existant ou créez un nouveau compte avec son mot de passe initial.
+                      Ajoutez un utilisateur existant ou créez un nouveau compte avec son mot de
+                      passe initial.
                     </DialogDescription>
                   </DialogHeader>
                   <form
@@ -886,7 +950,9 @@ export function TeamContent() {
                         disabled={addMemberMutation.isPending || !memberEmail.trim()}
                         className="bg-[#AA0033] text-white hover:bg-[#28264B]"
                       >
-                        {addMemberMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+                        {addMemberMutation.isPending && (
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                        )}
                         Ajouter
                       </Button>
                     </DialogFooter>
@@ -915,7 +981,9 @@ export function TeamContent() {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {currentWorkspace ? `Créé le ${new Date(currentWorkspace.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}` : "Créez votre premier workspace pour démarrer"}
+                {currentWorkspace
+                  ? `Créé le ${new Date(currentWorkspace.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`
+                  : "Créez votre premier workspace pour démarrer"}
               </p>
             </div>
           </div>
@@ -949,7 +1017,8 @@ export function TeamContent() {
               Aucun espace de travail
             </h3>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
-              Créez un premier workspace pour organiser vos bases de connaissances et inviter les membres de votre équipe.
+              Créez un premier workspace pour organiser vos bases de connaissances et inviter les
+              membres de votre équipe.
             </p>
             <Button
               onClick={() => setIsCreateWsOpen(true)}
@@ -979,10 +1048,7 @@ export function TeamContent() {
               </div>
             ) : (
               members.map((m) => {
-                const initials = (m.displayName || m.email)
-                  .split("@")[0]
-                  .slice(0, 2)
-                  .toUpperCase();
+                const initials = (m.displayName || m.email).split("@")[0].slice(0, 2).toUpperCase();
                 return (
                   <div
                     key={m.id}
@@ -1031,7 +1097,9 @@ export function TeamContent() {
                         className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         title="Retirer le membre"
                         onClick={() => {
-                          if (confirm(`Voulez-vous vraiment retirer ${m.email} de ce workspace ?`)) {
+                          if (
+                            confirm(`Voulez-vous vraiment retirer ${m.email} de ce workspace ?`)
+                          ) {
                             removeMemberMutation.mutate(m.userId);
                           }
                         }}
@@ -1067,7 +1135,8 @@ export function IntegrationsContent() {
         toast.info(`Connecteur ${updated.name} déconnecté.`);
       }
     },
-    onError: (err: Error) => toast.error(err.message || "Erreur lors de la configuration du connecteur"),
+    onError: (err: Error) =>
+      toast.error(err.message || "Erreur lors de la configuration du connecteur"),
   });
 
   return (
@@ -1105,8 +1174,12 @@ export function IntegrationsContent() {
                       {isConnected ? "Connecté" : "Disponible"}
                     </span>
                   </div>
-                  <h2 className="mt-4 font-semibold text-[#28264B] dark:text-[#E8EAE7]">{i.name}</h2>
-                  <p className="mt-1 min-h-12 text-sm leading-relaxed text-muted-foreground">{i.description}</p>
+                  <h2 className="mt-4 font-semibold text-[#28264B] dark:text-[#E8EAE7]">
+                    {i.name}
+                  </h2>
+                  <p className="mt-1 min-h-12 text-sm leading-relaxed text-muted-foreground">
+                    {i.description}
+                  </p>
                 </div>
                 <Button
                   className={`mt-6 w-full ${
@@ -1153,7 +1226,10 @@ export function SettingsContent() {
 
   return (
     <>
-      <PageHeader title="Paramètres" description="Profil, workspace, sécurité et préférences de réponse." />
+      <PageHeader
+        title="Paramètres"
+        description="Profil, workspace, sécurité et préférences de réponse."
+      />
       <div className="grid gap-5 p-4 md:p-6 xl:grid-cols-[220px_1fr]">
         <nav className="space-y-1">
           {["Profil", "Workspace", "Sécurité", "Modèles & recherche", "Facturation"].map((x, i) => (
@@ -1167,7 +1243,9 @@ export function SettingsContent() {
         </nav>
         <section className="panel max-w-3xl p-5">
           <h2 className="font-semibold">Profil personnel</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Votre adresse e-mail est fixée à l'inscription.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Votre adresse e-mail est fixée à l'inscription.
+          </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <label className="text-sm">
               Nom affiché
@@ -1184,7 +1262,8 @@ export function SettingsContent() {
             </label>
           </div>
           <div className="mt-2 text-xs text-muted-foreground">
-            Rôle&nbsp;: <span className="font-medium capitalize">{profile?.role.toLowerCase() ?? "—"}</span>
+            Rôle&nbsp;:{" "}
+            <span className="font-medium capitalize">{profile?.role.toLowerCase() ?? "—"}</span>
           </div>
           <Button
             className="mt-5"
@@ -1221,11 +1300,17 @@ export function AdminContent() {
 
   return (
     <>
-      <PageHeader title="Administration" description="Compteurs système, benchmark retrieval et traçabilité." />
+      <PageHeader
+        title="Administration"
+        description="Compteurs système, benchmark retrieval et traçabilité."
+      />
       <div className="space-y-5 p-4 md:p-6">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <KPICard title="Utilisateurs (réel)" value={String(counts?.totalUsers ?? "—")} />
-          <KPICard title="Knowledge bases (réel)" value={String(counts?.totalKnowledgeBases ?? "—")} />
+          <KPICard
+            title="Knowledge bases (réel)"
+            value={String(counts?.totalKnowledgeBases ?? "—")}
+          />
           <KPICard title="Documents (réel)" value={String(counts?.totalDocuments ?? "—")} />
           <KPICard
             title="Feedback (réel)"
@@ -1269,10 +1354,17 @@ export function AdminContent() {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant={rerank ? "default" : "outline"} onClick={() => setRerank((r) => !r)} type="button">
+            <Button
+              variant={rerank ? "default" : "outline"}
+              onClick={() => setRerank((r) => !r)}
+              type="button"
+            >
               Reranker {rerank ? "activé" : "désactivé"}
             </Button>
-            <Button onClick={() => evalMutation.mutate()} disabled={!selectedKb || evalMutation.isPending}>
+            <Button
+              onClick={() => evalMutation.mutate()}
+              disabled={!selectedKb || evalMutation.isPending}
+            >
               {evalMutation.isPending ? <Loader2 className="animate-spin" /> : <Play />}
               Lancer
             </Button>
@@ -1283,18 +1375,33 @@ export function AdminContent() {
               <Metric label="Questions" value={String(evalMutation.data.totalQuestions)} />
               <Metric
                 label="Recall@K"
-                value={evalMutation.data.meanRecallAtK !== null ? `${Math.round(evalMutation.data.meanRecallAtK * 100)}%` : "—"}
+                value={
+                  evalMutation.data.meanRecallAtK !== null
+                    ? `${Math.round(evalMutation.data.meanRecallAtK * 100)}%`
+                    : "—"
+                }
               />
               <Metric
                 label="Precision@K"
-                value={evalMutation.data.meanPrecisionAtK !== null ? `${Math.round(evalMutation.data.meanPrecisionAtK * 100)}%` : "—"}
+                value={
+                  evalMutation.data.meanPrecisionAtK !== null
+                    ? `${Math.round(evalMutation.data.meanPrecisionAtK * 100)}%`
+                    : "—"
+                }
               />
               <Metric label="MRR" value={evalMutation.data.mrr.toFixed(2)} />
               <Metric
                 label="Faithfulness"
-                value={evalMutation.data.meanFaithfulness !== null ? `${Math.round(evalMutation.data.meanFaithfulness * 100)}%` : "—"}
+                value={
+                  evalMutation.data.meanFaithfulness !== null
+                    ? `${Math.round(evalMutation.data.meanFaithfulness * 100)}%`
+                    : "—"
+                }
               />
-              <Metric label="Latence P95" value={`${Math.round(evalMutation.data.p95LatencyMs)} ms`} />
+              <Metric
+                label="Latence P95"
+                value={`${Math.round(evalMutation.data.p95LatencyMs)} ms`}
+              />
             </div>
           ) : null}
         </section>
@@ -1302,7 +1409,7 @@ export function AdminContent() {
         <div className="grid gap-5 xl:grid-cols-2">
           <section className="panel p-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold">Qualité RAG (historique)</h2>
+              <h2 className="font-semibold">Qualité RAG</h2>
               <PreviewBadge />
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
@@ -1324,7 +1431,9 @@ export function AdminContent() {
           <section className="panel overflow-hidden">
             <div className="flex items-center justify-between border-b p-4">
               <span className="font-semibold">Feedback négatif (réel)</span>
-              <span className="text-xs text-muted-foreground">{feedbackItems.length} réponse(s) à revoir</span>
+              <span className="text-xs text-muted-foreground">
+                {feedbackItems.length} réponse(s) à revoir
+              </span>
             </div>
             {feedbackItems.length === 0 ? (
               <p className="p-4 text-sm text-muted-foreground">Aucun 👎 pour l’instant.</p>
@@ -1338,7 +1447,9 @@ export function AdminContent() {
                     <span>{new Date(f.createdAt).toLocaleDateString("fr-FR")}</span>
                   </div>
                   <p className="mt-1 truncate font-mono">{f.messageContent}</p>
-                  {f.comment ? <p className="mt-1 italic text-muted-foreground">« {f.comment} »</p> : null}
+                  {f.comment ? (
+                    <p className="mt-1 italic text-muted-foreground">« {f.comment} »</p>
+                  ) : null}
                 </div>
               ))
             )}

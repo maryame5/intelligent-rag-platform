@@ -43,17 +43,27 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/4" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/15 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4" />
         {/* Dot grid */}
-        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        />
 
         <div className="relative z-10 flex items-center gap-2.5 font-semibold text-lg">
           <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold shadow-sm">
             S
           </div>
-          <span className="tracking-tight font-extrabold text-white">Smart<span className="text-indigo-400">RAG</span></span>
+          <span className="tracking-tight font-extrabold text-white">
+            Smart<span className="text-indigo-400">RAG</span>
+          </span>
         </div>
 
         <div className="relative z-10 my-auto max-w-xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-indigo-300">Plateforme RAG d'entreprise</p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-indigo-300">
+            Plateforme RAG d'entreprise
+          </p>
           <h1 className="mt-5 text-4xl font-extrabold leading-tight text-white">
             La connaissance de votre entreprise, gouvernée et prête à répondre.
           </h1>
@@ -63,7 +73,10 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
               { icon: Shield, text: "Recherche hybride intelligente avec reranking" },
               { icon: Zap, text: "Pipeline d'ingestion asynchrone sécurisé" },
             ].map((item) => (
-              <p key={item.text} className="flex items-center gap-3 text-sm text-slate-200 font-medium">
+              <p
+                key={item.text}
+                className="flex items-center gap-3 text-sm text-slate-200 font-medium"
+              >
                 <item.icon className="size-5 shrink-0 text-emerald-400" />
                 {item.text}
               </p>
@@ -71,7 +84,9 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
           </div>
         </div>
 
-        <p className="relative z-10 text-xs text-slate-400">Sécurité et isolation des données par espace et rôle (RBAC).</p>
+        <p className="relative z-10 text-xs text-slate-400">
+          Sécurité et isolation des données par espace et rôle (RBAC).
+        </p>
       </section>
 
       {/* ───── Right panel — Form ───── */}
@@ -82,39 +97,70 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
             <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold">
               S
             </div>
-            <strong className="text-lg text-slate-900">Smart<span className="text-indigo-600">RAG</span></strong>
+            <strong className="text-lg text-slate-900">
+              Smart<span className="text-indigo-600">RAG</span>
+            </strong>
           </div>
 
           <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
             <Brain className="size-3.5 text-indigo-600" />
             {mode === "login" ? "Bon retour" : "Nouveau compte"}
           </div>
-          <h2 className="mt-3 text-2xl font-extrabold text-slate-900">{mode === "login" ? "Connexion" : "Créer un compte"}</h2>
+          <h2 className="mt-3 text-2xl font-extrabold text-slate-900">
+            {mode === "login" ? "Connexion" : "Créer un compte"}
+          </h2>
           <p className="mt-2 text-sm text-slate-600">
-            {mode === "login" ? "Accédez à votre espace documentaire sécurisé." : "Quelques secondes, sans carte bancaire."}
+            {mode === "login"
+              ? "Accédez à votre espace documentaire sécurisé."
+              : "Quelques secondes, sans carte bancaire."}
           </p>
 
           <form onSubmit={submit} className="mt-7 space-y-4">
             <label className="block">
               <Label className="text-slate-700 font-semibold text-xs">Email</Label>
-              <Input className="mt-2 h-11 border-slate-200 bg-white focus-visible:border-indigo-600 focus-visible:ring-indigo-600/20" name="email" type="email" required placeholder="vous@entreprise.com" />
+              <Input
+                className="mt-2 h-11 border-slate-200 bg-white focus-visible:border-indigo-600 focus-visible:ring-indigo-600/20"
+                name="email"
+                type="email"
+                required
+                placeholder="vous@entreprise.com"
+              />
             </label>
             <label className="block">
               <Label className="text-slate-700 font-semibold text-xs">Mot de passe</Label>
-              <Input className="mt-2 h-11 border-slate-200 bg-white focus-visible:border-indigo-600 focus-visible:ring-indigo-600/20" name="password" type="password" minLength={8} required placeholder="8 caractères minimum" />
+              <Input
+                className="mt-2 h-11 border-slate-200 bg-white focus-visible:border-indigo-600 focus-visible:ring-indigo-600/20"
+                name="password"
+                type="password"
+                minLength={8}
+                required
+                placeholder="8 caractères minimum"
+              />
             </label>
             {message ? (
-              <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 font-medium">{message}</p>
+              <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 font-medium">
+                {message}
+              </p>
             ) : null}
-            <Button className="w-full h-11 rounded-xl bg-indigo-600 text-white font-bold shadow-md hover:bg-indigo-700 transition-all cursor-pointer" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin size-4" /> : <ArrowRight className="size-4" />}
+            <Button
+              className="w-full h-11 rounded-xl bg-indigo-600 text-white font-bold shadow-md hover:bg-indigo-700 transition-all cursor-pointer"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="animate-spin size-4" />
+              ) : (
+                <ArrowRight className="size-4" />
+              )}
               {mode === "login" ? "Se connecter" : "Créer mon compte"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-600">
             {mode === "login" ? "Nouveau ici ?" : "Déjà un compte ?"}{" "}
-            <Link to={mode === "login" ? "/auth/register" : "/auth/login"} className="font-bold text-indigo-600 hover:underline transition-colors">
+            <Link
+              to={mode === "login" ? "/auth/register" : "/auth/login"}
+              className="font-bold text-indigo-600 hover:underline transition-colors"
+            >
               {mode === "login" ? "Créer un compte" : "Se connecter"}
             </Link>
           </p>

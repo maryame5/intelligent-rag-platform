@@ -6,9 +6,15 @@ export const Route = createFileRoute("/knowledge-bases/")({
   head: () => ({
     meta: [
       { title: "Bases de connaissance — SmartRAG" },
-      { name: "description", content: "Espaces documentaires gouvernés, prêts pour la recherche et la citation." },
+      {
+        name: "description",
+        content: "Espaces documentaires gouvernés, prêts pour la recherche et la citation.",
+      },
       { property: "og:title", content: "Bases de connaissance — SmartRAG" },
-      { property: "og:description", content: "Espaces documentaires gouvernés, prêts pour la recherche." },
+      {
+        property: "og:description",
+        content: "Espaces documentaires gouvernés, prêts pour la recherche.",
+      },
     ],
   }),
   component: () => (

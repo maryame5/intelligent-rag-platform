@@ -10,7 +10,15 @@
  * pour que le reste de l'UI (déjà écrite contre ces 4 rôles) continue de
  * fonctionner sans modification.
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, clearTokens, getAccessToken, setTokens } from "./backend-client";
 import type { Role } from "./types";
@@ -87,11 +95,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const tokens = await apiRequest<{ access_token: string; refresh_token: string }>("/auth/login", {
-        method: "POST",
-        skipAuth: true,
-        body: { email, password },
-      });
+      const tokens = await apiRequest<{ access_token: string; refresh_token: string }>(
+        "/auth/login",
+        {
+          method: "POST",
+          skipAuth: true,
+          body: { email, password },
+        },
+      );
       setTokens(tokens.access_token, tokens.refresh_token);
       await hydrate();
     },
@@ -100,7 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (email: string, password: string) => {
-      await apiRequest("/auth/register", { method: "POST", skipAuth: true, body: { email, password } });
+      await apiRequest("/auth/register", {
+        method: "POST",
+        skipAuth: true,
+        body: { email, password },
+      });
       // L'inscription ne renvoie pas de token (voir POST /auth/register côté
       // backend) : on enchaîne avec une connexion pour obtenir la session.
       await login(email, password);

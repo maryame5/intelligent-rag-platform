@@ -93,7 +93,12 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
 
         {/* Points interactifs */}
         {points.map((p, i) => (
-          <g key={i} className="cursor-pointer" onMouseEnter={() => setHoveredIdx(i)} onMouseLeave={() => setHoveredIdx(null)}>
+          <g
+            key={i}
+            className="cursor-pointer"
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
+          >
             <circle
               cx={p.x}
               cy={p.y}
@@ -125,7 +130,8 @@ export function RAGAreaChart({ data, height = 200 }: AreaChartProps) {
           className="pointer-events-none absolute -top-8 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1 text-xs text-white shadow-lg transition-all transform -translate-x-1/2"
           style={{ left: `${(hoveredPoint.x / width) * 100}%` }}
         >
-          <span className="font-semibold text-indigo-300">{hoveredPoint.queries} questions</span> ({hoveredPoint.date})
+          <span className="font-semibold text-indigo-300">{hoveredPoint.queries} questions</span> (
+          {hoveredPoint.date})
         </div>
       )}
     </div>
@@ -148,7 +154,10 @@ export function RAGRadialGauge({ score, label, sublabel, size = 90 }: RadialGaug
 
   return (
     <div className="flex flex-col items-center justify-center text-center">
-      <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <div
+        className="relative flex items-center justify-center"
+        style={{ width: size, height: size }}
+      >
         <svg className="size-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
           {/* Cercle arrière plan */}
           <circle
@@ -168,7 +177,9 @@ export function RAGRadialGauge({ score, label, sublabel, size = 90 }: RadialGaug
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            className={score == null ? "stroke-slate-200" : "stroke-indigo-600 transition-all duration-700"}
+            className={
+              score == null ? "stroke-slate-200" : "stroke-indigo-600 transition-all duration-700"
+            }
             fill="none"
           />
         </svg>

@@ -111,7 +111,7 @@ def test_document_scoped_search_is_never_cached(db_session, monkeypatch):
 
 
 def test_empty_kb_returns_empty_list_and_clears_stale_cache(db_session, monkeypatch):
-    counting = _install_counting_bm25(monkeypatch)
+    _install_counting_bm25(monkeypatch)
     kb = _make_kb(db_session)
     document, chunk = _add_chunk(db_session, kb, "a.txt", "un texte quelconque")
 

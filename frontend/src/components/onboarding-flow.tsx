@@ -63,7 +63,9 @@ export function OnboardingFlow() {
           {steps.map((s, i) => (
             <li key={s}>
               <div className={`h-1 rounded ${i <= step ? "bg-primary" : "bg-secondary"}`} />
-              <p className={`mt-2 text-xs ${i === step ? "font-semibold" : "text-muted-foreground"}`}>
+              <p
+                className={`mt-2 text-xs ${i === step ? "font-semibold" : "text-muted-foreground"}`}
+              >
                 {i + 1}. {s}
               </p>
             </li>
@@ -92,7 +94,12 @@ export function OnboardingFlow() {
               </p>
               <label className="mt-6 block">
                 <Label>Nom de la base</Label>
-                <Input className="mt-2" value={kbName} onChange={(e) => setKbName(e.target.value)} required />
+                <Input
+                  className="mt-2"
+                  value={kbName}
+                  onChange={(e) => setKbName(e.target.value)}
+                  required
+                />
               </label>
             </>
           ) : (

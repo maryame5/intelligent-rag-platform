@@ -8,7 +8,10 @@ export const Route = createFileRoute("/verified")({
       { title: "Réponses vérifiées — SmartRAG" },
       { name: "description", content: "Référentiel des réponses validées par vos experts métier." },
       { property: "og:title", content: "Réponses vérifiées — SmartRAG" },
-      { property: "og:description", content: "Référentiel des réponses validées par vos experts métier." },
+      {
+        property: "og:description",
+        content: "Référentiel des réponses validées par vos experts métier.",
+      },
     ],
   }),
   component: () => (

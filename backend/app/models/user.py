@@ -3,9 +3,9 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Enum, String
-from app.db.types import GUID
 
 from app.db.base import Base
+from app.db.types import GUID
 
 
 class UserRole(str, enum.Enum):

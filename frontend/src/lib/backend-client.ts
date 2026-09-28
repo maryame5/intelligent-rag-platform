@@ -8,7 +8,8 @@
  * expiré pendant qu'il travaillait.
  */
 
-export const API_BASE_URL = (import.meta.env["VITE_API_BASE_URL"] as string | undefined) || "http://localhost:8000";
+export const API_BASE_URL =
+  (import.meta.env["VITE_API_BASE_URL"] as string | undefined) || "http://localhost:8000";
 
 const ACCESS_TOKEN_KEY = "rag.access_token";
 const REFRESH_TOKEN_KEY = "rag.refresh_token";
@@ -56,7 +57,10 @@ async function extractErrorMessage(response: Response): Promise<string> {
     if (typeof body?.detail === "string") return body.detail;
     if (Array.isArray(body?.detail)) {
       // Erreurs de validation Pydantic : liste d'objets {loc, msg}.
-      return body.detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join(", ");
+      return body.detail
+        .map((d: { msg?: string }) => d.msg)
+        .filter(Boolean)
+        .join(", ");
     }
   } catch {
     /* pas de corps JSON exploitable */

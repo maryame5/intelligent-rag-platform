@@ -8,11 +8,11 @@ from app.db.session import get_worker_session
 from app.models.chunk import Chunk
 from app.models.document import Document, DocumentStatus
 from app.models.job import IngestionJob, JobStatus
+from app.services.bm25_search import invalidate_bm25_cache
 from app.services.chunking import fixed_size_chunks
 from app.services.cleaning import clean_text
 from app.services.embeddings import get_embedding_provider
 from app.services.extraction import extract_pages
-from app.services.bm25_search import invalidate_bm25_cache
 from app.services.storage import download_bytes, get_minio_client
 
 logger = logging.getLogger(__name__)

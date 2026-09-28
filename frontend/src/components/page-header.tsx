@@ -22,12 +22,19 @@ export function PageHeader({
   return (
     <div className="border-b border-border px-6 py-5">
       {crumbs?.length ? (
-        <nav aria-label="Fil d'ariane" className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
+        <nav
+          aria-label="Fil d'ariane"
+          className="mb-2 flex items-center gap-1 text-xs text-muted-foreground"
+        >
           {crumbs.map((c, i) => (
             <span key={c.label} className="flex items-center gap-1">
               {i > 0 ? <ChevronRight className="size-3 opacity-60" /> : null}
               {c.to ? (
-                <Link to={c.to} params={c.params as never} className="transition-colors hover:text-foreground">
+                <Link
+                  to={c.to}
+                  params={c.params as never}
+                  className="transition-colors hover:text-foreground"
+                >
                   {c.label}
                 </Link>
               ) : (
@@ -40,7 +47,9 @@ export function PageHeader({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
-          {description ? <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p> : null}
+          {description ? (
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>
+          ) : null}
         </div>
         {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
       </div>

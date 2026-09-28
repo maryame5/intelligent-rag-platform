@@ -34,7 +34,7 @@ import {
   HelpCircle,
   Eye,
   SlidersHorizontal,
-  FolderOpen
+  FolderOpen,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -112,7 +112,8 @@ const DEMO_SCENARIOS: DemoScenario[] = [
     id: "hr",
     department: "Ressources Humaines",
     iconName: "hr",
-    query: "Combien de jours de télétravail par semaine sont autorisés et quel est le forfait équipement ?",
+    query:
+      "Combien de jours de télétravail par semaine sont autorisés et quel est le forfait équipement ?",
     docTitle: "Charte_RH_Teletravail_2024.docx",
     docLocation: "Section 3.1 & 4.2",
     docExcerpt:
@@ -176,28 +177,32 @@ const FEATURE_ITEMS: FeatureItem[] = [
     title: "Citations & Extraits vérifiables",
     category: "utilisateurs",
     status: "disponible",
-    simpleDesc: "Chaque affirmation affiche le document d'origine, le numéro de page et le passage exact.",
+    simpleDesc:
+      "Chaque affirmation affiche le document d'origine, le numéro de page et le passage exact.",
     benefit: "Zéro hallucination, confiance totale",
   },
   {
     title: "Import multi-fichiers instantané",
     category: "utilisateurs",
     status: "disponible",
-    simpleDesc: "Déposez vos PDF, fichiers Word (.docx), Markdown ou texte brut en un simple glisser-déposer.",
+    simpleDesc:
+      "Déposez vos PDF, fichiers Word (.docx), Markdown ou texte brut en un simple glisser-déposer.",
     benefit: "Indexation automatique en arrière-plan",
   },
   {
     title: "Bases documentaires compartimentées",
     category: "securite",
     status: "disponible",
-    simpleDesc: "Créez des espaces séparés par équipe (RH, Juridique, Finance, Technique) avec droits d'accès.",
+    simpleDesc:
+      "Créez des espaces séparés par équipe (RH, Juridique, Finance, Technique) avec droits d'accès.",
     benefit: "Confidentialité garantie par service",
   },
   {
     title: "Validation des réponses expertes",
     category: "securite",
     status: "disponible",
-    simpleDesc: "Les experts peuvent marquer des réponses comme « Référence vérifiée » pour enrichir la mémoire interne.",
+    simpleDesc:
+      "Les experts peuvent marquer des réponses comme « Référence vérifiée » pour enrichir la mémoire interne.",
     benefit: "Amélioration continue de la qualité",
   },
   {
@@ -211,26 +216,31 @@ const FEATURE_ITEMS: FeatureItem[] = [
     title: "Recherche hybride intelligente",
     category: "technique",
     status: "disponible",
-    simpleDesc: "Combine la compréhension sémantique profonde (sens) et la recherche textuelle exacte (codes, références).",
+    simpleDesc:
+      "Combine la compréhension sémantique profonde (sens) et la recherche textuelle exacte (codes, références).",
     benefit: "Précision maximale même sur les termes rares",
   },
   {
     title: "Clés d'API & Intégrations REST",
     category: "technique",
     status: "disponible",
-    simpleDesc: "Connectez SmartRAG à vos applications métiers grâce à notre API sécurisée haute performance.",
+    simpleDesc:
+      "Connectez SmartRAG à vos applications métiers grâce à notre API sécurisée haute performance.",
     benefit: "Automatisation de vos flux de travail",
-  }
+  },
 ];
 
 export function LandingPage() {
   const { session } = useAuth();
   const [activeScenarioId, setActiveScenarioId] = useState("legal");
-  const [filterCategory, setFilterCategory] = useState<"all" | "utilisateurs" | "securite" | "technique">("all");
+  const [filterCategory, setFilterCategory] = useState<
+    "all" | "utilisateurs" | "securite" | "technique"
+  >("all");
   const [filterStatus, setFilterStatus] = useState<"all" | "disponible" | "bientot">("all");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const currentScenario = DEMO_SCENARIOS.find((s) => s.id === activeScenarioId) || DEMO_SCENARIOS[0];
+  const currentScenario =
+    DEMO_SCENARIOS.find((s) => s.id === activeScenarioId) || DEMO_SCENARIOS[0];
 
   const filteredFeatures = FEATURE_ITEMS.filter((f) => {
     const matchCat = filterCategory === "all" || f.category === filterCategory;
@@ -253,7 +263,10 @@ export function LandingPage() {
           {/* Logo & Brand */}
           <div className="flex items-center gap-10">
             <Link to="/" className="flex items-center gap-3.5 group">
-              <SmartRAGLogoMark size={42} className="transition-transform duration-200 group-hover:scale-105" />
+              <SmartRAGLogoMark
+                size={42}
+                className="transition-transform duration-200 group-hover:scale-105"
+              />
               <div className="flex flex-col">
                 <span className="font-extrabold text-xl tracking-tight text-slate-900">
                   Smart<span className="text-indigo-600">RAG</span>
@@ -331,7 +344,9 @@ export function LandingPage() {
 
           {/* Clear, Human Subtitle */}
           <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
-            Importez vos <strong>PDF, contrats, politiques RH et guides internes</strong>. SmartRAG répond avec précision aux questions de vos équipes en citant toujours l'extrait et la page exacte du document d'origine.
+            Importez vos <strong>PDF, contrats, politiques RH et guides internes</strong>. SmartRAG
+            répond avec précision aux questions de vos équipes en citant toujours l'extrait et la
+            page exacte du document d'origine.
           </p>
 
           {/* CTAs */}
@@ -384,7 +399,8 @@ export function LandingPage() {
               Voyez comment SmartRAG traite une question en direct
             </h2>
             <p className="text-slate-600 text-sm mt-2 max-w-2xl mx-auto">
-              Choisissez un exemple métier ci-dessous pour voir la question posée, le document retrouvé et la réponse certifiée.
+              Choisissez un exemple métier ci-dessous pour voir la question posée, le document
+              retrouvé et la réponse certifiée.
             </p>
           </div>
 
@@ -422,7 +438,10 @@ export function LandingPage() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-slate-500">
-                  Temps de réponse : <strong className="text-slate-800 font-mono">{currentScenario.responseTime}</strong>
+                  Temps de réponse :{" "}
+                  <strong className="text-slate-800 font-mono">
+                    {currentScenario.responseTime}
+                  </strong>
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold">
                   <Check className="size-3" /> Confiance {currentScenario.confidenceScore}
@@ -435,7 +454,9 @@ export function LandingPage() {
               {/* Left Column: User Question & Found Document Excerpt */}
               <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Question de l'utilisateur</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Question de l'utilisateur
+                  </span>
                   <div className="mt-2 rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm font-semibold text-slate-800 flex items-start gap-3">
                     <MessageSquare className="size-4 text-indigo-600 shrink-0 mt-0.5" />
                     <span>« {currentScenario.query} »</span>
@@ -459,7 +480,9 @@ export function LandingPage() {
 
                 <div className="pt-2 text-[11px] text-slate-500 flex items-center gap-2">
                   <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
-                  <span>Le moteur scanne uniquement les documents autorisés de votre entreprise.</span>
+                  <span>
+                    Le moteur scanne uniquement les documents autorisés de votre entreprise.
+                  </span>
                 </div>
               </div>
 
@@ -476,7 +499,14 @@ export function LandingPage() {
                     </span>
                   </div>
                   <div className="rounded-xl bg-white border border-slate-200 p-5 shadow-2xs text-sm text-slate-800 leading-relaxed">
-                    <p dangerouslySetInnerHTML={{ __html: currentScenario.answerSummary.replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-950 font-bold bg-indigo-50 px-1 py-0.5 rounded">$1</strong>') }} />
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: currentScenario.answerSummary.replace(
+                          /\*\*(.*?)\*\*/g,
+                          '<strong class="text-indigo-950 font-bold bg-indigo-50 px-1 py-0.5 rounded">$1</strong>',
+                        ),
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -513,7 +543,8 @@ export function LandingPage() {
                 Comment ça marche en 3 étapes simples
               </h2>
               <p className="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
-                Aucune compétence technique n'est requise. Déposez vos documents et posez vos questions en quelques secondes.
+                Aucune compétence technique n'est requise. Déposez vos documents et posez vos
+                questions en quelques secondes.
               </p>
             </div>
 
@@ -524,11 +555,10 @@ export function LandingPage() {
                   <div className="flex size-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 font-extrabold text-lg mb-5 border border-indigo-100">
                     1
                   </div>
-                  <h3 className="font-bold text-base text-slate-900">
-                    Déposez vos documents
-                  </h3>
+                  <h3 className="font-bold text-base text-slate-900">Déposez vos documents</h3>
                   <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                    Glissez-déposez vos fichiers PDF, Word (.docx), fiches de paie, manuels de procédures ou notes textuelles dans vos bases dédiées.
+                    Glissez-déposez vos fichiers PDF, Word (.docx), fiches de paie, manuels de
+                    procédures ou notes textuelles dans vos bases dédiées.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-indigo-600 flex items-center gap-1">
@@ -542,11 +572,10 @@ export function LandingPage() {
                   <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 font-extrabold text-lg mb-5 border border-blue-100">
                     2
                   </div>
-                  <h3 className="font-bold text-base text-slate-900">
-                    L'IA organise et mémorise
-                  </h3>
+                  <h3 className="font-bold text-base text-slate-900">L'IA organise et mémorise</h3>
                   <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                    SmartRAG découpe intelligemment le texte en passages clés et prépare un index de recherche sans altérer vos fichiers d'origine.
+                    SmartRAG découpe intelligemment le texte en passages clés et prépare un index de
+                    recherche sans altérer vos fichiers d'origine.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-blue-600 flex items-center gap-1">
@@ -564,7 +593,8 @@ export function LandingPage() {
                     Posez vos questions & Obtenez les sources
                   </h3>
                   <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                    Discutez en français ou en anglais. Obtenez une synthèse claire avec le lien direct vers la page exacte du document source.
+                    Discutez en français ou en anglais. Obtenez une synthèse claire avec le lien
+                    direct vers la page exacte du document source.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
@@ -585,7 +615,8 @@ export function LandingPage() {
               Conçu pour résoudre les vrais défis des équipes
             </h2>
             <p className="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
-              Découvrez les bénéfices concrets pour votre productivité quotidienne et la sécurité de votre savoir interne.
+              Découvrez les bénéfices concrets pour votre productivité quotidienne et la sécurité de
+              votre savoir interne.
             </p>
           </div>
 
@@ -596,7 +627,8 @@ export function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-slate-900">Fin des heures de recherche</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Vos collaborateurs ne perdent plus 30 minutes à feuilleter un PDF de 200 pages. La réponse arrive en une fraction de seconde.
+                Vos collaborateurs ne perdent plus 30 minutes à feuilleter un PDF de 200 pages. La
+                réponse arrive en une fraction de seconde.
               </p>
             </div>
 
@@ -606,7 +638,8 @@ export function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-slate-900">Confiance absolue & Preuves</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Contrairement aux chatbots généralistes qui peuvent inventer, SmartRAG ne répond qu'à partir de vos vrais documents avec citations.
+                Contrairement aux chatbots généralistes qui peuvent inventer, SmartRAG ne répond
+                qu'à partir de vos vrais documents avec citations.
               </p>
             </div>
 
@@ -614,9 +647,12 @@ export function LandingPage() {
               <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 mb-4">
                 <Lock className="size-5" />
               </div>
-              <h3 className="font-bold text-base text-slate-900">Données souveraines & Sécurisées</h3>
+              <h3 className="font-bold text-base text-slate-900">
+                Données souveraines & Sécurisées
+              </h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Vos documents et requêtes restent strictement confidentiels. Aucun partage public, aucune réutilisation pour l'entraînement d'IA tierces.
+                Vos documents et requêtes restent strictement confidentiels. Aucun partage public,
+                aucune réutilisation pour l'entraînement d'IA tierces.
               </p>
             </div>
 
@@ -626,7 +662,8 @@ export function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-slate-900">Cloisonnement par département</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Organisez vos bases par équipe (Finance, RH, Commercial, Technique). Chaque utilisateur n'accède qu'aux documents auxquels il a droit.
+                Organisez vos bases par équipe (Finance, RH, Commercial, Technique). Chaque
+                utilisateur n'accède qu'aux documents auxquels il a droit.
               </p>
             </div>
 
@@ -634,9 +671,12 @@ export function LandingPage() {
               <div className="flex size-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 mb-4">
                 <FileCheck className="size-5" />
               </div>
-              <h3 className="font-bold text-base text-slate-900">Validation des réponses expertes</h3>
+              <h3 className="font-bold text-base text-slate-900">
+                Validation des réponses expertes
+              </h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Marquez une réponse approuvée en un clic pour que les prochaines questions identiques bénéficient instantanément de la réponse officielle.
+                Marquez une réponse approuvée en un clic pour que les prochaines questions
+                identiques bénéficient instantanément de la réponse officielle.
               </p>
             </div>
 
@@ -646,7 +686,8 @@ export function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-slate-900">Intégrable via API REST</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Intégrez facilement la recherche documentaire dans vos outils internes, Intranet, CRM ou portails clients grâce à nos clés d'API.
+                Intégrez facilement la recherche documentaire dans vos outils internes, Intranet,
+                CRM ou portails clients grâce à nos clés d'API.
               </p>
             </div>
           </div>
@@ -663,7 +704,8 @@ export function LandingPage() {
                 Fonctionnalités de la Plateforme
               </h2>
               <p className="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
-                Consultez ce qui est opérationnel immédiatement et ce qui est planifié dans notre feuille de route.
+                Consultez ce qui est opérationnel immédiatement et ce qui est planifié dans notre
+                feuille de route.
               </p>
             </div>
 
@@ -708,7 +750,11 @@ export function LandingPage() {
                 <span className="text-slate-400 font-semibold">Catégorie :</span>
                 <select
                   value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value as any)}
+                  onChange={(e) =>
+                    setFilterCategory(
+                      e.target.value as "all" | "utilisateurs" | "securite" | "technique",
+                    )
+                  }
                   className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="all">Toutes les catégories</option>
@@ -744,7 +790,9 @@ export function LandingPage() {
                       )}
                     </div>
                     <h4 className="font-bold text-sm text-slate-900">{feat.title}</h4>
-                    <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">{feat.simpleDesc}</p>
+                    <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                      {feat.simpleDesc}
+                    </p>
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-700 font-semibold">
@@ -826,7 +874,8 @@ export function LandingPage() {
                 Prêt à libérer la connaissance de votre entreprise ?
               </h2>
               <p className="mt-4 text-slate-300 text-sm sm:text-base leading-relaxed">
-                Rejoignez vos collaborateurs et testez la recherche intelligente sur vos premiers documents dès aujourd'hui.
+                Rejoignez vos collaborateurs et testez la recherche intelligente sur vos premiers
+                documents dès aujourd'hui.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
                 <Link

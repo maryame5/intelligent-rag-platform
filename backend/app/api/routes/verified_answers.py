@@ -1,12 +1,13 @@
 import uuid
 from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
-from app.models.user import User
 from app.models.knowledge_base import KnowledgeBase
+from app.models.user import User
 from app.models.verified_answer import VerifiedAnswer
 from app.schemas.verified_answer import VerifiedAnswerCreate, VerifiedAnswerOut
 

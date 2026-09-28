@@ -8,7 +8,10 @@ export const Route = createFileRoute("/team")({
       { title: "Équipe & accès — SmartRAG" },
       { name: "description", content: "Membres, invitations et responsabilités du workspace." },
       { property: "og:title", content: "Équipe & accès — SmartRAG" },
-      { property: "og:description", content: "Membres, invitations et responsabilités du workspace." },
+      {
+        property: "og:description",
+        content: "Membres, invitations et responsabilités du workspace.",
+      },
     ],
   }),
   component: () => (

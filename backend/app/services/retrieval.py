@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.models.chunk import Chunk
 from app.models.document import Document, DocumentStatus
-from app.services.bm25_search import bm25_search, _tokenize as _bm25_tokenize
+from app.services.bm25_search import _tokenize as _bm25_tokenize
+from app.services.bm25_search import bm25_search
 from app.services.fusion import reciprocal_rank_fusion
 
 # Sous ce seuil de similarité cosinus, un chunk n'est pas considéré comme

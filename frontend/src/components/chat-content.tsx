@@ -30,7 +30,13 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api, type ChatCitation, type ChatMessage, type ConversationDetail } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -110,7 +116,11 @@ export function ChatContent() {
           ),
         };
       });
-      toast.success(variables.rating === "up" ? "Merci pour ce retour positif !" : "Merci, feedback enregistré.");
+      toast.success(
+        variables.rating === "up"
+          ? "Merci pour ce retour positif !"
+          : "Merci, feedback enregistré.",
+      );
     },
     onError: (error: Error) => toast.error(error.message || "Échec de l'envoi du feedback."),
   });
@@ -188,7 +198,9 @@ export function ChatContent() {
       <aside
         className={cn(
           "h-full border-r border-[#dcdfd9] bg-white transition-all duration-300 ease-in-out flex flex-col z-20 shrink-0",
-          sidebarOpen ? "w-72 shadow-sm" : "w-0 -translate-x-full md:translate-x-0 md:w-0 overflow-hidden border-r-0",
+          sidebarOpen
+            ? "w-72 shadow-sm"
+            : "w-0 -translate-x-full md:translate-x-0 md:w-0 overflow-hidden border-r-0",
         )}
       >
         {sidebarOpen && (
@@ -278,11 +290,26 @@ export function ChatContent() {
                       setSelectedCitation(null);
                     }}
                   >
-                    <MessageSquare className={cn("size-3.5 shrink-0", isActive ? "text-[#959EC9]" : "text-[#4E5174]")} />
+                    <MessageSquare
+                      className={cn(
+                        "size-3.5 shrink-0",
+                        isActive ? "text-[#959EC9]" : "text-[#4E5174]",
+                      )}
+                    />
                     <div className="min-w-0 flex-1">
-                      <span className="block truncate text-xs">{c.title ?? "Nouvelle discussion"}</span>
-                      <span className={cn("text-[10px] block", isActive ? "text-white/60" : "text-[#4E5174]/70")}>
-                        {new Date(c.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                      <span className="block truncate text-xs">
+                        {c.title ?? "Nouvelle discussion"}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-[10px] block",
+                          isActive ? "text-white/60" : "text-[#4E5174]/70",
+                        )}
+                      >
+                        {new Date(c.createdAt).toLocaleDateString("fr-FR", {
+                          day: "numeric",
+                          month: "short",
+                        })}
                       </span>
                     </div>
                     <button
@@ -294,7 +321,7 @@ export function ChatContent() {
                       disabled={deleteMutation.isPending}
                       className={cn(
                         "rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-400",
-                        isActive ? "text-white/70" : "text-[#4E5174]"
+                        isActive ? "text-white/70" : "text-[#4E5174]",
                       )}
                     >
                       <Trash2 className="size-3.5" />
@@ -377,7 +404,8 @@ export function ChatContent() {
                   Interrogez {currentKb?.name || "vos documents"}
                 </h3>
                 <p className="mt-2 max-w-lg text-sm text-[#4E5174] leading-relaxed">
-                  Posez vos questions en langage naturel. Le moteur extrait les passages pertinents, réordonne par pertinence et formule une réponse avec citations exactes.
+                  Posez vos questions en langage naturel. Le moteur extrait les passages pertinents,
+                  réordonne par pertinence et formule une réponse avec citations exactes.
                 </p>
 
                 <div className="mt-8 grid w-full gap-3 sm:grid-cols-2 text-left">
@@ -402,7 +430,9 @@ export function ChatContent() {
                 onSelectCitation={(citation) => setSelectedCitation(citation)}
                 selectedCitation={selectedCitation}
                 onFeedback={
-                  m.role === "assistant" ? (rating) => feedbackMutation.mutate({ messageId: m.id, rating }) : undefined
+                  m.role === "assistant"
+                    ? (rating) => feedbackMutation.mutate({ messageId: m.id, rating })
+                    : undefined
                 }
               />
             ))}
@@ -501,7 +531,11 @@ export function ChatContent() {
           >
             <Input
               ref={inputRef}
-              placeholder={currentKb ? `Interroger « ${currentKb.name} »…` : "Posez une question sur vos documents…"}
+              placeholder={
+                currentKb
+                  ? `Interroger « ${currentKb.name} »…`
+                  : "Posez une question sur vos documents…"
+              }
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               disabled={!kbId || isSending}
@@ -513,7 +547,11 @@ export function ChatContent() {
               disabled={!kbId || isSending || !draft.trim()}
               className="size-9 shrink-0 rounded-lg bg-[#AA0033] text-white hover:bg-[#880029] transition-all cursor-pointer"
             >
-              {isSending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
+              {isSending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ArrowRight className="size-4" />
+              )}
             </Button>
           </form>
         </div>
@@ -600,7 +638,8 @@ export function ChatContent() {
                   Passage vérifié par le pipeline
                 </div>
                 <p className="text-[11px] text-emerald-700 leading-relaxed">
-                  Ce passage a obtenu un score de similarité élevé lors de la fusion RRF et a été validé par le Cross-Encoder pour composer la réponse.
+                  Ce passage a obtenu un score de similarité élevé lors de la fusion RRF et a été
+                  validé par le Cross-Encoder pour composer la réponse.
                 </p>
               </div>
             </div>
@@ -633,7 +672,10 @@ function MarkdownFormatted({ content }: { content: string }) {
           const lang = lines[0] || "text";
           const code = lines.slice(1).join("\n") || lines[0];
           return (
-            <div key={index} className="my-3 overflow-hidden rounded-xl border border-[#4E5174] bg-[#28264B] text-[#E8EAE7] text-xs shadow-md">
+            <div
+              key={index}
+              className="my-3 overflow-hidden rounded-xl border border-[#4E5174] bg-[#28264B] text-[#E8EAE7] text-xs shadow-md"
+            >
               <div className="flex items-center justify-between bg-black/40 px-3.5 py-1.5 text-[11px] font-mono text-[#959EC9]">
                 <span>{lang}</span>
                 <button
@@ -754,7 +796,7 @@ function MessageBubble({
                   <span
                     className={cn(
                       "flex size-4.5 items-center justify-center rounded-full text-[10px] font-bold",
-                      isSelected ? "bg-white text-[#AA0033]" : "bg-[#28264B] text-white"
+                      isSelected ? "bg-white text-[#AA0033]" : "bg-[#28264B] text-white",
                     )}
                   >
                     {c.index}
@@ -776,7 +818,11 @@ function MessageBubble({
           onClick={handleCopy}
           className="h-7 px-2 text-xs text-[#4E5174] hover:text-[#28264B] hover:bg-[#E8EAE7]"
         >
-          {copied ? <Check className="mr-1 size-3.5 text-emerald-600" /> : <Copy className="mr-1 size-3.5" />}
+          {copied ? (
+            <Check className="mr-1 size-3.5 text-emerald-600" />
+          ) : (
+            <Copy className="mr-1 size-3.5" />
+          )}
           {copied ? "Copié !" : "Copier"}
         </Button>
 

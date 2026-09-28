@@ -1,12 +1,13 @@
 import uuid
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
-from app.models.user import User
 from app.models.integration import Integration
+from app.models.user import User
 from app.schemas.integration import IntegrationConnectRequest, IntegrationOut
 
 router = APIRouter(prefix="/integrations", tags=["integrations"])

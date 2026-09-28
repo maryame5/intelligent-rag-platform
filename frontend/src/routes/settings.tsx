@@ -8,7 +8,10 @@ export const Route = createFileRoute("/settings")({
       { title: "Paramètres — SmartRAG" },
       { name: "description", content: "Profil, workspace, sécurité et préférences de réponse." },
       { property: "og:title", content: "Paramètres — SmartRAG" },
-      { property: "og:description", content: "Profil, workspace, sécurité et préférences de réponse." },
+      {
+        property: "og:description",
+        content: "Profil, workspace, sécurité et préférences de réponse.",
+      },
     ],
   }),
   component: () => (

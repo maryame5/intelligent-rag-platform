@@ -8,10 +8,18 @@ const map = {
   workspace: { icon: Globe, label: "Workspace" },
 } as const;
 
-export function VisibilityBadge({ visibility, className }: { visibility: Visibility; className?: string }) {
+export function VisibilityBadge({
+  visibility,
+  className,
+}: {
+  visibility: Visibility;
+  className?: string;
+}) {
   const { icon: Icon, label } = map[visibility];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 text-xs text-muted-foreground", className)}>
+    <span
+      className={cn("inline-flex items-center gap-1.5 text-xs text-muted-foreground", className)}
+    >
       <Icon className="size-3.5" />
       {label}
     </span>

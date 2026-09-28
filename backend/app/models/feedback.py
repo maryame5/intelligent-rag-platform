@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Text, UniqueConstraint
 
 from app.db.base import Base
 from app.db.types import GUID

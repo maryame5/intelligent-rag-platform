@@ -1,8 +1,11 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON
-from app.db.types import GUID
+
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, String, Text
+
 from app.db.base import Base
+from app.db.types import GUID
+
 
 class Integration(Base):
     __tablename__ = "integrations"

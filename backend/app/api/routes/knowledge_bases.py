@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_owned_kb
+from app.core.config import settings
 from app.db.session import get_db
 from app.models.chunk import Chunk
 from app.models.conversation import Conversation
@@ -16,10 +17,9 @@ from app.models.user import User
 from app.schemas.document import DocumentOut, DocumentUploadOut
 from app.schemas.knowledge_base import KnowledgeBaseCreate, KnowledgeBaseOut, KnowledgeBaseUpdate
 from app.services.bm25_search import invalidate_bm25_cache
-from app.services.validation import FileValidationError, detect_mismatched_signature, validate_upload
 from app.services.storage import delete_object, get_minio_client, upload_bytes
+from app.services.validation import FileValidationError, detect_mismatched_signature, validate_upload
 from app.tasks.ingestion_task import run_ingestion_task
-from app.core.config import settings
 
 router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 

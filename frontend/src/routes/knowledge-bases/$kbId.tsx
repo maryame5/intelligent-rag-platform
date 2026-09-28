@@ -1,7 +1,15 @@
 import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, FileText, Loader2, Search, SplitSquareHorizontal, Trash2, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  FileText,
+  Loader2,
+  Search,
+  SplitSquareHorizontal,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader, EmptyState } from "@/components/page-header";
@@ -33,9 +41,18 @@ function KnowledgeBaseDetail() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  const { data: kb } = useQuery({ queryKey: ["kb", kbId], queryFn: () => api.getKnowledgeBase(kbId) });
-  const { data: docs = [] } = useQuery({ queryKey: ["docs", kbId], queryFn: () => api.getDocuments(kbId) });
-  const { data: workspaces = [] } = useQuery({ queryKey: ["workspaces"], queryFn: api.getWorkspaces });
+  const { data: kb } = useQuery({
+    queryKey: ["kb", kbId],
+    queryFn: () => api.getKnowledgeBase(kbId),
+  });
+  const { data: docs = [] } = useQuery({
+    queryKey: ["docs", kbId],
+    queryFn: () => api.getDocuments(kbId),
+  });
+  const { data: workspaces = [] } = useQuery({
+    queryKey: ["workspaces"],
+    queryFn: api.getWorkspaces,
+  });
   const currentWsId = workspaces[0]?.id;
   const { data: members = [] } = useQuery({
     queryKey: ["workspace-members", currentWsId],
@@ -61,7 +78,9 @@ function KnowledgeBaseDetail() {
       if (job.status === "SUCCESS") {
         toast.success(`« ${document.title} » indexé avec succès.`);
       } else {
-        toast.error(`Échec du traitement de « ${document.title} »${job.errorMessage ? ` : ${job.errorMessage}` : ""}`);
+        toast.error(
+          `Échec du traitement de « ${document.title} »${job.errorMessage ? ` : ${job.errorMessage}` : ""}`,
+        );
       }
     },
     onError: (error: Error) => toast.error(error.message || "Échec de l'upload."),
@@ -118,9 +137,16 @@ function KnowledgeBaseDetail() {
   return (
     <AppShell>
       <PageHeader
-        crumbs={[{ label: "Bases de connaissance", to: "/knowledge-bases" }, { label: kb?.name ?? "Base" }]}
+        crumbs={[
+          { label: "Bases de connaissance", to: "/knowledge-bases" },
+          { label: kb?.name ?? "Base" },
+        ]}
         title={kb?.name ?? "Base de connaissance"}
-        description={kb ? `${kb.documentCount} document${kb.documentCount === 1 ? "" : "s"} indexés` : "Chargement…"}
+        description={
+          kb
+            ? `${kb.documentCount} document${kb.documentCount === 1 ? "" : "s"} indexés`
+            : "Chargement…"
+        }
         actions={
           <>
             <input
@@ -135,7 +161,11 @@ function KnowledgeBaseDetail() {
               disabled={uploadMutation.isPending}
               className="bg-[#AA0033] text-white hover:bg-[#880029]"
             >
-              {uploadMutation.isPending ? <Loader2 className="animate-spin mr-1.5 size-4" /> : <Upload className="mr-1.5 size-4" />}
+              {uploadMutation.isPending ? (
+                <Loader2 className="animate-spin mr-1.5 size-4" />
+              ) : (
+                <Upload className="mr-1.5 size-4" />
+              )}
               Importer un document
             </Button>
           </>
@@ -202,7 +232,8 @@ function KnowledgeBaseDetail() {
                 Glissez-déposez vos fichiers ici, ou cliquez pour parcourir
               </h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Formats acceptés : PDF, DOCX, Markdown, HTML, TXT (Traitement automatique en chunks vectorisés)
+                Formats acceptés : PDF, DOCX, Markdown, HTML, TXT (Traitement automatique en chunks
+                vectorisés)
               </p>
             </div>
 
@@ -222,7 +253,10 @@ function KnowledgeBaseDetail() {
                 title="Aucun document"
                 description="Importez des fichiers PDF, DOCX, HTML ou Markdown pour alimenter cette base."
                 action={
-                  <Button onClick={() => fileInputRef.current?.click()} className="bg-[#AA0033] text-white hover:bg-[#880029]">
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-[#AA0033] text-white hover:bg-[#880029]"
+                  >
                     <Upload className="mr-1.5 size-4" />
                     Importer
                   </Button>
@@ -252,13 +286,19 @@ function KnowledgeBaseDetail() {
                             <FileText className="size-4" />
                           )}
                         </div>
-                        <span className="truncate font-medium text-sm text-[#28264B] dark:text-[#E8EAE7]">{d.title}</span>
+                        <span className="truncate font-medium text-sm text-[#28264B] dark:text-[#E8EAE7]">
+                          {d.title}
+                        </span>
                       </div>
                       <span className="hidden font-mono text-[11px] text-muted-foreground uppercase md:block">
                         {documentTypeLabel(d.mimeType)}
                       </span>
                       <span className="hidden truncate text-xs text-muted-foreground md:block">
-                        {new Date(d.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                        {new Date(d.createdAt).toLocaleDateString("fr-FR", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </span>
                       <span className="justify-self-start">
                         <StatusBadge status={badge.status} label={badge.label} />
@@ -289,9 +329,12 @@ function KnowledgeBaseDetail() {
           <section className="panel max-w-3xl p-6 shadow-sm border-border/70">
             <div className="flex items-center justify-between border-b pb-3 mb-4">
               <div>
-                <h2 className="font-semibold text-[#28264B] dark:text-[#E8EAE7]">Membres du workspace ayant accès</h2>
+                <h2 className="font-semibold text-[#28264B] dark:text-[#E8EAE7]">
+                  Membres du workspace ayant accès
+                </h2>
                 <p className="text-xs text-muted-foreground">
-                  Tous les collaborateurs de ce workspace peuvent interroger cette base documentaire.
+                  Tous les collaborateurs de ce workspace peuvent interroger cette base
+                  documentaire.
                 </p>
               </div>
               <span className="rounded-full bg-[#AA0033]/10 px-2.5 py-1 text-xs font-medium text-[#AA0033] dark:text-[#959EC9]">
@@ -324,9 +367,9 @@ function KnowledgeBaseDetail() {
             <div className="panel p-5">
               <h2 className="font-semibold">Comparer les stratégies de retrieval</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Une même question, cherchée en vectoriel seul, en hybride (BM25 + vectoriel),
-                et en hybride avec reranking — pour voir concrètement ce que chaque étape
-                change (Sprint 5 du backend).
+                Une même question, cherchée en vectoriel seul, en hybride (BM25 + vectoriel), et en
+                hybride avec reranking — pour voir concrètement ce que chaque étape change (Sprint 5
+                du backend).
               </p>
               <form
                 onSubmit={(e) => {
@@ -341,7 +384,11 @@ function KnowledgeBaseDetail() {
                   onChange={(e) => setCompareQuery(e.target.value)}
                 />
                 <Button type="submit" disabled={compareMutation.isPending || !compareQuery.trim()}>
-                  {compareMutation.isPending ? <Loader2 className="animate-spin" /> : <SplitSquareHorizontal />}
+                  {compareMutation.isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <SplitSquareHorizontal />
+                  )}
                   Comparer
                 </Button>
               </form>
@@ -360,7 +407,9 @@ function KnowledgeBaseDetail() {
                           column.results.map((r) => (
                             <div key={r.chunkId} className="p-3 text-xs">
                               <div className="flex items-center justify-between text-muted-foreground">
-                                <span className="truncate font-medium text-foreground">{r.documentFilename}</span>
+                                <span className="truncate font-medium text-foreground">
+                                  {r.documentFilename}
+                                </span>
                                 <span className="font-mono">{r.score.toFixed(3)}</span>
                               </div>
                               <p className="mt-1 line-clamp-3 text-muted-foreground">{r.content}</p>
@@ -390,7 +439,9 @@ function KnowledgeBaseDetail() {
                   return (
                     <li key={s} className="flex items-center justify-between">
                       <StatusBadge status={badge.status} label={badge.label} />
-                      <span className="font-mono tabular-nums">{docs.filter((d) => d.status === s).length}</span>
+                      <span className="font-mono tabular-nums">
+                        {docs.filter((d) => d.status === s).length}
+                      </span>
                     </li>
                   );
                 })}

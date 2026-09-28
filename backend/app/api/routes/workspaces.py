@@ -9,7 +9,6 @@ Workspace management API.
 - DELETE /workspaces/{id}/members/{user_id} → remove member
 """
 import uuid
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -20,7 +19,6 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
 from app.schemas.workspace import (
-    AddMemberRequest,
     CreateMemberWithPassword,
     WorkspaceCreate,
     WorkspaceMemberOut,

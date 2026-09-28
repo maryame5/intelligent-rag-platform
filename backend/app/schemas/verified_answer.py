@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
+
 
 class VerifiedAnswerCreate(BaseModel):
     knowledge_base_id: uuid.UUID

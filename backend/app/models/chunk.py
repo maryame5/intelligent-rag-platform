@@ -2,9 +2,9 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from app.db.types import GUID
 
 from app.db.base import Base
+from app.db.types import GUID
 
 
 class Chunk(Base):

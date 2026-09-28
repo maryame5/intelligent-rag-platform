@@ -12,7 +12,13 @@ import {
 } from "@/components/ui/command";
 import { api } from "@/lib/api";
 
-export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function CommandPalette({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const navigate = useNavigate();
   const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
   const { data: convos = [] } = useQuery({
@@ -31,7 +37,10 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     },
     enabled: kbs.length > 0,
   });
-  const { data: verified = [] } = useQuery({ queryKey: ["verified"], queryFn: () => api.getVerifiedAnswers() });
+  const { data: verified = [] } = useQuery({
+    queryKey: ["verified"],
+    queryFn: () => api.getVerifiedAnswers(),
+  });
 
   const go = (to: string, params?: Record<string, string>) => {
     onOpenChange(false);
@@ -57,10 +66,16 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
         <CommandSeparator />
         <CommandGroup heading="Knowledge bases">
           {kbs.map((kb) => (
-            <CommandItem key={kb.id} value={kb.name} onSelect={() => go("/knowledge-bases/$kbId", { kbId: kb.id })}>
+            <CommandItem
+              key={kb.id}
+              value={kb.name}
+              onSelect={() => go("/knowledge-bases/$kbId", { kbId: kb.id })}
+            >
               <BookOpen className="size-4" />
               <span>{kb.name}</span>
-              <span className="ml-auto text-xs text-muted-foreground">{kb.documentCount} documents</span>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {kb.documentCount} documents
+              </span>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -86,7 +101,11 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
         <CommandSeparator />
         <CommandGroup heading="Documents">
           {docs.slice(0, 6).map((d) => (
-            <CommandItem key={d.id} value={d.title} onSelect={() => go("/knowledge-bases/$kbId", { kbId: d.knowledgeBaseId })}>
+            <CommandItem
+              key={d.id}
+              value={d.title}
+              onSelect={() => go("/knowledge-bases/$kbId", { kbId: d.knowledgeBaseId })}
+            >
               <FileText className="size-4" />
               <span className="truncate">{d.title}</span>
               <span className="ml-auto text-xs text-muted-foreground">{d.status}</span>

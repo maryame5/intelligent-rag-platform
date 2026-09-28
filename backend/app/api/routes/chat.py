@@ -2,8 +2,6 @@ import json
 import logging
 import uuid
 
-logger = logging.getLogger(__name__)
-
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -26,6 +24,8 @@ from app.services.query_expansion import expand_query
 from app.services.query_rewriting import rewrite_query
 from app.services.reranking import get_reranker
 from app.services.retrieval import hybrid_search, multi_query_hybrid_search, search_chunks
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["chat"])
 

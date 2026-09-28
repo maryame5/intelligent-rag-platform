@@ -57,9 +57,7 @@ function toKnowledgeBase(raw: BackendKnowledgeBase, documentCount = 0): Knowledg
 
 export async function getKnowledgeBases(): Promise<KnowledgeBase[]> {
   const list = await apiRequest<BackendKnowledgeBase[]>("/knowledge-bases");
-  return Promise.all(
-    list.map(async (kb) => toKnowledgeBase(kb, await fetchDocumentCount(kb.id))),
-  );
+  return Promise.all(list.map(async (kb) => toKnowledgeBase(kb, await fetchDocumentCount(kb.id))));
 }
 
 export async function getKnowledgeBase(id: string): Promise<KnowledgeBase | null> {
@@ -202,7 +200,12 @@ export async function getJob(jobId: string): Promise<IngestionJobStatus> {
     status: BackendJobStatus;
     error_message: string | null;
   }>(`/jobs/${jobId}`);
-  return { id: raw.id, documentId: raw.document_id, status: raw.status, errorMessage: raw.error_message };
+  return {
+    id: raw.id,
+    documentId: raw.document_id,
+    status: raw.status,
+    errorMessage: raw.error_message,
+  };
 }
 
 /**
@@ -350,7 +353,10 @@ function toCitations(raw: BackendCitation[] | null | undefined): Citation[] | un
   }));
 }
 
-export async function getConversationsForKb(kbId: string, limit = 50): Promise<ConversationSummary[]> {
+export async function getConversationsForKb(
+  kbId: string,
+  limit = 50,
+): Promise<ConversationSummary[]> {
   const raw = await apiRequest<Array<{ id: string; title: string | null; created_at: string }>>(
     `/knowledge-bases/${kbId}/conversations?limit=${limit}`,
   );
@@ -721,29 +727,50 @@ export interface WorkspaceMemberInfo {
 }
 
 export async function getWorkspaces(): Promise<WorkspaceInfo[]> {
-  const raw = await apiRequest<Array<{
-    id: string; name: string; created_at: string; created_by: string;
-  }>>("/workspaces");
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      name: string;
+      created_at: string;
+      created_by: string;
+    }>
+  >("/workspaces");
   return raw.map((w) => ({
-    id: w.id, name: w.name, createdAt: w.created_at, createdBy: w.created_by,
+    id: w.id,
+    name: w.name,
+    createdAt: w.created_at,
+    createdBy: w.created_by,
   }));
 }
 
 export async function createWorkspace(name: string): Promise<WorkspaceInfo> {
   const raw = await apiRequest<{
-    id: string; name: string; created_at: string; created_by: string;
+    id: string;
+    name: string;
+    created_at: string;
+    created_by: string;
   }>("/workspaces", { method: "POST", body: { name } });
   return { id: raw.id, name: raw.name, createdAt: raw.created_at, createdBy: raw.created_by };
 }
 
 export async function getWorkspaceMembers(workspaceId: string): Promise<WorkspaceMemberInfo[]> {
-  const raw = await apiRequest<Array<{
-    id: string; user_id: string; email: string; display_name: string | null;
-    role: "ADMIN" | "MEMBER"; joined_at: string | null;
-  }>>(`/workspaces/${workspaceId}/members`);
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      user_id: string;
+      email: string;
+      display_name: string | null;
+      role: "ADMIN" | "MEMBER";
+      joined_at: string | null;
+    }>
+  >(`/workspaces/${workspaceId}/members`);
   return raw.map((m) => ({
-    id: m.id, userId: m.user_id, email: m.email, displayName: m.display_name,
-    role: m.role, joinedAt: m.joined_at,
+    id: m.id,
+    userId: m.user_id,
+    email: m.email,
+    displayName: m.display_name,
+    role: m.role,
+    joinedAt: m.joined_at,
   }));
 }
 
@@ -754,15 +781,23 @@ export async function addWorkspaceMember(
   role: "ADMIN" | "MEMBER" = "MEMBER",
 ): Promise<WorkspaceMemberInfo> {
   const raw = await apiRequest<{
-    id: string; user_id: string; email: string; display_name: string | null;
-    role: "ADMIN" | "MEMBER"; joined_at: string | null;
+    id: string;
+    user_id: string;
+    email: string;
+    display_name: string | null;
+    role: "ADMIN" | "MEMBER";
+    joined_at: string | null;
   }>(`/workspaces/${workspaceId}/members`, {
     method: "POST",
     body: { email, password, role },
   });
   return {
-    id: raw.id, userId: raw.user_id, email: raw.email, displayName: raw.display_name,
-    role: raw.role, joinedAt: raw.joined_at,
+    id: raw.id,
+    userId: raw.user_id,
+    email: raw.email,
+    displayName: raw.display_name,
+    role: raw.role,
+    joinedAt: raw.joined_at,
   };
 }
 
@@ -788,17 +823,19 @@ export interface VerifiedAnswer {
 
 export async function getVerifiedAnswers(kbId?: string): Promise<VerifiedAnswer[]> {
   const url = kbId ? `/verified-answers?kb_id=${kbId}` : "/verified-answers";
-  const raw = await apiRequest<Array<{
-    id: string;
-    knowledge_base_id: string;
-    question: string;
-    answer: string;
-    tags: string[];
-    uses_count: number;
-    verified_by: string | null;
-    created_at: string;
-    updated_at: string;
-  }>>(url);
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      knowledge_base_id: string;
+      question: string;
+      answer: string;
+      tags: string[];
+      uses_count: number;
+      verified_by: string | null;
+      created_at: string;
+      updated_at: string;
+    }>
+  >(url);
   return raw.map((r) => ({
     id: r.id,
     knowledgeBaseId: r.knowledge_base_id,
@@ -868,14 +905,16 @@ export interface NotificationItem {
 }
 
 export async function getNotifications(): Promise<NotificationItem[]> {
-  const raw = await apiRequest<Array<{
-    id: string;
-    title: string;
-    description: string;
-    kind: string;
-    read: boolean;
-    created_at: string;
-  }>>("/notifications");
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      title: string;
+      description: string;
+      kind: string;
+      read: boolean;
+      created_at: string;
+    }>
+  >("/notifications");
   return raw.map((n) => ({
     id: n.id,
     title: n.title,
@@ -905,15 +944,17 @@ export interface IntegrationItem {
 }
 
 export async function getIntegrations(): Promise<IntegrationItem[]> {
-  const raw = await apiRequest<Array<{
-    id: string;
-    provider: string;
-    name: string;
-    description: string;
-    status: string;
-    config: Record<string, unknown>;
-    created_at: string;
-  }>>("/integrations");
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      provider: string;
+      name: string;
+      description: string;
+      status: string;
+      config: Record<string, unknown>;
+      created_at: string;
+    }>
+  >("/integrations");
   return raw.map((i) => ({
     id: i.id,
     provider: i.provider,
@@ -925,7 +966,10 @@ export async function getIntegrations(): Promise<IntegrationItem[]> {
   }));
 }
 
-export async function connectIntegration(provider: string, config?: Record<string, unknown>): Promise<IntegrationItem> {
+export async function connectIntegration(
+  provider: string,
+  config?: Record<string, unknown>,
+): Promise<IntegrationItem> {
   const raw = await apiRequest<{
     id: string;
     provider: string;
@@ -994,14 +1038,16 @@ export interface ActivityItem {
 }
 
 export async function getActivity(): Promise<ActivityItem[]> {
-  const raw = await apiRequest<Array<{
-    id: string;
-    action: string;
-    user: string;
-    target: string;
-    time: string;
-    kind: string;
-  }>>("/analytics/activity");
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      action: string;
+      user: string;
+      target: string;
+      time: string;
+      kind: string;
+    }>
+  >("/analytics/activity");
   return raw.map((a) => ({
     id: a.id,
     action: a.action,

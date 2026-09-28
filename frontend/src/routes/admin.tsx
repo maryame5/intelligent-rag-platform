@@ -6,9 +6,15 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Observabilité — SmartRAG" },
-      { name: "description", content: "Performance, qualité RAG, traitements et traçabilité du workspace." },
+      {
+        name: "description",
+        content: "Performance, qualité RAG, traitements et traçabilité du workspace.",
+      },
       { property: "og:title", content: "Observabilité — SmartRAG" },
-      { property: "og:description", content: "Performance, qualité RAG, traitements et traçabilité." },
+      {
+        property: "og:description",
+        content: "Performance, qualité RAG, traitements et traçabilité.",
+      },
     ],
   }),
   component: () => (

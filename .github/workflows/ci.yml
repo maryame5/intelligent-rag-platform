@@ -21,7 +21,7 @@ jobs:
       - name: Ruff
         run: ruff check app tests
       - name: Tests with coverage
-        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=0
+        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=60
 
   frontend:
     runs-on: ubuntu-latest

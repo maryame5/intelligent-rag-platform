@@ -1,8 +1,11 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, JSON
-from app.db.types import GUID
+
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
+
 from app.db.base import Base
+from app.db.types import GUID
+
 
 class VerifiedAnswer(Base):
     __tablename__ = "verified_answers"

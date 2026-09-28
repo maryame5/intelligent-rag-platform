@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict
+
 
 class IntegrationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)

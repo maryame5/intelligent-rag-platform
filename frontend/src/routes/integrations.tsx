@@ -6,9 +6,15 @@ export const Route = createFileRoute("/integrations")({
   head: () => ({
     meta: [
       { title: "Intégrations — SmartRAG" },
-      { name: "description", content: "Connectez les systèmes où vit la connaissance de votre entreprise." },
+      {
+        name: "description",
+        content: "Connectez les systèmes où vit la connaissance de votre entreprise.",
+      },
       { property: "og:title", content: "Intégrations — SmartRAG" },
-      { property: "og:description", content: "Connectez les systèmes où vit la connaissance de votre entreprise." },
+      {
+        property: "og:description",
+        content: "Connectez les systèmes où vit la connaissance de votre entreprise.",
+      },
     ],
   }),
   component: () => (

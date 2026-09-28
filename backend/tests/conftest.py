@@ -7,19 +7,20 @@ import os
 # la suite de tests.
 os.environ["RATE_LIMIT_STORAGE_URI"] = "memory://"
 
-import pytest
 import re
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core.rate_limit import limiter
+from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.models.user import User, UserRole
-from app.core.security import hash_password
-from app.core.rate_limit import limiter
 from app.worker import celery_app
 
 # Mode "eager" : les tâches Celery s'exécutent en synchrone, dans le même

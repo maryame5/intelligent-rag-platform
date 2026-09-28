@@ -93,7 +93,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const { light, toggle } = useTheme();
   const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
-  const { data: notifications = [] } = useQuery({ queryKey: ["notifications"], queryFn: api.getNotifications });
+  const { data: notifications = [] } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: api.getNotifications,
+  });
   const unread = notifications.filter((n) => !n.read).length;
 
   const markReadMutation = useMutation({
@@ -120,7 +123,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     return <div className="min-h-screen bg-background" />;
   }
 
-  const isActive = (to: string, exact?: boolean) => (exact ? pathname === to : pathname.startsWith(to));
+  const isActive = (to: string, exact?: boolean) =>
+    exact ? pathname === to : pathname.startsWith(to);
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900">
@@ -171,7 +175,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                       )}
                       title={collapsed ? item.label : undefined}
                     >
-                      <item.icon className={cn("size-4 shrink-0", active ? "text-white" : "text-slate-500")} />
+                      <item.icon
+                        className={cn("size-4 shrink-0", active ? "text-white" : "text-slate-500")}
+                      />
                       {!collapsed ? <span>{item.label}</span> : null}
                     </Link>
                   </li>
@@ -187,7 +193,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                   Bases de Connaissances
                 </span>
-                <Link to="/knowledge-bases" className="text-[10px] font-bold text-indigo-600 hover:underline">
+                <Link
+                  to="/knowledge-bases"
+                  className="text-[10px] font-bold text-indigo-600 hover:underline"
+                >
                   Voir tout
                 </Link>
               </div>
@@ -266,7 +275,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
             title={collapsed ? "Déplier" : "Replier"}
           >
-            {collapsed ? <ChevronsRight className="size-4 text-indigo-600" /> : <ChevronsLeft className="size-4" />}
+            {collapsed ? (
+              <ChevronsRight className="size-4 text-indigo-600" />
+            ) : (
+              <ChevronsLeft className="size-4" />
+            )}
             {!collapsed ? "Replier le menu" : null}
           </button>
         </div>
@@ -325,10 +338,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-88 p-0 bg-white border border-slate-200 shadow-xl rounded-xl">
+              <PopoverContent
+                align="end"
+                className="w-88 p-0 bg-white border border-slate-200 shadow-xl rounded-xl"
+              >
                 <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-slate-50">
-                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">Notifications</span>
-                  <span className="text-xs text-slate-500">{unread} non lue{unread > 1 ? "s" : ""}</span>
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Notifications
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {unread} non lue{unread > 1 ? "s" : ""}
+                  </span>
                 </div>
                 <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto">
                   {notifications.length === 0 ? (
@@ -344,7 +364,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         }}
                         className={cn(
                           "cursor-pointer px-4 py-3 transition-colors hover:bg-slate-50",
-                          !n.read && "bg-indigo-50/40 font-medium"
+                          !n.read && "bg-indigo-50/40 font-medium",
                         )}
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -375,7 +395,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <ChevronDown className="size-3.5 text-slate-500" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-1.5">
+              <DropdownMenuContent
+                align="end"
+                className="w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-1.5"
+              >
                 <DropdownMenuLabel className="p-2.5">
                   <p className="text-sm font-bold text-slate-900">{session.user.name}</p>
                   <p className="text-xs font-normal text-slate-500">{session.user.email}</p>
