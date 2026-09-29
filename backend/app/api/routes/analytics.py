@@ -22,6 +22,7 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 def _owned_kb_ids_subquery(db: Session, user: User):
     return db.query(KnowledgeBase.id).filter(KnowledgeBase.owner_id == user.id)
 
+
 @router.get("/metrics", response_model=PlatformMetricsOut)
 def get_metrics(
     db: Session = Depends(get_db),
@@ -30,10 +31,7 @@ def get_metrics(
     """Calculate metrics from the current user's data only."""
     owned_kb_ids = _owned_kb_ids_subquery(db, current_user)
     doc_count = (
-        db.query(func.count(Document.id))
-        .filter(Document.knowledge_base_id.in_(owned_kb_ids))
-        .scalar()
-        or 0
+        db.query(func.count(Document.id)).filter(Document.knowledge_base_id.in_(owned_kb_ids)).scalar() or 0
     )
     chunk_count = (
         db.query(func.count(Chunk.id))
@@ -45,9 +43,7 @@ def get_metrics(
 
     # Feedbacks
     total_feedbacks = (
-        db.query(func.count(MessageFeedback.id))
-        .filter(MessageFeedback.user_id == current_user.id)
-        .scalar()
+        db.query(func.count(MessageFeedback.id)).filter(MessageFeedback.user_id == current_user.id).scalar()
         or 0
     )
     up_feedbacks = (
@@ -102,6 +98,7 @@ def get_metrics(
         costPerQuery=None,
     )
 
+
 @router.get("/activity", response_model=list[ActivityItemOut])
 def get_activity(
     db: Session = Depends(get_db),
@@ -120,14 +117,16 @@ def get_activity(
         .all()
     )
     for doc in recent_docs:
-        items.append(ActivityItemOut(
-            id=str(doc.id),
-            action="a téléversé et indexé",
-            user="Vous",
-            target=doc.filename,
-            time=doc.created_at.strftime("%d %b %H:%M") if doc.created_at else "Récemment",
-            kind="doc",
-        ))
+        items.append(
+            ActivityItemOut(
+                id=str(doc.id),
+                action="a téléversé et indexé",
+                user="Vous",
+                target=doc.filename,
+                time=doc.created_at.strftime("%d %b %H:%M") if doc.created_at else "Récemment",
+                kind="doc",
+            )
+        )
 
     # Recent knowledge bases
     recent_kbs = (
@@ -138,14 +137,16 @@ def get_activity(
         .all()
     )
     for kb in recent_kbs:
-        items.append(ActivityItemOut(
-            id=str(kb.id),
-            action="a créé la base de connaissances",
-            user="Vous",
-            target=kb.name,
-            time=kb.created_at.strftime("%d %b %H:%M") if kb.created_at else "Récemment",
-            kind="kb",
-        ))
+        items.append(
+            ActivityItemOut(
+                id=str(kb.id),
+                action="a créé la base de connaissances",
+                user="Vous",
+                target=kb.name,
+                time=kb.created_at.strftime("%d %b %H:%M") if kb.created_at else "Récemment",
+                kind="kb",
+            )
+        )
 
     # Recent jobs
     recent_jobs = (
@@ -157,23 +158,27 @@ def get_activity(
         .all()
     )
     for job in recent_jobs:
-        items.append(ActivityItemOut(
-            id=str(job.id),
-            action=f"a exécuté un job ({job.status.value})",
-            user="Worker IA",
-            target=f"Job #{str(job.id)[:8]}",
-            time=job.created_at.strftime("%d %b %H:%M") if job.created_at else "Récemment",
-            kind="job",
-        ))
+        items.append(
+            ActivityItemOut(
+                id=str(job.id),
+                action=f"a exécuté un job ({job.status.value})",
+                user="Worker IA",
+                target=f"Job #{str(job.id)[:8]}",
+                time=job.created_at.strftime("%d %b %H:%M") if job.created_at else "Récemment",
+                kind="job",
+            )
+        )
 
     if not items:
-        items.append(ActivityItemOut(
-            id="act_init",
-            action="a initialisé l'espace",
-            user="SmartRAG",
-            target="Plateforme prête pour l'ingestion",
-            time="Maintenant",
-            kind="kb",
-        ))
+        items.append(
+            ActivityItemOut(
+                id="act_init",
+                action="a initialisé l'espace",
+                user="SmartRAG",
+                target="Plateforme prête pour l'ingestion",
+                time="Maintenant",
+                kind="kb",
+            )
+        )
 
     return items[:15]

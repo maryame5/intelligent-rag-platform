@@ -18,7 +18,9 @@ class Document(Base):
     __tablename__ = "documents"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    knowledge_base_id = Column(GUID(), ForeignKey("knowledge_bases.id", ondelete="CASCADE"), nullable=False, index=True)
+    knowledge_base_id = Column(
+        GUID(), ForeignKey("knowledge_bases.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     filename = Column(String, nullable=False)
     storage_path = Column(String, nullable=False)
     mime_type = Column(String, nullable=False)

@@ -119,7 +119,9 @@ def record_spend(cost_usd: float, redis_client=None) -> None:
         try:
             redis_client = get_redis_client()
         except Exception as exc:
-            logger.warning("spend_cap: impossible d'accéder à Redis pour enregistrer %.6f USD : %s", cost_usd, exc)
+            logger.warning(
+                "spend_cap: impossible d'accéder à Redis pour enregistrer %.6f USD : %s", cost_usd, exc
+            )
             return
 
     key = _current_month_key()

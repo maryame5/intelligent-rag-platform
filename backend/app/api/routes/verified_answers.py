@@ -13,6 +13,7 @@ from app.schemas.verified_answer import VerifiedAnswerCreate, VerifiedAnswerOut
 
 router = APIRouter(prefix="/verified-answers", tags=["verified-answers"])
 
+
 @router.get("", response_model=list[VerifiedAnswerOut])
 def list_verified_answers(
     kb_id: uuid.UUID | None = None,
@@ -25,6 +26,7 @@ def list_verified_answers(
         query = query.filter(VerifiedAnswer.knowledge_base_id == kb_id)
     answers = query.order_by(VerifiedAnswer.created_at.desc()).all()
     return answers
+
 
 @router.post("", response_model=VerifiedAnswerOut, status_code=status.HTTP_201_CREATED)
 def create_verified_answer(
@@ -53,6 +55,7 @@ def create_verified_answer(
     db.commit()
     db.refresh(va)
     return va
+
 
 @router.delete("/{answer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_verified_answer(

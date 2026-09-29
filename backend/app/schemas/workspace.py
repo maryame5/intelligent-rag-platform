@@ -39,6 +39,7 @@ class AddMemberRequest(BaseModel):
 
 class CreateMemberWithPassword(BaseModel):
     """Admin creates a user account + adds them to the workspace."""
+
     email: EmailStr
     password: str
     role: WorkspaceRole = WorkspaceRole.MEMBER

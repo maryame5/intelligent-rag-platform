@@ -41,9 +41,7 @@ def run_ingestion(document_id: str, job_id: str) -> None:
         raw_bytes = download_bytes(client, settings.minio_bucket, document.storage_path)
 
         pages = extract_pages(raw_bytes, document.mime_type)
-        cleaned_blocks = [
-            (page_number, section, clean_text(text)) for page_number, section, text in pages
-        ]
+        cleaned_blocks = [(page_number, section, clean_text(text)) for page_number, section, text in pages]
 
         chunk_results = fixed_size_chunks(cleaned_blocks)
         if not chunk_results:

@@ -56,7 +56,9 @@ def test_documents_pagination_default_limit_is_reasonable(
     assert response.status_code == 200  # pas d'erreur sans paramètres explicites
 
 
-def test_conversations_pagination_limit(client, fake_minio, worker_session_override, fake_embeddings, fake_chat):
+def test_conversations_pagination_limit(
+    client, fake_minio, worker_session_override, fake_embeddings, fake_chat
+):
     headers = register_and_login(client, "page4@example.com")
     kb = client.post("/knowledge-bases", json={"name": "Docs"}, headers=headers).json()
     client.post(

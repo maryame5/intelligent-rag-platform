@@ -19,12 +19,12 @@ from app.schemas.conversation import ConversationOut, ConversationSummaryOut, Me
 from app.services.bm25_search import bm25_search
 from app.services.embeddings import EmbeddingProviderError, get_embedding_provider
 from app.services.generation import ChatProvider, ChatProviderError, get_chat_provider
-from app.services.spend_cap import SpendCapExceededError
 from app.services.prompt_builder import build_chat_messages
 from app.services.query_expansion import expand_query
 from app.services.query_rewriting import rewrite_query
 from app.services.reranking import get_reranker
 from app.services.retrieval import hybrid_search, multi_query_hybrid_search, search_chunks
+from app.services.spend_cap import SpendCapExceededError
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,11 @@ def _prepare_turn(
             queries = expand_query(chat_provider, standalone_query)
             query_embeddings = embedding_provider.embed(queries)
             results = multi_query_hybrid_search(
-                db, knowledge_base_id=kb.id, queries=queries, query_embeddings=query_embeddings, top_k=candidate_k
+                db,
+                knowledge_base_id=kb.id,
+                queries=queries,
+                query_embeddings=query_embeddings,
+                top_k=candidate_k,
             )
         elif payload.use_hybrid:
             query_embedding = embedding_provider.embed([standalone_query])[0]
@@ -131,7 +135,9 @@ def _prepare_turn(
             # reste donc un signal fiable de "contexte insuffisant".
         else:
             query_embedding = embedding_provider.embed([standalone_query])[0]
-            results = search_chunks(db, knowledge_base_id=kb.id, query_embedding=query_embedding, top_k=candidate_k)
+            results = search_chunks(
+                db, knowledge_base_id=kb.id, query_embedding=query_embedding, top_k=candidate_k
+            )
             results = [r for r in results if r[2] >= MIN_RELEVANCE_SCORE]
     except EmbeddingProviderError as exc:
         logger.warning("Échec du service d'embeddings (%s), repli automatique sur BM25.", exc)
@@ -144,7 +150,9 @@ def _prepare_turn(
     return conversation, history, chat_provider, standalone_query, results[: payload.top_k]
 
 
-def _persist_assistant_message(db: Session, conversation: Conversation, answer: str, citations_payload: list[dict]) -> Message:
+def _persist_assistant_message(
+    db: Session, conversation: Conversation, answer: str, citations_payload: list[dict]
+) -> Message:
     assistant_message = Message(
         conversation_id=conversation.id,
         role=MessageRole.ASSISTANT,
@@ -159,7 +167,12 @@ def _persist_assistant_message(db: Session, conversation: Conversation, answer: 
 
 @router.post("/chat", response_model=ChatResponse)
 @limiter.limit("20/minute")
-def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def chat(
+    request: Request,
+    payload: ChatRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     kb = get_owned_kb(db, payload.knowledge_base_id, user)
     conversation, history, chat_provider, standalone_query, results = _prepare_turn(db, payload, kb, user)
 
@@ -177,7 +190,7 @@ def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db), 
             raise HTTPException(
                 status_code=402,
                 detail=f"Plafond de dépense LLM atteint : {exc}. "
-                       "Contactez l'administrateur ou attendez le mois prochain."
+                "Contactez l'administrateur ou attendez le mois prochain.",
             )
         except ChatProviderError as exc:
             raise HTTPException(status_code=502, detail=f"Échec de la génération : {exc}")
@@ -202,7 +215,10 @@ def _sse(event: dict) -> str:
 @router.post("/chat/stream")
 @limiter.limit("20/minute")
 def chat_stream(
-    request: Request, payload: ChatRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+    request: Request,
+    payload: ChatRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
     """Variante streaming de /chat, même logique de retrieval/grounding,
     réponse envoyée au format SSE (Server-Sent Events) plutôt qu'en un bloc.
@@ -354,7 +370,9 @@ def delete_conversation(
     messages = db.query(Message).filter(Message.conversation_id == conversation.id).all()
     msg_ids = [m.id for m in messages]
     if msg_ids:
-        db.query(MessageFeedback).filter(MessageFeedback.message_id.in_(msg_ids)).delete(synchronize_session=False)
+        db.query(MessageFeedback).filter(MessageFeedback.message_id.in_(msg_ids)).delete(
+            synchronize_session=False
+        )
         db.query(Message).filter(Message.id.in_(msg_ids)).delete(synchronize_session=False)
 
     db.delete(conversation)

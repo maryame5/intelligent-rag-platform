@@ -1,4 +1,5 @@
 """Tests unitaires pour le service de plafond de dépense LLM."""
+
 import pytest
 
 from app.services.spend_cap import (
@@ -107,5 +108,6 @@ def test_redis_unavailable_doesnt_raise(monkeypatch):
 def test_month_key_format():
     """La clé Redis doit commencer par 'llm:spend:' et contenir YYYY-MM."""
     import re
+
     key = _current_month_key()
     assert re.match(r"llm:spend:\d{4}-\d{2}$", key), f"Clé invalide : {key}"

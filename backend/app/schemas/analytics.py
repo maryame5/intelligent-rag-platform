@@ -8,11 +8,13 @@ class UsagePoint(BaseModel):
     queries: int
     users: int
 
+
 class RAGQuality(BaseModel):
     faithfulness: Optional[float] = None
     answerRelevance: Optional[float] = None
     contextRecall: Optional[float] = None
     contextPrecision: Optional[float] = None
+
 
 class PlatformMetricsOut(BaseModel):
     series: list[UsagePoint]
@@ -26,6 +28,7 @@ class PlatformMetricsOut(BaseModel):
     errorRate: Optional[float] = None
     throughput: Optional[float] = None
     costPerQuery: Optional[float] = None
+
 
 class ActivityItemOut(BaseModel):
     id: str

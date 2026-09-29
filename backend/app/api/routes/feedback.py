@@ -26,7 +26,9 @@ def _get_owned_assistant_message(db: Session, message_id: uuid.UUID, user: User)
     if message.role != MessageRole.ASSISTANT:
         # Noter un avis sur sa propre question n'a pas de sens : le feedback
         # porte sur la qualité d'une réponse, jamais sur une question.
-        raise HTTPException(status_code=422, detail="Le feedback ne s'applique qu'aux réponses de l'assistant.")
+        raise HTTPException(
+            status_code=422, detail="Le feedback ne s'applique qu'aux réponses de l'assistant."
+        )
     return message
 
 
@@ -54,7 +56,9 @@ def submit_feedback(
         existing.comment = payload.comment
         feedback = existing
     else:
-        feedback = MessageFeedback(message_id=message_id, user_id=user.id, rating=rating, comment=payload.comment)
+        feedback = MessageFeedback(
+            message_id=message_id, user_id=user.id, rating=rating, comment=payload.comment
+        )
         db.add(feedback)
 
     db.commit()

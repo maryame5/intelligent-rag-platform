@@ -19,4 +19,3 @@ class Integration(Base):
     status = Column(String(50), default="available", nullable=False)  # connected, available, coming_soon
     config = Column(JSON, default=dict, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-

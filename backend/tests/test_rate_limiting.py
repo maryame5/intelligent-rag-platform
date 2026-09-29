@@ -4,9 +4,7 @@ def test_login_rate_limit_triggers_429_beyond_threshold(client):
     client.post("/auth/register", json={"email": "ratelimit1@example.com", "password": "strongpass123"})
 
     responses = [
-        client.post(
-            "/auth/login", json={"email": "ratelimit1@example.com", "password": "wrongpassword"}
-        )
+        client.post("/auth/login", json={"email": "ratelimit1@example.com", "password": "wrongpassword"})
         for _ in range(11)
     ]
 

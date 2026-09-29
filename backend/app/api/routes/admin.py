@@ -60,7 +60,9 @@ def list_feedback(
         .order_by(MessageFeedback.created_at.desc())
     )
     if rating is not None:
-        query = query.filter(MessageFeedback.rating == (FeedbackRating.UP if rating == "up" else FeedbackRating.DOWN))
+        query = query.filter(
+            MessageFeedback.rating == (FeedbackRating.UP if rating == "up" else FeedbackRating.DOWN)
+        )
 
     rows = query.offset(offset).limit(limit).all()
 

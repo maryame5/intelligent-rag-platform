@@ -4,7 +4,9 @@ def register_and_login(client, email, password="strongpass123"):
     return {"Authorization": f"Bearer {login.json()['access_token']}"}
 
 
-def test_upload_txt_document_is_ingested_end_to_end(client, fake_minio, worker_session_override, fake_embeddings):
+def test_upload_txt_document_is_ingested_end_to_end(
+    client, fake_minio, worker_session_override, fake_embeddings
+):
     headers = register_and_login(client, "uploader1@example.com")
     kb = client.post("/knowledge-bases", json={"name": "Docs"}, headers=headers).json()
 
@@ -75,7 +77,9 @@ def test_list_documents_for_a_knowledge_base(client, fake_minio, worker_session_
     assert filenames == {"a.txt", "b.txt"}
 
 
-def test_delete_document_removes_it_and_its_chunks(client, fake_minio, worker_session_override, fake_embeddings):
+def test_delete_document_removes_it_and_its_chunks(
+    client, fake_minio, worker_session_override, fake_embeddings
+):
     headers = register_and_login(client, "uploader4@example.com")
     kb = client.post("/knowledge-bases", json={"name": "Docs"}, headers=headers).json()
 

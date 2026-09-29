@@ -164,7 +164,6 @@ class CachingEmbeddingProvider:
         return results  # type: ignore[return-value]
 
 
-
 _fastembed_model_instance = None
 _fastembed_model_lock = threading.Lock()
 

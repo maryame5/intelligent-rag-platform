@@ -32,9 +32,7 @@ class _FlakyEmbeddingTransport(_FlakyThenSuccessTransport):
 class _FlakyChatTransport(_FlakyThenSuccessTransport):
     def _success_response(self):
         request = httpx.Request("POST", "https://example.test/chat/completions")
-        return httpx.Response(
-            200, json={"choices": [{"message": {"content": "ok"}}]}, request=request
-        )
+        return httpx.Response(200, json={"choices": [{"message": {"content": "ok"}}]}, request=request)
 
 
 class _AlwaysFailingTransport:
@@ -46,7 +44,9 @@ def test_embedding_retry_succeeds_after_transient_failures(monkeypatch):
     transport = _FlakyEmbeddingTransport(fail_times=2)
     monkeypatch.setattr(httpx, "post", transport)
 
-    provider = OpenAIEmbeddingProvider(api_key="test-key", model="test-model", base_url="https://example.test")
+    provider = OpenAIEmbeddingProvider(
+        api_key="test-key", model="test-model", base_url="https://example.test"
+    )
     result = provider.embed(["bonjour"])
 
     assert result == [[0.1, 0.2]]
@@ -57,7 +57,9 @@ def test_embedding_retry_gives_up_after_max_attempts(monkeypatch):
     transport = _AlwaysFailingTransport()
     monkeypatch.setattr(httpx, "post", transport)
 
-    provider = OpenAIEmbeddingProvider(api_key="test-key", model="test-model", base_url="https://example.test")
+    provider = OpenAIEmbeddingProvider(
+        api_key="test-key", model="test-model", base_url="https://example.test"
+    )
     with pytest.raises(EmbeddingProviderError):
         provider.embed(["bonjour"])
 
@@ -119,7 +121,9 @@ def test_embedding_batches_large_input_lists(monkeypatch):
 
     monkeypatch.setattr(httpx, "post", _mock_post)
 
-    provider = OpenAIEmbeddingProvider(api_key="test-key", model="test-model", base_url="https://example.test")
+    provider = OpenAIEmbeddingProvider(
+        api_key="test-key", model="test-model", base_url="https://example.test"
+    )
     texts = [f"chunk {i}" for i in range(100)]  # 100 > 32
     result = provider.embed(texts)
 
@@ -129,4 +133,3 @@ def test_embedding_batches_large_input_lists(monkeypatch):
     assert len(recorded_batches[1]) == 32
     assert len(recorded_batches[2]) == 32
     assert len(recorded_batches[3]) == 4
-

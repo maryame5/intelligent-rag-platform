@@ -51,6 +51,7 @@ DEFAULT_PROVIDERS = [
     },
 ]
 
+
 @router.get("", response_model=list[IntegrationOut])
 def list_integrations(
     workspace_id: uuid.UUID | None = None,
@@ -79,6 +80,7 @@ def list_integrations(
             db.refresh(item)
         return created_items
     return db_items
+
 
 @router.post("/{provider}/connect", response_model=IntegrationOut)
 def connect_integration(

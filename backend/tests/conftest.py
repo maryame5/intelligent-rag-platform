@@ -75,6 +75,7 @@ def _clear_bm25_cache():
     BM25Okapi lui-même reste valide seulement pour la DB du test courant.
     On le vide avant chaque test pour éviter toute contamination entre suites."""
     from app.services.bm25_search import clear_bm25_cache
+
     clear_bm25_cache()
     yield
     clear_bm25_cache()

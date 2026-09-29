@@ -17,4 +17,3 @@ class Notification(Base):
     kind = Column(String(50), default="info", nullable=False)  # job, access, feedback, info
     read = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-

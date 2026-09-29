@@ -70,8 +70,11 @@ def _evaluate_single_question(
 
     if mode == "hybrid":
         retrieved = hybrid_search(
-            db, knowledge_base_id=knowledge_base_id, query=question.question,
-            query_embedding=query_embedding, top_k=top_k,
+            db,
+            knowledge_base_id=knowledge_base_id,
+            query=question.question,
+            query_embedding=query_embedding,
+            top_k=top_k,
         )
     else:
         retrieved = search_chunks(
@@ -143,8 +146,16 @@ def run_evaluation(
     for question in dataset.questions:
         try:
             result = _evaluate_single_question(
-                db, knowledge_base_id, question, top_k, mode, rerank,
-                run_generation, embedding_provider, chat_provider, reranker,
+                db,
+                knowledge_base_id,
+                question,
+                top_k,
+                mode,
+                rerank,
+                run_generation,
+                embedding_provider,
+                chat_provider,
+                reranker,
             )
             question_results.append(result)
         except Exception as exc:

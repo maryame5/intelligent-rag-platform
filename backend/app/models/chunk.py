@@ -1,4 +1,3 @@
-import os
 import uuid
 from datetime import datetime, timezone
 
@@ -7,6 +6,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 
 from app.db.base import Base
 from app.db.types import GUID
+
 
 # Vecteur pgvector natif : stockage binaire compact, supporte les index HNSW/IVFFlat.
 # La dimension exacte (384) est définie et gérée au niveau DDL/migration PostgreSQL (0011).

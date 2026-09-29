@@ -24,7 +24,9 @@ def test_embedding_success_increments_request_counter(monkeypatch):
         "embedding_requests_total", {"model": "test-model-metrics-a", "status": "success"}
     )
 
-    provider = OpenAIEmbeddingProvider(api_key="key", model="test-model-metrics-a", base_url="https://example.test")
+    provider = OpenAIEmbeddingProvider(
+        api_key="key", model="test-model-metrics-a", base_url="https://example.test"
+    )
     provider.embed(["texte"])
 
     after = _get_counter_value(
@@ -43,7 +45,9 @@ def test_embedding_failure_increments_error_counter(monkeypatch):
         "embedding_requests_total", {"model": "test-model-metrics-b", "status": "error"}
     )
 
-    provider = OpenAIEmbeddingProvider(api_key="key", model="test-model-metrics-b", base_url="https://example.test")
+    provider = OpenAIEmbeddingProvider(
+        api_key="key", model="test-model-metrics-b", base_url="https://example.test"
+    )
     try:
         provider.embed(["texte"])
     except Exception:
@@ -71,7 +75,9 @@ def test_chat_success_tracks_tokens_from_usage_field(monkeypatch):
 
     before = _get_counter_value("llm_tokens_total", {"model": "test-model-metrics-c", "direction": "input"})
 
-    provider = OpenAIChatProvider(api_key="key", model="test-model-metrics-c", base_url="https://example.test")
+    provider = OpenAIChatProvider(
+        api_key="key", model="test-model-metrics-c", base_url="https://example.test"
+    )
     provider.generate([{"role": "user", "content": "salut"}])
 
     after = _get_counter_value("llm_tokens_total", {"model": "test-model-metrics-c", "direction": "input"})

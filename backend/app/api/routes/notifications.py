@@ -12,6 +12,7 @@ from app.schemas.notification import NotificationOut
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
+
 @router.get("", response_model=list[NotificationOut])
 def list_notifications(
     db: Session = Depends(get_db),
@@ -40,6 +41,7 @@ def list_notifications(
         db.refresh(welcome_note)
         notes = [welcome_note]
     return notes
+
 
 @router.post("/{notification_id}/read", response_model=NotificationOut)
 def mark_notification_read(

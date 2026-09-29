@@ -19,7 +19,9 @@ def test_search_ranks_relevant_document_first(client, fake_minio, worker_session
     kb = client.post("/knowledge-bases", json={"name": "Docs"}, headers=headers).json()
 
     _upload_and_wait(client, headers, kb["id"], "animaux.txt", b"Le chat chat chat dort sur le canape.")
-    _upload_and_wait(client, headers, kb["id"], "juridique.txt", b"Le contrat contrat contrat doit etre signe.")
+    _upload_and_wait(
+        client, headers, kb["id"], "juridique.txt", b"Le contrat contrat contrat doit etre signe."
+    )
 
     response = client.post(
         f"/knowledge-bases/{kb['id']}/search",

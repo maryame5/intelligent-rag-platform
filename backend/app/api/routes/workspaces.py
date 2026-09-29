@@ -8,6 +8,7 @@ Workspace management API.
 - POST   /workspaces/{id}/members → add existing user OR create new user + add
 - DELETE /workspaces/{id}/members/{user_id} → remove member
 """
+
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -46,6 +47,7 @@ def _require_ws_admin(db: Session, workspace_id: uuid.UUID, user: User) -> Works
 
 
 # ─── routes ─────────────────────────────────────────────────────────────────
+
 
 @router.post("", response_model=WorkspaceOut, status_code=status.HTTP_201_CREATED)
 def create_workspace(
@@ -149,7 +151,9 @@ def list_members(
     ]
 
 
-@router.post("/{workspace_id}/members", response_model=WorkspaceMemberOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{workspace_id}/members", response_model=WorkspaceMemberOut, status_code=status.HTTP_201_CREATED
+)
 def add_member(
     workspace_id: uuid.UUID,
     payload: CreateMemberWithPassword,

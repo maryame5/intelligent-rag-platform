@@ -25,7 +25,9 @@ router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 
 
 @router.post("", response_model=KnowledgeBaseOut, status_code=201)
-def create_kb(payload: KnowledgeBaseCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def create_kb(
+    payload: KnowledgeBaseCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     kb = KnowledgeBase(name=payload.name, owner_id=user.id)
     db.add(kb)
     db.commit()
@@ -69,7 +71,9 @@ def delete_kb(kb_id: uuid.UUID, db: Session = Depends(get_db), user: User = Depe
         messages = db.query(Message).filter(Message.conversation_id.in_(conv_ids)).all()
         msg_ids = [m.id for m in messages]
         if msg_ids:
-            db.query(MessageFeedback).filter(MessageFeedback.message_id.in_(msg_ids)).delete(synchronize_session=False)
+            db.query(MessageFeedback).filter(MessageFeedback.message_id.in_(msg_ids)).delete(
+                synchronize_session=False
+            )
             db.query(Message).filter(Message.id.in_(msg_ids)).delete(synchronize_session=False)
         db.query(Conversation).filter(Conversation.id.in_(conv_ids)).delete(synchronize_session=False)
 

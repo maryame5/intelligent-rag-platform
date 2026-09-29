@@ -20,7 +20,9 @@ def _upload_and_wait(client, headers, kb_id, filename, content: bytes):
 def _create_conversation_with_assistant_message(client, headers, fake_minio, fake_embeddings, fake_chat):
     kb = client.post("/knowledge-bases", json={"name": "RH"}, headers=headers).json()
     _upload_and_wait(client, headers, kb["id"], "conges.txt", b"chat chat chat politique de conges.")
-    chat_response = client.post("/chat", json={"knowledge_base_id": kb["id"], "message": "chat"}, headers=headers)
+    chat_response = client.post(
+        "/chat", json={"knowledge_base_id": kb["id"], "message": "chat"}, headers=headers
+    )
     body = chat_response.json()
     return kb, body["conversation_id"], body["message_id"]
 
@@ -48,7 +50,9 @@ def test_resubmitting_feedback_updates_existing_entry_not_duplicates(
 
     first = client.post(f"/messages/{message_id}/feedback", json={"rating": "up"}, headers=headers)
     second = client.post(
-        f"/messages/{message_id}/feedback", json={"rating": "down", "comment": "pas assez précis"}, headers=headers
+        f"/messages/{message_id}/feedback",
+        json={"rating": "down", "comment": "pas assez précis"},
+        headers=headers,
     )
     assert first.json()["id"] == second.json()["id"]  # même enregistrement, pas un nouveau
     assert second.json()["rating"] == "down"
@@ -136,7 +140,9 @@ def test_admin_feedback_listing_includes_context_and_filters_by_rating(
         client, headers, fake_minio, fake_embeddings, fake_chat
     )
     client.post(
-        f"/messages/{message_id}/feedback", json={"rating": "down", "comment": "réponse incomplète"}, headers=headers
+        f"/messages/{message_id}/feedback",
+        json={"rating": "down", "comment": "réponse incomplète"},
+        headers=headers,
     )
 
     admin_headers = {"Authorization": f"Bearer {create_access_token(str(admin_user.id))}"}

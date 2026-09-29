@@ -39,7 +39,9 @@ class LLMReranker:
             return candidates
 
         limited = candidates[:MAX_RERANK_CANDIDATES]
-        listing = "\n".join(f"{i}. {chunk.content[:400]}" for i, (chunk, _doc, _score) in enumerate(limited, start=1))
+        listing = "\n".join(
+            f"{i}. {chunk.content[:400]}" for i, (chunk, _doc, _score) in enumerate(limited, start=1)
+        )
         messages = [
             {"role": "system", "content": RERANK_SYSTEM_PROMPT},
             {"role": "user", "content": f"Question : {query}\n\nExtraits :\n{listing}"},

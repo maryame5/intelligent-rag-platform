@@ -30,12 +30,16 @@ def _get_owned_document(db: Session, document_id: uuid.UUID, user: User) -> Docu
 
 
 @router.get("/documents/{document_id}", response_model=DocumentOut)
-def get_document(document_id: uuid.UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_document(
+    document_id: uuid.UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     return _get_owned_document(db, document_id, user)
 
 
 @router.delete("/documents/{document_id}", status_code=204)
-def delete_document(document_id: uuid.UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def delete_document(
+    document_id: uuid.UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     doc = _get_owned_document(db, document_id, user)
 
     db.query(Chunk).filter(Chunk.document_id == doc.id).delete()

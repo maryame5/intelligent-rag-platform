@@ -25,7 +25,9 @@ class ChatProviderError(Exception):
     wait=wait_exponential(multiplier=0.5, max=4),
     retry=retry_if_exception_type(httpx.HTTPError),
 )
-def _post_chat_completion(base_url: str, api_key: str, model: str, messages: list[dict], temperature: float) -> dict:
+def _post_chat_completion(
+    base_url: str, api_key: str, model: str, messages: list[dict], temperature: float
+) -> dict:
     """Appel HTTP isolé pour lui appliquer un retry avec backoff exponentiel sur
     les erreurs réseau transitoires — mêmes réglages que pour les embeddings."""
     response = httpx.post(
@@ -61,7 +63,9 @@ class OpenAIChatProvider:
             data = _post_chat_completion(self.base_url, self.api_key, self.model, messages, self.temperature)
         except httpx.HTTPError as exc:
             LLM_REQUESTS_TOTAL.labels(model=self.model, status="error").inc()
-            raise ChatProviderError(f"Appel au service de génération échoué après 3 tentatives : {exc}") from exc
+            raise ChatProviderError(
+                f"Appel au service de génération échoué après 3 tentatives : {exc}"
+            ) from exc
 
         LLM_REQUESTS_TOTAL.labels(model=self.model, status="success").inc()
 

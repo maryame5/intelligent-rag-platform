@@ -10,6 +10,7 @@ class VerifiedAnswerCreate(BaseModel):
     answer: str
     tags: list[str] = []
 
+
 class VerifiedAnswerOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

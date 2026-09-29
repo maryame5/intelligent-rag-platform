@@ -136,14 +136,8 @@ def search_chunks(
     if not chunk_ids:
         return []
 
-    chunks_map = {
-        str(c.id): c
-        for c in db.query(Chunk).filter(Chunk.id.in_(chunk_ids)).all()
-    }
-    docs_map = {
-        str(d.id): d
-        for d in db.query(Document).filter(Document.id.in_(set(doc_ids))).all()
-    }
+    chunks_map = {str(c.id): c for c in db.query(Chunk).filter(Chunk.id.in_(chunk_ids)).all()}
+    docs_map = {str(d.id): d for d in db.query(Document).filter(Document.id.in_(set(doc_ids))).all()}
 
     result: list[tuple[Chunk, Document, float]] = []
     for chunk_id, doc_id in zip(chunk_ids, doc_ids):
@@ -163,7 +157,9 @@ def _relevant_vector_candidates(
     document_id: uuid.UUID | None,
 ) -> list[tuple[Chunk, Document, float]]:
     """search_chunks() + filtre de pertinence minimale — voir MIN_VECTOR_SCORE."""
-    results = search_chunks(db, knowledge_base_id, query_embedding, top_k=candidate_k, document_id=document_id)
+    results = search_chunks(
+        db, knowledge_base_id, query_embedding, top_k=candidate_k, document_id=document_id
+    )
     return [r for r in results if r[2] >= MIN_VECTOR_SCORE]
 
 
@@ -185,10 +181,7 @@ def _relevant_keyword_candidates(
     corpus."""
     results = bm25_search(db, knowledge_base_id, query, top_k=candidate_k, document_id=document_id)
     query_tokens = set(_bm25_tokenize(query))
-    return [
-        r for r in results
-        if query_tokens & set(_bm25_tokenize(r[0].content))
-    ]
+    return [r for r in results if query_tokens & set(_bm25_tokenize(r[0].content))]
 
 
 def hybrid_search(
@@ -211,7 +204,9 @@ def hybrid_search(
     non nul au meilleur candidat technique même quand rien n'est réellement
     pertinent — cassant le refus déterministe de /chat (voir
     app/api/routes/chat.py et docs/sprints/sprint-05-hybrid-rerank.md)."""
-    vector_results = _relevant_vector_candidates(db, knowledge_base_id, query_embedding, candidate_k, document_id)
+    vector_results = _relevant_vector_candidates(
+        db, knowledge_base_id, query_embedding, candidate_k, document_id
+    )
     keyword_results = _relevant_keyword_candidates(db, knowledge_base_id, query, candidate_k, document_id)
 
     fused = reciprocal_rank_fusion([vector_results, keyword_results])

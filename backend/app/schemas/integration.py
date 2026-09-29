@@ -17,6 +17,7 @@ class IntegrationOut(BaseModel):
     config: dict[str, Any]
     created_at: datetime
 
+
 class IntegrationConnectRequest(BaseModel):
     workspace_id: uuid.UUID | None = None
     config: dict[str, Any] = {}

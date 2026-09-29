@@ -74,9 +74,7 @@ def test_conversation_continues_across_turns(
     kb = client.post("/knowledge-bases", json={"name": "RH"}, headers=headers).json()
     _upload_and_wait(client, headers, kb["id"], "conges.txt", b"chat chat chat politique de conges.")
 
-    first = client.post(
-        "/chat", json={"knowledge_base_id": kb["id"], "message": "chat"}, headers=headers
-    )
+    first = client.post("/chat", json={"knowledge_base_id": kb["id"], "message": "chat"}, headers=headers)
     conversation_id = first.json()["conversation_id"]
 
     second = client.post(
