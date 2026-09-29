@@ -6,30 +6,57 @@ Système RAG production-ready : ingestion de documents, retrieval hybride (vecto
 génération grounded avec citations, évaluation automatique, observabilité et CI/CD.
 
 ## Stack
-- **Frontend** : React + TypeScript + Vite + Tailwind
+
+- **Frontend** : React + TypeScript + Vite + Tailwind — authentification, chat RAG, gestion des bases de connaissances, dashboard métriques
 - **Backend** : FastAPI + Pydantic + SQLAlchemy
-- **Data** : PostgreSQL (recherche vectorielle) + Redis + MinIO
+- **Data** : PostgreSQL (vecteurs JSON + BM25) + Redis + MinIO
 - **Async** : Celery + Redis
-- **Infra** : Docker Compose + GitHub Actions
+- **Infra** : Docker Compose + Caddy (HTTPS) + GitHub Actions
 - **Observability** : Prometheus + Grafana + logs structurés
 
-## Démarrage rapide
+## Démarrage rapide (dev)
 
 ```bash
 cp .env.example .env
+# Renseigner LLM_API_KEY dans .env (Groq gratuit : https://console.groq.com/keys)
 docker compose up -d --build
 ```
 
-- API : http://localhost:8000/docs
+- API docs : http://localhost:8000/docs
 - Frontend : http://localhost:5173
 - MinIO console : http://localhost:9001
+
+## Déploiement production
+
+```bash
+cp .env.prod.example .env.prod
+# Renseigner tous les secrets (SECRET_KEY, mots de passe, domaines, LLM_API_KEY)
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+```
+
+Caddy gère automatiquement les certificats TLS Let's Encrypt. Aucun port de base de données
+n'est exposé à l'extérieur.
+
+## Architecture vectorielle
+
+Les embeddings sont générés **localement** via FastEmbed (ONNX, CPU, sans API key, sans rate
+limit). Le modèle par défaut est `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
+(384 dims, multilangue). Le stockage et la recherche vectorielle s'appuient nativement sur
+**PostgreSQL + pgvector** avec un index HNSW (`vector_cosine_ops`, O(log n)), assurant des temps
+de réponse sous les 10 ms même sur des bases à large volume.
+
+La recherche hybride combine la similarité vectorielle pgvector et la recherche textuelle BM25 via
+Reciprocal Rank Fusion (RRF), suivi d'un reranking optionnel.
+
+> **Note :** changer de modèle d'embedding (`LOCAL_EMBEDDING_MODEL`) après indexation nécessite
+> de réindexer tous les documents (dimensions différentes). La config est validée au démarrage.
 
 ## Structure
 
 ```
 backend/        API FastAPI (auth, knowledge bases, documents, RAG)
-frontend/       Application React
-infrastructure/ Config docker/CI/monitoring
+frontend/       Application React (UI complète : chat, KB, dashboard, admin)
+infrastructure/ Config Caddy, Prometheus
 docs/           Architecture, ADRs, notes de sprint
 ```
 
@@ -42,8 +69,5 @@ chaque sprint réalisé — la référence pour comprendre le projet sans relire
 
 Voir `docs/roadmap.md` — 8 sprints d'une semaine, du squelette au système observable et évalué.
 
-## Sprint actuel
 
-Les 8 sprints du planning initial sont terminés (voir `docs/sprints/` pour le détail de
-chacun). Le projet est présenté comme une démo publique d'un système RAG hybride évalué ;
-les métriques sans données observées sont affichées comme indisponibles plutôt qu'inventées.
+

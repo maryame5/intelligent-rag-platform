@@ -19,6 +19,7 @@ from app.schemas.conversation import ConversationOut, ConversationSummaryOut, Me
 from app.services.bm25_search import bm25_search
 from app.services.embeddings import EmbeddingProviderError, get_embedding_provider
 from app.services.generation import ChatProvider, ChatProviderError, get_chat_provider
+from app.services.spend_cap import SpendCapExceededError
 from app.services.prompt_builder import build_chat_messages
 from app.services.query_expansion import expand_query
 from app.services.query_rewriting import rewrite_query
@@ -172,6 +173,12 @@ def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db), 
         messages = build_chat_messages(payload.message, results, history)
         try:
             answer_text = chat_provider.generate(messages)
+        except SpendCapExceededError as exc:
+            raise HTTPException(
+                status_code=402,
+                detail=f"Plafond de dépense LLM atteint : {exc}. "
+                       "Contactez l'administrateur ou attendez le mois prochain."
+            )
         except ChatProviderError as exc:
             raise HTTPException(status_code=502, detail=f"Échec de la génération : {exc}")
         grounded = True
@@ -240,6 +247,9 @@ def chat_stream(
             for delta in chat_provider.generate_stream(messages):
                 full_answer += delta
                 yield _sse({"type": "answer_chunk", "content": delta})
+        except SpendCapExceededError as exc:
+            yield _sse({"type": "error", "message": f"Plafond de dépense LLM atteint : {exc}"})
+            return
         except ChatProviderError as exc:
             yield _sse({"type": "error", "message": f"Échec de la génération : {exc}"})
             return

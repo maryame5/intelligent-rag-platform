@@ -7,6 +7,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 from app.core.config import settings
 from app.core.metrics import LLM_COST_USD_TOTAL, LLM_REQUESTS_TOTAL, LLM_TOKENS_TOTAL
 from app.services.cost_tracking import estimate_cost, estimate_tokens
+from app.services.spend_cap import check_spend_cap, record_spend
 
 
 class ChatProvider(Protocol):
@@ -51,6 +52,11 @@ class OpenAIChatProvider:
         if not self.api_key:
             raise ChatProviderError("LLM_API_KEY manquant : impossible d'appeler le service de génération.")
 
+        # Estimation du coût avant l'appel pour vérifier le plafond mensuel.
+        estimated_input = sum(estimate_tokens(m.get("content", "")) for m in messages)
+        estimated_cost = estimate_cost(self.model, estimated_input)
+        check_spend_cap(estimated_cost, settings.llm_monthly_spend_cap_usd)
+
         try:
             data = _post_chat_completion(self.base_url, self.api_key, self.model, messages, self.temperature)
         except httpx.HTTPError as exc:
@@ -61,11 +67,13 @@ class OpenAIChatProvider:
 
         content = data["choices"][0]["message"]["content"]
         usage = data.get("usage", {})
-        input_tokens = usage.get("prompt_tokens") or sum(estimate_tokens(m.get("content", "")) for m in messages)
+        input_tokens = usage.get("prompt_tokens") or estimated_input
         output_tokens = usage.get("completion_tokens") or estimate_tokens(content)
+        actual_cost = estimate_cost(self.model, input_tokens, output_tokens)
         LLM_TOKENS_TOTAL.labels(model=self.model, direction="input").inc(input_tokens)
         LLM_TOKENS_TOTAL.labels(model=self.model, direction="output").inc(output_tokens)
-        LLM_COST_USD_TOTAL.labels(model=self.model).inc(estimate_cost(self.model, input_tokens, output_tokens))
+        LLM_COST_USD_TOTAL.labels(model=self.model).inc(actual_cost)
+        record_spend(actual_cost)
 
         return content
 

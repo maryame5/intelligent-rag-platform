@@ -1,4 +1,3 @@
-import json
 import logging
 import time
 
@@ -54,6 +53,11 @@ def run_ingestion(document_id: str, job_id: str) -> None:
         provider = get_embedding_provider()
         vectors = provider.embed([result.content for result in chunk_results])
 
+        embedding_model_name = (
+            settings.local_embedding_model
+            if settings.embedding_provider_type.lower() == "local"
+            else settings.embedding_model
+        )
         for result, vector in zip(chunk_results, vectors):
             db.add(
                 Chunk(
@@ -62,8 +66,8 @@ def run_ingestion(document_id: str, job_id: str) -> None:
                     content=result.content,
                     page=result.page,
                     section=result.section,
-                    embedding=json.dumps(vector),
-                    embedding_model=settings.embedding_model,
+                    embedding=vector,  # list[float] → pgvector sérialise nativement
+                    embedding_model=embedding_model_name,
                 )
             )
 

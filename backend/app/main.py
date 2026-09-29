@@ -1,6 +1,7 @@
 import logging
 import time
 import uuid
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,8 +18,34 @@ from app.core.rate_limit import limiter
 
 configure_logging()
 access_logger = logging.getLogger("rag_platform.access")
+startup_logger = logging.getLogger("rag_platform.startup")
 
-app = FastAPI(title="Production RAG Platform API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Validations au démarrage — échouent vite plutôt qu'en prod silencieusement."""
+    # Vérification du modèle d'embedding local
+    if settings.embedding_provider_type.lower() == "local":
+        dims = settings.embedding_dimensions
+        if dims is None:
+            startup_logger.warning(
+                "Modèle d'embedding local '%s' absent du registre _FASTEMBED_DIMENSIONS. "
+                "Les dimensions de sortie ne peuvent pas être vérifiées au démarrage. "
+                "Si vous changez de modèle après indexation, réindexez tous les chunks "
+                "(dimensions différentes = scores cosinus incohérents). "
+                "Ajoutez le modèle à _FASTEMBED_DIMENSIONS dans core/config.py.",
+                settings.local_embedding_model,
+            )
+        else:
+            startup_logger.info(
+                "Embedding local : modèle='%s', dimensions=%d",
+                settings.local_embedding_model,
+                dims,
+            )
+    yield
+
+
+app = FastAPI(title="Production RAG Platform API", version="0.1.0", lifespan=lifespan)
 
 app.state.limiter = limiter
 
@@ -73,4 +100,24 @@ Instrumentator().instrument(app).expose(app, endpoint="/metrics", include_in_sch
 
 @app.get("/health", tags=["system"])
 def health():
-    return {"status": "ok", "environment": settings.environment}
+    from app.services.spend_cap import get_current_spend
+
+    cap = settings.llm_monthly_spend_cap_usd
+    current_spend = get_current_spend()
+    spend_info: dict = {"cap_usd": cap, "current_spend_usd": round(current_spend, 6)}
+    if cap > 0:
+        spend_info["remaining_usd"] = round(max(0.0, cap - current_spend), 6)
+        spend_info["cap_reached"] = current_spend >= cap
+
+    return {
+        "status": "ok",
+        "environment": settings.environment,
+        "embedding_provider": settings.embedding_provider_type,
+        "embedding_model": (
+            settings.local_embedding_model
+            if settings.embedding_provider_type.lower() == "local"
+            else settings.embedding_model
+        ),
+        "llm_model": settings.llm_model,
+        "llm_spend": spend_info,
+    }

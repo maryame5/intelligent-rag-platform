@@ -37,7 +37,7 @@ def _add_chunk(db_session, kb, filename: str, content: str) -> Chunk:
         document_id=document.id,
         chunk_index=0,
         content=content,
-        embedding=json.dumps(ZERO_VECTOR),
+        embedding=ZERO_VECTOR,
         embedding_model="test",
     )
     db_session.add(chunk)

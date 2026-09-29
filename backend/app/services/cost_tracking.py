@@ -1,9 +1,21 @@
-# Tarifs indicatifs en USD pour 1 million de tokens. Les modèles ":free"
-# d'OpenRouter sont à 0 par définition. Pour un modèle inconnu, on suppose 0
-# plutôt que d'inventer un chiffre arbitraire qui fausserait le suivi de coût.
+# Tarifs indicatifs en USD pour 1 million de tokens.
+# Les modèles ":free" d'OpenRouter sont à 0 par définition.
+# Pour un modèle inconnu, on suppose 0 plutôt que d'inventer un chiffre
+# arbitraire qui fausserait le suivi de coût.
+# Source tarifs Groq : https://console.groq.com/docs/pricing (septembre 2026)
 PRICING_PER_MILLION_TOKENS: dict[str, dict[str, float]] = {
+    # OpenRouter gratuits
     "z-ai/glm-5.2:free": {"input": 0.0, "output": 0.0},
     "liquid/lfm-2.5-embedding-350m:free": {"input": 0.0, "output": 0.0},
+    # Groq
+    "qwen/qwen3.8-27b": {"input": 0.10, "output": 0.10},
+    "llama3-8b-8192": {"input": 0.05, "output": 0.08},
+    "llama3-70b-8192": {"input": 0.59, "output": 0.79},
+    "mixtral-8x7b-32768": {"input": 0.24, "output": 0.24},
+    # Modèles locaux FastEmbed (ONNX) : coût nul
+    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2": {"input": 0.0, "output": 0.0},
+    "BAAI/bge-small-en-v1.5": {"input": 0.0, "output": 0.0},
+    "BAAI/bge-base-en-v1.5": {"input": 0.0, "output": 0.0},
 }
 _DEFAULT_PRICING = {"input": 0.0, "output": 0.0}
 
