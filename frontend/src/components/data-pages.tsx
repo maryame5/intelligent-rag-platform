@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -9,16 +9,22 @@ import {
   ChevronRight,
   Clock3,
   Crown,
+  Eye,
+  EyeOff,
   FileText,
+  KeyRound,
   Loader2,
+  Lock,
   MessagesSquare,
   Play,
   Plus,
   Search,
+  Settings2,
   Shield,
   ShieldCheck,
   Sparkles,
   Trash2,
+  UserCog,
   UserPlus,
   Users,
   Zap,
@@ -392,13 +398,18 @@ export function KnowledgeBasesContent() {
   const [name, setName] = useState("");
   const [search, setSearch] = useState("");
 
+  const activeWsId =
+    typeof window !== "undefined"
+      ? localStorage.getItem("rag.activeWorkspaceId") || undefined
+      : undefined;
+
   const { data: bases = [], isLoading } = useQuery({
-    queryKey: ["kbs"],
-    queryFn: api.getKnowledgeBases,
+    queryKey: ["kbs", activeWsId],
+    queryFn: () => api.getKnowledgeBases(activeWsId),
   });
 
   const createMutation = useMutation({
-    mutationFn: (kbName: string) => api.createKnowledgeBase(kbName),
+    mutationFn: (kbName: string) => api.createKnowledgeBase(kbName, activeWsId),
     onSuccess: (kb) => {
       toast.success(`Base « ${kb.name} » créée.`);
       queryClient.invalidateQueries({ queryKey: ["kbs"] });
@@ -1203,18 +1214,27 @@ export function IntegrationsContent() {
   );
 }
 
+type SettingsTab = "profile" | "workspace" | "security" | "models";
+
+const SETTINGS_TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
+  { id: "profile", label: "Profil", icon: <Users className="size-4" /> },
+  { id: "workspace", label: "Workspace", icon: <Building2 className="size-4" /> },
+  { id: "security", label: "Sécurité", icon: <Lock className="size-4" /> },
+  { id: "models", label: "Modèles & recherche", icon: <Settings2 className="size-4" /> },
+];
+
 export function SettingsContent() {
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+
+  // ── Profil ──────────────────────────────────────────────────────────
   const { data: profile } = useQuery({ queryKey: ["me"], queryFn: api.getMe });
   const [displayName, setDisplayName] = useState("");
-
-  // Initialiser le champ une fois le profil chargé
   const [initialised, setInitialised] = useState(false);
   if (profile && !initialised) {
     setDisplayName(profile.displayName ?? "");
     setInitialised(true);
   }
-
   const updateMutation = useMutation({
     mutationFn: () => api.updateMe(displayName),
     onSuccess: (updated) => {
@@ -1224,62 +1244,430 @@ export function SettingsContent() {
     onError: (error: Error) => toast.error(error.message || "Échec de la mise à jour."),
   });
 
+  // ── Sécurité ─────────────────────────────────────────────────────────
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const changePwdMutation = useMutation({
+    mutationFn: () => api.changePassword(currentPwd, newPwd),
+    onSuccess: () => {
+      toast.success("Mot de passe modifié avec succès.");
+      setCurrentPwd("");
+      setNewPwd("");
+      setConfirmPwd("");
+    },
+    onError: (error: Error) => toast.error(error.message || "Échec du changement de mot de passe."),
+  });
+
+  // ── Workspace ─────────────────────────────────────────────────────────
+  const { data: workspaces = [], isLoading: isLoadingWs } = useQuery({
+    queryKey: ["workspaces"],
+    queryFn: api.getWorkspaces,
+    enabled: activeTab === "workspace",
+  });
+  const [selectedWsId, setSelectedWsId] = useState<string | null>(null);
+  const currentWsId = selectedWsId || workspaces[0]?.id || null;
+  const currentWorkspace = workspaces.find((w) => w.id === currentWsId);
+  const { data: members = [], isLoading: isLoadingMembers } = useQuery({
+    queryKey: ["workspace-members", currentWsId],
+    queryFn: () => (currentWsId ? api.getWorkspaceMembers(currentWsId) : Promise.resolve([])),
+    enabled: !!currentWsId && activeTab === "workspace",
+  });
+
+  // ── Modèles ──────────────────────────────────────────────────────────
+  const [searchMode, setSearchMode] = useState<"vector" | "hybrid">("hybrid");
+  const [topK, setTopK] = useState(5);
+  const [rerankerEnabled, setRerankerEnabled] = useState(false);
+
   return (
     <>
       <PageHeader
         title="Paramètres"
         description="Profil, workspace, sécurité et préférences de réponse."
       />
-      <div className="grid gap-5 p-4 md:p-6 xl:grid-cols-[220px_1fr]">
+      <div className="grid gap-5 p-4 md:p-6 xl:grid-cols-[240px_1fr]">
+        {/* ── Navigation latérale ── */}
         <nav className="space-y-1">
-          {["Profil", "Workspace", "Sécurité", "Modèles & recherche", "Facturation"].map((x, i) => (
+          {SETTINGS_TABS.map((tab) => (
             <button
-              key={x}
-              className={`w-full rounded-md px-3 py-2 text-left text-sm ${i === 0 ? "bg-secondary font-medium" : "text-muted-foreground hover:bg-secondary"}`}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                activeTab === tab.id
+                  ? "bg-secondary font-semibold text-foreground shadow-sm"
+                  : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+              }`}
             >
-              {x}
+              {tab.icon}
+              {tab.label}
             </button>
           ))}
         </nav>
-        <section className="panel max-w-3xl p-5">
-          <h2 className="font-semibold">Profil personnel</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Votre adresse e-mail est fixée à l'inscription.
-          </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <label className="text-sm">
-              Nom affiché
-              <Input
-                className="mt-2"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Prénom Nom"
-              />
-            </label>
-            <label className="text-sm">
-              Adresse e-mail
-              <Input className="mt-2" disabled value={profile?.email ?? "—"} />
-            </label>
-          </div>
-          <div className="mt-2 text-xs text-muted-foreground">
-            Rôle&nbsp;:{" "}
-            <span className="font-medium capitalize">{profile?.role.toLowerCase() ?? "—"}</span>
-          </div>
-          <Button
-            className="mt-5"
-            onClick={() => updateMutation.mutate()}
-            disabled={updateMutation.isPending || !displayName.trim()}
-          >
-            {updateMutation.isPending ? <Loader2 className="animate-spin" /> : null}
-            Enregistrer
-          </Button>
-        </section>
+
+        {/* ── Contenu actif ── */}
+        <div className="min-w-0">
+          {/* ────────── PROFIL ────────── */}
+          {activeTab === "profile" && (
+            <section className="panel max-w-2xl space-y-6 p-6">
+              <div>
+                <h2 className="text-base font-semibold">Profil personnel</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Votre adresse e-mail est fixée à l'inscription et ne peut pas être modifiée.
+                </p>
+              </div>
+
+              {/* Avatar + infos */}
+              <div className="flex items-center gap-4">
+                <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-marine/20 to-braise/20 text-2xl font-bold text-marine">
+                  {(profile?.displayName ?? profile?.email ?? "?")[0].toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold">{profile?.displayName || "—"}</p>
+                  <p className="text-sm text-muted-foreground">{profile?.email}</p>
+                  <span
+                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                      profile?.role === "ADMIN"
+                        ? "bg-braise/10 text-braise"
+                        : "bg-orbite-soft text-marine"
+                    }`}
+                  >
+                    {profile?.role === "ADMIN" ? "Administrateur" : "Utilisateur"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="text-sm font-medium">
+                  Nom affiché
+                  <Input
+                    className="mt-2"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Prénom Nom"
+                  />
+                </label>
+                <label className="text-sm font-medium">
+                  Adresse e-mail
+                  <Input className="mt-2" disabled value={profile?.email ?? "—"} />
+                </label>
+              </div>
+
+              {profile?.createdAt && (
+                <p className="text-xs text-muted-foreground">
+                  Compte créé le{" "}
+                  {new Date(profile.createdAt).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              )}
+
+              <Button
+                onClick={() => updateMutation.mutate()}
+                disabled={updateMutation.isPending || !displayName.trim()}
+              >
+                {updateMutation.isPending ? (
+                  <Loader2 className="mr-1 animate-spin" />
+                ) : (
+                  <Check className="mr-1 size-4" />
+                )}
+                Enregistrer les modifications
+              </Button>
+            </section>
+          )}
+
+          {/* ────────── WORKSPACE ────────── */}
+          {activeTab === "workspace" && (
+            <section className="max-w-2xl space-y-5">
+              <div className="panel p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-semibold">Mes workspaces</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Liste des espaces de travail auxquels vous appartenez.
+                    </p>
+                  </div>
+                </div>
+
+                {isLoadingWs ? (
+                  <div className="mt-4 flex justify-center py-8">
+                    <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : workspaces.length === 0 ? (
+                  <p className="mt-4 text-sm text-muted-foreground">Aucun workspace trouvé.</p>
+                ) : (
+                  <div className="mt-4 space-y-2">
+                    {workspaces.map((ws) => (
+                      <button
+                        key={ws.id}
+                        onClick={() => setSelectedWsId(ws.id)}
+                        className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors ${
+                          ws.id === currentWsId
+                            ? "border-marine/30 bg-orbite-soft/30"
+                            : "border-border hover:bg-secondary/50"
+                        }`}
+                      >
+                        <div className="flex size-9 items-center justify-center rounded-lg bg-marine/10 text-marine">
+                          <Building2 className="size-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{ws.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Créé le {new Date(ws.createdAt).toLocaleDateString("fr-FR")}
+                          </p>
+                        </div>
+                        {ws.id === currentWsId && <Check className="size-4 text-marine shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {currentWorkspace && (
+                <div className="panel p-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">Membres — {currentWorkspace.name}</h3>
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
+                      {members.length} membre{members.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  {isLoadingMembers ? (
+                    <div className="mt-4 flex justify-center py-4">
+                      <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="mt-4 divide-y divide-border/50">
+                      {members.map((m) => (
+                        <div key={m.id} className="flex items-center gap-3 py-2.5">
+                          <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-marine/20 to-braise/20 text-sm font-semibold text-marine">
+                            {(m.displayName ?? m.email)[0].toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {m.displayName ?? m.email}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+                          </div>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                              m.role === "ADMIN"
+                                ? "bg-braise/10 text-braise"
+                                : "bg-orbite-soft text-marine"
+                            }`}
+                          >
+                            {m.role === "ADMIN" ? "Admin" : "Membre"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ────────── SÉCURITÉ ────────── */}
+          {activeTab === "security" && (
+            <section className="panel max-w-2xl space-y-6 p-6">
+              <div>
+                <h2 className="text-base font-semibold">Changer le mot de passe</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Choisissez un mot de passe robuste d'au moins 8 caractères.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <label className="block text-sm font-medium">
+                  Mot de passe actuel
+                  <div className="relative mt-2">
+                    <Input
+                      type={showPwd ? "text" : "password"}
+                      value={currentPwd}
+                      onChange={(e) => setCurrentPwd(e.target.value)}
+                      placeholder="••••••••"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwd((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                </label>
+
+                <label className="block text-sm font-medium">
+                  Nouveau mot de passe
+                  <Input
+                    type="password"
+                    className="mt-2"
+                    value={newPwd}
+                    onChange={(e) => setNewPwd(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </label>
+
+                <label className="block text-sm font-medium">
+                  Confirmer le nouveau mot de passe
+                  <Input
+                    type="password"
+                    className="mt-2"
+                    value={confirmPwd}
+                    onChange={(e) => setConfirmPwd(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                  {confirmPwd && newPwd !== confirmPwd && (
+                    <p className="mt-1 text-xs text-red-500">
+                      Les mots de passe ne correspondent pas.
+                    </p>
+                  )}
+                </label>
+              </div>
+
+              <Button
+                onClick={() => changePwdMutation.mutate()}
+                disabled={
+                  changePwdMutation.isPending ||
+                  !currentPwd ||
+                  !newPwd ||
+                  newPwd !== confirmPwd ||
+                  newPwd.length < 6
+                }
+              >
+                {changePwdMutation.isPending ? (
+                  <Loader2 className="mr-1 animate-spin" />
+                ) : (
+                  <KeyRound className="mr-1 size-4" />
+                )}
+                Mettre à jour le mot de passe
+              </Button>
+
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+                <div className="flex items-start gap-2">
+                  <Shield className="mt-0.5 size-4 shrink-0 text-amber-600" />
+                  <div className="text-sm">
+                    <p className="font-medium text-amber-800 dark:text-amber-300">
+                      Bonnes pratiques
+                    </p>
+                    <ul className="mt-1 space-y-0.5 text-xs text-amber-700 dark:text-amber-400 list-disc list-inside">
+                      <li>Utilisez au moins 12 caractères</li>
+                      <li>Combinez lettres, chiffres et symboles</li>
+                      <li>N'utilisez pas le même mot de passe sur d'autres sites</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ────────── MODÈLES & RECHERCHE ────────── */}
+          {activeTab === "models" && (
+            <section className="max-w-2xl space-y-5">
+              <div className="panel p-5 space-y-5">
+                <div>
+                  <h2 className="text-base font-semibold">Préférences de recherche</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ces paramètres sont sauvegardés localement et s'appliquent à vos sessions de
+                    chat.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Mode de recherche</Label>
+                    <div className="mt-2 flex gap-2">
+                      {(["vector", "hybrid"] as const).map((mode) => (
+                        <button
+                          key={mode}
+                          onClick={() => setSearchMode(mode)}
+                          className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+                            searchMode === mode
+                              ? "border-marine bg-orbite-soft/40 text-marine"
+                              : "border-border hover:bg-secondary/50 text-muted-foreground"
+                          }`}
+                        >
+                          {mode === "vector" ? "🔍 Vectoriel" : "⚡ Hybride (Vector + BM25)"}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {searchMode === "hybrid"
+                        ? "Le mode hybride combine la recherche vectorielle et BM25 pour de meilleurs résultats."
+                        : "La recherche vectorielle utilise uniquement les embeddings sémantiques."}
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">
+                      Nombre de chunks récupérés (Top-K)
+                    </Label>
+                    <div className="mt-2 flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={1}
+                        max={20}
+                        value={topK}
+                        onChange={(e) => setTopK(Number(e.target.value))}
+                        className="flex-1 accent-marine"
+                      />
+                      <span className="w-8 text-center font-mono text-sm font-semibold">
+                        {topK}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Un Top-K plus élevé améliore le recall mais augmente la latence.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border border-border/70 p-3">
+                    <div>
+                      <p className="text-sm font-medium">Reranker (Cross-Encoder)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Améliore la précision au prix d'une latence légèrement plus élevée.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setRerankerEnabled((v) => !v)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                        rerankerEnabled ? "bg-marine" : "bg-muted"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow ring-0 transition-transform ${
+                          rerankerEnabled ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="panel p-5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="size-4 text-braise" />
+                  <h3 className="font-semibold">Modèle LLM configuré</h3>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Le modèle de génération est configuré globalement par l'administrateur via les
+                  variables d'environnement du backend.
+                </p>
+                <div className="mt-3 rounded-lg bg-secondary/50 px-4 py-3 text-sm font-mono">
+                  LLM_MODEL=gpt-4o-mini · EMBEDDING_MODEL=text-embedding-3-small
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
       </div>
     </>
   );
 }
 
 export function AdminContent() {
+  const queryClient = useQueryClient();
   const { data: counts } = useQuery({ queryKey: ["admin-counts"], queryFn: api.getAdminCounts });
   const { data: metrics } = useQuery({ queryKey: ["metrics"], queryFn: api.getMetrics });
   const { data: feedbackItems = [] } = useQuery({
@@ -1287,6 +1675,10 @@ export function AdminContent() {
     queryFn: () => api.getAdminFeedback("down"),
   });
   const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: allUsers = [], isLoading: isLoadingUsers } = useQuery({
+    queryKey: ["admin-users"],
+    queryFn: api.getAdminUsers,
+  });
 
   const [selectedKb, setSelectedKb] = useState<string>("");
   const [mode, setMode] = useState<"vector" | "hybrid">("vector");
@@ -1296,6 +1688,18 @@ export function AdminContent() {
     mutationFn: () => api.runEvaluation({ knowledgeBaseId: selectedKb, mode, rerank }),
     onSuccess: () => toast.success("Évaluation terminée."),
     onError: (error: Error) => toast.error(error.message || "Échec de l'évaluation."),
+  });
+
+  const changeRoleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: "ADMIN" | "USER" }) =>
+      api.updateAdminUserRole(userId, role),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["admin-users"], (prev: typeof allUsers) =>
+        prev.map((u) => (u.id === updated.id ? updated : u)),
+      );
+      toast.success(`Rôle mis à jour pour ${updated.email}.`);
+    },
+    onError: (error: Error) => toast.error(error.message || "Échec du changement de rôle."),
   });
 
   return (
@@ -1455,6 +1859,66 @@ export function AdminContent() {
             )}
           </section>
         </div>
+
+        {/* ── Gestion des utilisateurs ── */}
+        <section className="panel overflow-hidden">
+          <div className="flex items-center justify-between border-b p-4">
+            <div className="flex items-center gap-2">
+              <UserCog className="size-4 text-marine" />
+              <span className="font-semibold">Gestion des utilisateurs</span>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {allUsers.length} compte{allUsers.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+          {isLoadingUsers ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : allUsers.length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">Aucun utilisateur trouvé.</p>
+          ) : (
+            <div className="divide-y divide-border/50">
+              {allUsers.map((u) => (
+                <div key={u.id} className="flex items-center gap-3 px-4 py-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-marine/20 to-braise/20 text-sm font-semibold text-marine">
+                    {(u.displayName ?? u.email)[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{u.displayName ?? u.email}</p>
+                    <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                    {u.createdAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Inscrit le {new Date(u.createdAt).toLocaleDateString("fr-FR")}
+                      </p>
+                    )}
+                  </div>
+                  <Select
+                    value={u.role}
+                    onValueChange={(role) =>
+                      changeRoleMutation.mutate({ userId: u.id, role: role as "ADMIN" | "USER" })
+                    }
+                    disabled={changeRoleMutation.isPending}
+                  >
+                    <SelectTrigger
+                      className={`w-36 text-xs font-medium ${
+                        u.role === "ADMIN"
+                          ? "border-braise/30 bg-braise/5 text-braise"
+                          : "border-marine/30 bg-orbite-soft/30 text-marine"
+                      }`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USER">Utilisateur</SelectItem>
+                      <SelectItem value="ADMIN">Administrateur</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </>
   );

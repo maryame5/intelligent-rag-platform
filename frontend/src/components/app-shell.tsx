@@ -78,7 +78,38 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const { light, toggle } = useTheme();
-  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+
+  // Gestion du workspace actif
+  const { data: workspaces = [] } = useQuery({
+    queryKey: ["workspaces"],
+    queryFn: api.getWorkspaces,
+  });
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(
+    () => localStorage.getItem("rag.activeWorkspaceId") || "",
+  );
+
+  useEffect(() => {
+    if (workspaces.length > 0) {
+      if (!activeWorkspaceId || !workspaces.some((w) => w.id === activeWorkspaceId)) {
+        const firstId = workspaces[0].id;
+        setActiveWorkspaceId(firstId);
+        localStorage.setItem("rag.activeWorkspaceId", firstId);
+      }
+    }
+  }, [workspaces, activeWorkspaceId]);
+
+  const handleSelectWorkspace = (wsId: string) => {
+    setActiveWorkspaceId(wsId);
+    localStorage.setItem("rag.activeWorkspaceId", wsId);
+    queryClient.invalidateQueries({ queryKey: ["kbs"] });
+  };
+
+  const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0];
+
+  const { data: kbs = [] } = useQuery({
+    queryKey: ["kbs", activeWorkspaceId],
+    queryFn: () => api.getKnowledgeBases(activeWorkspaceId || undefined),
+  });
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications"],
     queryFn: api.getNotifications,
@@ -96,7 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
+      if (e.key?.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setPaletteOpen((o) => !o);
       }
@@ -135,6 +166,62 @@ export function AppShell({ children }: { children: ReactNode }) {
             )}
           </Link>
         </div>
+
+        {/* Workspace Switcher */}
+        {!collapsed && workspaces.length > 0 && (
+          <div className="px-3 pt-3 pb-1 border-b border-slate-100">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800 transition-all hover:bg-slate-100 cursor-pointer shadow-2xs">
+                  <div className="flex items-center gap-2 truncate">
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-marine text-[11px] font-bold text-papier">
+                      {activeWorkspace?.name?.slice(0, 1).toUpperCase() || "W"}
+                    </div>
+                    <div className="text-left truncate">
+                      <p className="truncate text-xs font-bold text-slate-900">
+                        {activeWorkspace?.name || "Workspace"}
+                      </p>
+                      <p className="text-[10px] font-medium text-slate-500">Workspace actif</p>
+                    </div>
+                  </div>
+                  <ChevronDown className="size-3.5 shrink-0 text-slate-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-58 bg-white border border-slate-200 shadow-lg rounded-xl p-1"
+              >
+                <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Changer de Workspace
+                </DropdownMenuLabel>
+                {workspaces.map((ws) => (
+                  <DropdownMenuItem
+                    key={ws.id}
+                    onSelect={() => handleSelectWorkspace(ws.id)}
+                    className={cn(
+                      "flex items-center justify-between rounded-lg px-2.5 py-2 text-xs cursor-pointer",
+                      ws.id === activeWorkspaceId
+                        ? "bg-brume font-bold text-marine"
+                        : "text-slate-700 hover:bg-slate-50",
+                    )}
+                  >
+                    <span className="truncate">{ws.name}</span>
+                    {ws.id === activeWorkspaceId && (
+                      <span className="text-marine font-bold">✓</span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator className="bg-slate-100" />
+                <DropdownMenuItem
+                  onSelect={() => navigate({ to: "/team" })}
+                  className="rounded-lg px-2.5 py-2 text-xs font-semibold text-marine hover:bg-slate-50 cursor-pointer"
+                >
+                  <Users className="size-3.5 mr-2" /> Gérer les workspaces
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
 
         {/* Navigation links */}
         <nav className="flex-1 overflow-y-auto px-2.5 py-4 space-y-6">

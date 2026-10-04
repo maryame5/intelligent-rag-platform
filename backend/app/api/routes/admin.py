@@ -1,3 +1,4 @@
+import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -13,11 +14,49 @@ from app.models.document import Document
 from app.models.feedback import FeedbackRating, MessageFeedback
 from app.models.knowledge_base import KnowledgeBase
 from app.models.message import Message
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.evaluation import RunEvaluationRequest, RunEvaluationResponse
 from app.schemas.feedback import AdminFeedbackItemOut
+from app.schemas.user import AdminRoleUpdate, AdminUserListItem
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+@router.get("/users", response_model=list[AdminUserListItem])
+def list_users(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """Liste tous les utilisateurs de la plateforme (réservé ADMIN)."""
+    return db.query(User).order_by(User.created_at.desc()).all()
+
+
+@router.patch("/users/{user_id}/role", response_model=AdminUserListItem)
+def update_user_role(
+    user_id: uuid.UUID,
+    payload: AdminRoleUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin),
+):
+    """Change le rôle d'un utilisateur (USER <-> ADMIN). Réservé ADMIN."""
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+
+    # Protection : empêcher l'admin de se rétrograder lui-même s'il est le seul admin
+    if target_user.id == current_admin.id and payload.role != UserRole.ADMIN:
+        admin_count = db.query(User).filter(User.role == UserRole.ADMIN).count()
+        if admin_count <= 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Impossible de retirer le rôle Admin du dernier administrateur de la plateforme.",
+            )
+
+    target_user.role = payload.role
+    db.add(target_user)
+    db.commit()
+    db.refresh(target_user)
+    return target_user
 
 
 @router.get("/metrics")

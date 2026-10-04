@@ -59,6 +59,17 @@ class Settings(BaseSettings):
     # Recommandé en prod pour les modèles payants : ex. 10.0 pour 10 $/mois.
     llm_monthly_spend_cap_usd: float = 0.0
 
+    # --- Email / SMTP Settings ---
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_tls: bool = True
+    smtp_ssl: bool = False
+    email_from: str = "noreply@smartrag.local"
+    frontend_url: str = "http://localhost:5173"
+    invitation_expire_hours: int = 48
+
     @property
     def embedding_dimensions(self) -> int | None:
         """Retourne les dimensions du modèle d'embedding local configuré,

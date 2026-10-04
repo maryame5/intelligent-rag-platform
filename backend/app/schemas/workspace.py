@@ -38,8 +38,50 @@ class AddMemberRequest(BaseModel):
 
 
 class CreateMemberWithPassword(BaseModel):
-    """Admin creates a user account + adds them to the workspace."""
+    """Admin adds a member to the workspace. If the user doesn't exist yet,
+    a password is required to create their account. If they already exist,
+    password can be omitted."""
 
     email: EmailStr
-    password: str
+    password: str | None = None
     role: WorkspaceRole = WorkspaceRole.MEMBER
+
+
+class WorkspaceInviteRequest(BaseModel):
+    email: EmailStr
+    role: WorkspaceRole = WorkspaceRole.MEMBER
+
+
+class WorkspaceInvitationOut(BaseModel):
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    email: str
+    role: WorkspaceRole
+    invited_by: uuid.UUID
+    created_at: datetime | None = None
+    expires_at: datetime
+    accepted_at: datetime | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class InvitationDetailsOut(BaseModel):
+    token: str
+    workspace_id: uuid.UUID
+    workspace_name: str
+    email: str
+    role: WorkspaceRole
+    inviter_email: str
+    inviter_name: str | None = None
+    expires_at: datetime
+    is_expired: bool
+    is_accepted: bool
+
+
+class AcceptInvitationRequest(BaseModel):
+    """Payload to accept an invitation. Password and display_name are required if the user has no account yet."""
+
+    password: str | None = None
+    display_name: str | None = None
+

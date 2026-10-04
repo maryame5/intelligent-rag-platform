@@ -170,3 +170,12 @@ pré-construit fourni — à connecter manuellement au premier lancement).
 `.github/workflows/ci.yml` : lint (`ruff`) → tests avec seuil de couverture (`pytest-cov`,
 60%) → build Docker du backend (valide que le `Dockerfile` fonctionne réellement, pas
 seulement que `requirements.txt` s'installe en local), en parallèle du build frontend.
+
+## Multi-Tenant & Invitations Workspace (Sprint 8)
+
+Gestion multi-utilisateurs et collaboration en entreprise :
+- **Workspaces & Membres** : isolation logique des équipes avec rôles (`ADMIN`, `MEMBER`).
+- **Invitations sécurisées par Email** : génération de jetons d'invitation avec expiration (48h), envoi asynchrone via Celery Worker et modèle dédié `WorkspaceInvitation`.
+- **Rattachement intelligent** : aucun compte dupliqué pour les utilisateurs déjà inscrits, onboarding automatique avec mot de passe pour les nouveaux arrivants.
+- **Documentation complète et diagrammes de flux** : voir [`docs/workspace-invitations.md`](file:///d:/rag-platform/docs/workspace-invitations.md).
+

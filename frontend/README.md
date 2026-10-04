@@ -13,20 +13,26 @@ Interface moderne et performante pour la plateforme RAG d'entreprise, construite
 ## Démarrage rapide
 
 ### 1. Prérequis
+
 - Node.js >= 20
 - Backend FastAPI démarré sur `http://localhost:8000`
 
 ### 2. Configuration
+
 Copiez le fichier d'exemple et ajustez les variables si nécessaire :
+
 ```bash
 cp .env.example .env
 ```
+
 Contenu par défaut :
+
 ```env
 VITE_API_BASE_URL="http://localhost:8000"
 ```
 
 ### 3. Installation et lancement
+
 ```bash
 # Installation des dépendances
 npm install

@@ -28,6 +28,7 @@ export function paginate<T>(items: T[], page: number, pageSize: number): Page<T>
 export interface KnowledgeBase {
   id: string;
   name: string;
+  workspaceId?: string | null;
   createdAt: string;
   /** Rempli séparément (l'API de liste ne renvoie pas le compte) — voir
    * `getKnowledgeBases()`, qui fait un appel par base. Acceptable au volume
@@ -39,6 +40,7 @@ interface BackendKnowledgeBase {
   id: string;
   name: string;
   owner_id: string;
+  workspace_id?: string | null;
   created_at: string;
 }
 
@@ -52,11 +54,18 @@ async function fetchDocumentCount(kbId: string): Promise<number> {
 }
 
 function toKnowledgeBase(raw: BackendKnowledgeBase, documentCount = 0): KnowledgeBase {
-  return { id: raw.id, name: raw.name, createdAt: raw.created_at, documentCount };
+  return {
+    id: raw.id,
+    name: raw.name,
+    workspaceId: raw.workspace_id,
+    createdAt: raw.created_at,
+    documentCount,
+  };
 }
 
-export async function getKnowledgeBases(): Promise<KnowledgeBase[]> {
-  const list = await apiRequest<BackendKnowledgeBase[]>("/knowledge-bases");
+export async function getKnowledgeBases(workspaceId?: string): Promise<KnowledgeBase[]> {
+  const url = workspaceId ? `/knowledge-bases?workspace_id=${workspaceId}` : "/knowledge-bases";
+  const list = await apiRequest<BackendKnowledgeBase[]>(url);
   return Promise.all(list.map(async (kb) => toKnowledgeBase(kb, await fetchDocumentCount(kb.id))));
 }
 
@@ -69,10 +78,13 @@ export async function getKnowledgeBase(id: string): Promise<KnowledgeBase | null
   }
 }
 
-export async function createKnowledgeBase(name: string): Promise<KnowledgeBase> {
+export async function createKnowledgeBase(
+  name: string,
+  workspaceId?: string,
+): Promise<KnowledgeBase> {
   const raw = await apiRequest<BackendKnowledgeBase>("/knowledge-bases", {
     method: "POST",
-    body: { name },
+    body: { name, workspace_id: workspaceId || undefined },
   });
   return toKnowledgeBase(raw, 0);
 }
@@ -684,6 +696,7 @@ export interface UserProfile {
   email: string;
   role: string;
   displayName: string | null;
+  createdAt?: string | null;
 }
 
 export async function getMe(): Promise<UserProfile> {
@@ -692,8 +705,15 @@ export async function getMe(): Promise<UserProfile> {
     email: string;
     role: string;
     display_name: string | null;
+    created_at?: string | null;
   }>("/auth/me");
-  return { id: raw.id, email: raw.email, role: raw.role, displayName: raw.display_name };
+  return {
+    id: raw.id,
+    email: raw.email,
+    role: raw.role,
+    displayName: raw.display_name,
+    createdAt: raw.created_at,
+  };
 }
 
 export async function updateMe(displayName: string): Promise<UserProfile> {
@@ -702,8 +722,75 @@ export async function updateMe(displayName: string): Promise<UserProfile> {
     email: string;
     role: string;
     display_name: string | null;
+    created_at?: string | null;
   }>("/auth/me", { method: "PATCH", body: { display_name: displayName } });
-  return { id: raw.id, email: raw.email, role: raw.role, displayName: raw.display_name };
+  return {
+    id: raw.id,
+    email: raw.email,
+    role: raw.role,
+    displayName: raw.display_name,
+    createdAt: raw.created_at,
+  };
+}
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ message: string }> {
+  return await apiRequest<{ message: string }>("/auth/change-password", {
+    method: "POST",
+    body: { current_password: currentPassword, new_password: newPassword },
+  });
+}
+
+export interface AdminPlatformUser {
+  id: string;
+  email: string;
+  role: "ADMIN" | "USER";
+  displayName: string | null;
+  createdAt: string | null;
+}
+
+export async function getAdminUsers(): Promise<AdminPlatformUser[]> {
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      email: string;
+      role: "ADMIN" | "USER";
+      display_name: string | null;
+      created_at: string | null;
+    }>
+  >("/admin/users");
+  return raw.map((u) => ({
+    id: u.id,
+    email: u.email,
+    role: u.role,
+    displayName: u.display_name,
+    createdAt: u.created_at,
+  }));
+}
+
+export async function updateAdminUserRole(
+  userId: string,
+  role: "ADMIN" | "USER",
+): Promise<AdminPlatformUser> {
+  const raw = await apiRequest<{
+    id: string;
+    email: string;
+    role: "ADMIN" | "USER";
+    display_name: string | null;
+    created_at: string | null;
+  }>(`/admin/users/${userId}/role`, {
+    method: "PATCH",
+    body: { role },
+  });
+  return {
+    id: raw.id,
+    email: raw.email,
+    role: raw.role,
+    displayName: raw.display_name,
+    createdAt: raw.created_at,
+  };
 }
 
 // ============================================================================
@@ -1088,6 +1175,9 @@ export const api = {
   runEvaluation,
   getMe,
   updateMe,
+  changePassword,
+  getAdminUsers,
+  updateAdminUserRole,
   // Workspaces
   getWorkspaces,
   createWorkspace,

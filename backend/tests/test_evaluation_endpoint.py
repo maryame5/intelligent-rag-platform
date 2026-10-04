@@ -2,7 +2,7 @@ from app.core.security import create_access_token
 
 
 def register_and_login(client, email, password="strongpass123"):
-    client.post("/auth/register", json={"email": email, "password": password})
+    client.post("/auth/register", json={"email": email, "password": password, "role": "USER"})
     login = client.post("/auth/login", json={"email": email, "password": password})
     return {"Authorization": f"Bearer {login.json()['access_token']}"}
 

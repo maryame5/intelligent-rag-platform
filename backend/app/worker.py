@@ -6,7 +6,10 @@ celery_app = Celery(
     "rag_platform",
     broker=settings.redis_url,
     backend=settings.redis_url,
-    include=["app.tasks.ingestion_task"],
+    include=[
+        "app.tasks.ingestion_task",
+        "app.tasks.email_task",
+    ],
 )
 
 celery_app.conf.update(

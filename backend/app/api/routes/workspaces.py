@@ -9,22 +9,36 @@ Workspace management API.
 - DELETE /workspaces/{id}/members/{user_id} → remove member
 """
 
+import secrets
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
-from app.core.security import hash_password
+from app.api.deps import get_current_user, get_optional_current_user
+from app.core.config import settings
+from app.core.security import create_access_token, create_refresh_token, hash_password
 from app.db.session import get_db
 from app.models.user import User
-from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
+from app.models.workspace import (
+    Workspace,
+    WorkspaceInvitation,
+    WorkspaceMember,
+    WorkspaceRole,
+)
+from app.schemas.user import TokenPair
 from app.schemas.workspace import (
+    AcceptInvitationRequest,
     CreateMemberWithPassword,
+    InvitationDetailsOut,
     WorkspaceCreate,
+    WorkspaceInvitationOut,
+    WorkspaceInviteRequest,
     WorkspaceMemberOut,
     WorkspaceOut,
 )
+from app.tasks.email_task import send_invitation_email_task
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 
@@ -240,3 +254,240 @@ def remove_member(
 
     db.delete(membership)
     db.commit()
+
+
+# ─── invitations ────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/{workspace_id}/invitations",
+    response_model=WorkspaceInvitationOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_invitation(
+    workspace_id: uuid.UUID,
+    payload: WorkspaceInviteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Admin invites a user to the workspace by email. Sends an email invitation asynchronously."""
+    _require_ws_admin(db, workspace_id, current_user)
+
+    target_email = payload.email.strip().lower()
+
+    # Check if already an active member
+    existing_user = db.query(User).filter(User.email == target_email).first()
+    if existing_user:
+        existing_member = (
+            db.query(WorkspaceMember)
+            .filter(
+                WorkspaceMember.workspace_id == workspace_id,
+                WorkspaceMember.user_id == existing_user.id,
+            )
+            .first()
+        )
+        if existing_member:
+            raise HTTPException(status_code=400, detail="User is already a member of this workspace")
+
+    # Check if there is already a pending invitation for this email
+    now = datetime.now(timezone.utc)
+    pending_invite = (
+        db.query(WorkspaceInvitation)
+        .filter(
+            WorkspaceInvitation.workspace_id == workspace_id,
+            WorkspaceInvitation.email == target_email,
+            WorkspaceInvitation.accepted_at.is_(None),
+            WorkspaceInvitation.expires_at > now,
+        )
+        .first()
+    )
+
+    if pending_invite:
+        # Renew token and expiration
+        pending_invite.token = secrets.token_urlsafe(32)
+        pending_invite.expires_at = now + timedelta(hours=settings.invitation_expire_hours)
+        pending_invite.role = payload.role
+        pending_invite.invited_by = current_user.id
+        invitation = pending_invite
+    else:
+        invitation = WorkspaceInvitation(
+            workspace_id=workspace_id,
+            email=target_email,
+            role=payload.role,
+            token=secrets.token_urlsafe(32),
+            invited_by=current_user.id,
+            expires_at=now + timedelta(hours=settings.invitation_expire_hours),
+        )
+        db.add(invitation)
+
+    db.commit()
+    db.refresh(invitation)
+
+    # Queue async email sending via Celery
+    try:
+        send_invitation_email_task.delay(str(invitation.id))
+    except Exception:
+        # Fallback if Celery broker is momentarily unreachable (e.g. testing standalone)
+        import logging
+        logging.getLogger(__name__).warning("Celery task queueing failed, trying direct task execution")
+        try:
+            send_invitation_email_task(str(invitation.id))
+        except Exception:
+            pass
+
+    return invitation
+
+
+@router.get("/{workspace_id}/invitations", response_model=list[WorkspaceInvitationOut])
+def list_invitations(
+    workspace_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Admin lists pending invitations for the workspace."""
+    _require_ws_admin(db, workspace_id, current_user)
+    now = datetime.now(timezone.utc)
+    invites = (
+        db.query(WorkspaceInvitation)
+        .filter(
+            WorkspaceInvitation.workspace_id == workspace_id,
+            WorkspaceInvitation.accepted_at.is_(None),
+            WorkspaceInvitation.expires_at > now,
+        )
+        .all()
+    )
+    return invites
+
+
+@router.delete(
+    "/{workspace_id}/invitations/{invitation_id}", status_code=status.HTTP_204_NO_CONTENT
+)
+def revoke_invitation(
+    workspace_id: uuid.UUID,
+    invitation_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Admin revokes a pending invitation."""
+    _require_ws_admin(db, workspace_id, current_user)
+    inv = (
+        db.query(WorkspaceInvitation)
+        .filter(
+            WorkspaceInvitation.id == invitation_id,
+            WorkspaceInvitation.workspace_id == workspace_id,
+        )
+        .first()
+    )
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+
+    db.delete(inv)
+    db.commit()
+
+
+@router.get("/invitations/{token}", response_model=InvitationDetailsOut)
+def get_invitation_by_token(token: str, db: Session = Depends(get_db)):
+    """Inspect invitation details from magic link token (no authentication required)."""
+    inv = db.query(WorkspaceInvitation).filter(WorkspaceInvitation.token == token).first()
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invitation not found or invalid")
+
+    now = datetime.now(timezone.utc)
+    # Ensure tz-aware comparison
+    exp = inv.expires_at
+    if exp.tzinfo is None:
+        exp = exp.replace(tzinfo=timezone.utc)
+
+    is_expired = exp < now
+    is_accepted = inv.accepted_at is not None
+
+    workspace = db.query(Workspace).filter(Workspace.id == inv.workspace_id).first()
+    inviter = db.query(User).filter(User.id == inv.invited_by).first()
+
+    return InvitationDetailsOut(
+        token=token,
+        workspace_id=inv.workspace_id,
+        workspace_name=workspace.name if workspace else "Workspace",
+        email=inv.email,
+        role=inv.role,
+        inviter_email=inviter.email if inviter else "admin@smartrag.local",
+        inviter_name=inviter.display_name if inviter else None,
+        expires_at=exp,
+        is_expired=is_expired,
+        is_accepted=is_accepted,
+    )
+
+
+@router.post("/invitations/{token}/accept", response_model=TokenPair)
+def accept_invitation(
+    token: str,
+    payload: AcceptInvitationRequest,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_optional_current_user),
+):
+    """Accept an invitation to join a workspace."""
+    inv = db.query(WorkspaceInvitation).filter(WorkspaceInvitation.token == token).first()
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+
+    if inv.accepted_at is not None:
+        raise HTTPException(status_code=400, detail="Invitation already accepted")
+
+    now = datetime.now(timezone.utc)
+    exp = inv.expires_at
+    if exp.tzinfo is None:
+        exp = exp.replace(tzinfo=timezone.utc)
+
+    if exp < now:
+        raise HTTPException(status_code=400, detail="Invitation has expired")
+
+    user_to_join: User | None = None
+
+    if current_user:
+        # If user is logged in
+        user_to_join = current_user
+    else:
+        # Check if user already exists with this email
+        existing_user = db.query(User).filter(User.email == inv.email).first()
+        if existing_user:
+            user_to_join = existing_user
+        else:
+            # Create user account
+            if not payload.password:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Password is required to create your account",
+                )
+            user_to_join = User(
+                email=inv.email,
+                hashed_password=hash_password(payload.password),
+                display_name=payload.display_name.strip() if payload.display_name else None,
+            )
+            db.add(user_to_join)
+            db.flush()
+
+    # Check if membership already exists
+    membership = (
+        db.query(WorkspaceMember)
+        .filter(
+            WorkspaceMember.workspace_id == inv.workspace_id,
+            WorkspaceMember.user_id == user_to_join.id,
+        )
+        .first()
+    )
+    if not membership:
+        membership = WorkspaceMember(
+            workspace_id=inv.workspace_id,
+            user_id=user_to_join.id,
+            role=inv.role,
+        )
+        db.add(membership)
+
+    inv.accepted_at = now
+    db.commit()
+
+    return TokenPair(
+        access_token=create_access_token(str(user_to_join.id)),
+        refresh_token=create_refresh_token(str(user_to_join.id)),
+    )
+

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, EmailStr
 
@@ -8,6 +9,7 @@ from app.models.user import UserRole
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
+    role: UserRole | None = None
 
 
 class UserLogin(BaseModel):
@@ -20,6 +22,7 @@ class UserOut(BaseModel):
     email: EmailStr
     role: UserRole
     display_name: str | None = None
+    created_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -27,6 +30,26 @@ class UserOut(BaseModel):
 
 class UserUpdate(BaseModel):
     display_name: str | None = None
+
+
+class UserPasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class AdminRoleUpdate(BaseModel):
+    role: UserRole
+
+
+class AdminUserListItem(BaseModel):
+    id: uuid.UUID
+    email: EmailStr
+    role: UserRole
+    display_name: str | None = None
+    created_at: datetime | None = None
+
+    class Config:
+        from_attributes = True
 
 
 class TokenPair(BaseModel):

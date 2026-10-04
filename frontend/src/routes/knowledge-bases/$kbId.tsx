@@ -53,11 +53,12 @@ function KnowledgeBaseDetail() {
     queryKey: ["workspaces"],
     queryFn: api.getWorkspaces,
   });
-  const currentWsId = workspaces[0]?.id;
+  const targetWsId =
+    kb?.workspaceId || localStorage.getItem("rag.activeWorkspaceId") || workspaces[0]?.id;
   const { data: members = [] } = useQuery({
-    queryKey: ["workspace-members", currentWsId],
-    queryFn: () => (currentWsId ? api.getWorkspaceMembers(currentWsId) : Promise.resolve([])),
-    enabled: !!currentWsId,
+    queryKey: ["workspace-members", targetWsId],
+    queryFn: () => (targetWsId ? api.getWorkspaceMembers(targetWsId) : Promise.resolve([])),
+    enabled: !!targetWsId,
   });
 
   const [isDragging, setIsDragging] = useState(false);

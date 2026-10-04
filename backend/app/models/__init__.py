@@ -9,7 +9,7 @@ from app.models.message import Message, MessageRole
 from app.models.notification import Notification
 from app.models.user import User, UserRole
 from app.models.verified_answer import VerifiedAnswer
-from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
+from app.models.workspace import Workspace, WorkspaceInvitation, WorkspaceMember, WorkspaceRole
 
 __all__ = [
     "User",
@@ -27,6 +27,7 @@ __all__ = [
     "FeedbackRating",
     "Workspace",
     "WorkspaceMember",
+    "WorkspaceInvitation",
     "WorkspaceRole",
     "VerifiedAnswer",
     "Notification",

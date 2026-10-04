@@ -13,7 +13,8 @@ from app.models.feedback import MessageFeedback
 from app.models.job import IngestionJob
 from app.models.knowledge_base import KnowledgeBase
 from app.models.message import Message
-from app.models.user import User
+from app.models.user import User, UserRole
+from app.models.workspace import WorkspaceMember
 from app.schemas.document import DocumentOut, DocumentUploadOut
 from app.schemas.knowledge_base import KnowledgeBaseCreate, KnowledgeBaseOut, KnowledgeBaseUpdate
 from app.services.bm25_search import invalidate_bm25_cache
@@ -28,7 +29,23 @@ router = APIRouter(prefix="/knowledge-bases", tags=["knowledge-bases"])
 def create_kb(
     payload: KnowledgeBaseCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
-    kb = KnowledgeBase(name=payload.name, owner_id=user.id)
+    ws_id = payload.workspace_id
+    if ws_id:
+        member = (
+            db.query(WorkspaceMember)
+            .filter(
+                WorkspaceMember.workspace_id == ws_id,
+                WorkspaceMember.user_id == user.id,
+            )
+            .first()
+        )
+        if not member and user.role != UserRole.ADMIN:
+            raise HTTPException(
+                status_code=403, detail="Vous n'êtes pas membre de ce workspace"
+            )
+    # No auto-assignment: if no workspace_id is given, the KB stays private (owner only)
+
+    kb = KnowledgeBase(name=payload.name, owner_id=user.id, workspace_id=ws_id)
     db.add(kb)
     db.commit()
     db.refresh(kb)
@@ -36,8 +53,44 @@ def create_kb(
 
 
 @router.get("", response_model=list[KnowledgeBaseOut])
-def list_kbs(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    return db.query(KnowledgeBase).filter(KnowledgeBase.owner_id == user.id).all()
+def list_kbs(
+    workspace_id: uuid.UUID | None = Query(default=None),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    if workspace_id:
+        member = (
+            db.query(WorkspaceMember)
+            .filter(
+                WorkspaceMember.workspace_id == workspace_id,
+                WorkspaceMember.user_id == user.id,
+            )
+            .first()
+        )
+        if not member and user.role != UserRole.ADMIN:
+            raise HTTPException(
+                status_code=403, detail="Vous n'êtes pas membre de ce workspace"
+            )
+        return (
+            db.query(KnowledgeBase)
+            .filter(KnowledgeBase.workspace_id == workspace_id)
+            .all()
+        )
+
+    user_ws_rows = (
+        db.query(WorkspaceMember.workspace_id)
+        .filter(WorkspaceMember.user_id == user.id)
+        .all()
+    )
+    user_ws_ids = [row[0] for row in user_ws_rows]
+    return (
+        db.query(KnowledgeBase)
+        .filter(
+            (KnowledgeBase.owner_id == user.id)
+            | (KnowledgeBase.workspace_id.in_(user_ws_ids))
+        )
+        .all()
+    )
 
 
 @router.get("/{kb_id}", response_model=KnowledgeBaseOut)

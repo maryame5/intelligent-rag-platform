@@ -31,3 +31,18 @@ class WorkspaceMember(Base):
     user_id = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     role = Column(Enum(WorkspaceRole), nullable=False, default=WorkspaceRole.MEMBER)
     joined_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class WorkspaceInvitation(Base):
+    __tablename__ = "workspace_invitations"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    workspace_id = Column(GUID(), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
+    email = Column(String, nullable=False, index=True)
+    role = Column(Enum(WorkspaceRole), nullable=False, default=WorkspaceRole.MEMBER)
+    token = Column(String, unique=True, nullable=False, index=True)
+    invited_by = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    expires_at = Column(DateTime, nullable=False)
+    accepted_at = Column(DateTime, nullable=True)
+

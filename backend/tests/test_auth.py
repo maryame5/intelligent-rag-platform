@@ -3,8 +3,13 @@ def test_register_success(client):
     assert response.status_code == 201
     body = response.json()
     assert body["email"] == "alice@example.com"
-    assert body["role"] == "USER"
+    assert body["role"] == "ADMIN"  # First registered user becomes ADMIN
     assert "hashed_password" not in body  # ne doit jamais fuiter
+
+    # Second user becomes USER
+    resp2 = client.post("/auth/register", json={"email": "alice2@example.com", "password": "strongpass123"})
+    assert resp2.status_code == 201
+    assert resp2.json()["role"] == "USER"
 
 
 def test_register_duplicate_email_rejected(client):
@@ -67,6 +72,38 @@ def test_refresh_rejects_access_token_used_as_refresh(client):
     # Un access token ne doit pas être accepté à la place d'un refresh token.
     response = client.post("/auth/refresh", json={"refresh_token": access_token})
     assert response.status_code == 401
+
+
+def test_change_password_success_and_login_with_new_password(client):
+    client.post("/auth/register", json={"email": "passchange@example.com", "password": "oldpassword123"})
+    login = client.post("/auth/login", json={"email": "passchange@example.com", "password": "oldpassword123"})
+    token = login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Wrong current password
+    bad_res = client.post(
+        "/auth/change-password",
+        json={"current_password": "wrongpassword", "new_password": "newpassword123"},
+        headers=headers,
+    )
+    assert bad_res.status_code == 400
+
+    # Successful change
+    res = client.post(
+        "/auth/change-password",
+        json={"current_password": "oldpassword123", "new_password": "newpassword123"},
+        headers=headers,
+    )
+    assert res.status_code == 200
+
+    # Old password no longer works
+    login_old = client.post("/auth/login", json={"email": "passchange@example.com", "password": "oldpassword123"})
+    assert login_old.status_code == 401
+
+    # New password works
+    login_new = client.post("/auth/login", json={"email": "passchange@example.com", "password": "newpassword123"})
+    assert login_new.status_code == 200
+
 
 
 def test_refresh_rejects_garbage_token(client):

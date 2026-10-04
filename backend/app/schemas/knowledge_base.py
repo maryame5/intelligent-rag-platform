@@ -6,6 +6,7 @@ from pydantic import BaseModel, field_validator
 
 class KnowledgeBaseCreate(BaseModel):
     name: str
+    workspace_id: uuid.UUID | None = None
 
 
 class KnowledgeBaseUpdate(BaseModel):
@@ -24,6 +25,7 @@ class KnowledgeBaseOut(BaseModel):
     id: uuid.UUID
     name: str
     owner_id: uuid.UUID
+    workspace_id: uuid.UUID | None = None
     created_at: datetime
 
     class Config:

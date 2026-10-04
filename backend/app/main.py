@@ -42,6 +42,35 @@ async def lifespan(app: FastAPI):
                 settings.local_embedding_model,
                 dims,
             )
+    # Vérification et promotion automatique du premier utilisateur en ADMIN si aucun admin n'existe
+    try:
+        from app.db.session import SessionLocal
+        from app.models.user import User, UserRole
+        from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
+
+        with SessionLocal() as db:
+            admin_user = db.query(User).filter(User.role == UserRole.ADMIN).first()
+            if not admin_user:
+                first_user = db.query(User).order_by(User.created_at.asc()).first()
+                if first_user:
+                    first_user.role = UserRole.ADMIN
+                    db.commit()
+                    startup_logger.info("Premier utilisateur %s promu automatiquement en ADMIN", first_user.email)
+
+            # S'assurer que chaque utilisateur a au moins un workspace
+            users = db.query(User).all()
+            for u in users:
+                has_ws = db.query(WorkspaceMember).filter(WorkspaceMember.user_id == u.id).first()
+                if not has_ws:
+                    ws = Workspace(name=f"Workspace de {u.email.split('@')[0]}", created_by=u.id)
+                    db.add(ws)
+                    db.flush()
+                    db.add(WorkspaceMember(workspace_id=ws.id, user_id=u.id, role=WorkspaceRole.ADMIN))
+                    db.commit()
+                    startup_logger.info("Workspace par défaut créé pour %s", u.email)
+    except Exception as e:
+        startup_logger.warning("Erreur lors de l'initialisation des utilisateurs/workspaces au démarrage : %s", e)
+
     yield
 
 
