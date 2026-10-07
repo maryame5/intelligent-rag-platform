@@ -29,6 +29,10 @@ x-backend-env: &backend-env
   EMAIL_FROM: ${EMAIL_FROM:-no-reply@${APP_DOMAIN:-localhost}}
   FRONTEND_URL: https://${APP_DOMAIN:-localhost}
   INVITATION_EXPIRE_HOURS: ${INVITATION_EXPIRE_HOURS:-48}
+  LANGFUSE_ENABLED: ${LANGFUSE_ENABLED:-false}
+  LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+  LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+  LANGFUSE_HOST: ${LANGFUSE_HOST:-https://${API_DOMAIN:-localhost}/langfuse}
 
 
 x-backend-build: &backend-build

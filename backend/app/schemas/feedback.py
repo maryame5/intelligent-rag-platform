@@ -25,10 +25,12 @@ class AdminFeedbackItemOut(BaseModel):
 
     feedback_id: uuid.UUID
     rating: Literal["up", "down"]
-    comment: str | None
+    comment: str | None = None
     created_at: datetime
     message_id: uuid.UUID
     message_content: str
+    question_content: str | None = None
+    citations: str | None = None
     knowledge_base_id: uuid.UUID
     knowledge_base_name: str
     user_email: str

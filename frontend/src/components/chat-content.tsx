@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -37,7 +38,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api, type ChatCitation, type ChatMessage, type ConversationDetail } from "@/lib/api";
+import { api, type Citation, type ChatMessage, type ConversationDetail } from "@/lib/api";
+
+// Alias local — la couche API expose `Citation`, le chat l'appelle ChatCitation
+type ChatCitation = Citation;
 import { cn } from "@/lib/utils";
 import { CitedText, SourceCard } from "@/components/Citation";
 import { APP_NAME } from "@/config";
@@ -51,7 +55,7 @@ const SAMPLE_PROMPTS = [
 
 export function ChatContent() {
   const queryClient = useQueryClient();
-  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: () => api.getKnowledgeBases() });
   const [kbId, setKbId] = useState<string>("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -138,12 +142,18 @@ export function ChatContent() {
     streamingBufferRef.current = "";
 
     const timer1 = setTimeout(() => setPipelineStep(2), 500);
-    const timer2 = setTimeout(() => setPipelineStep(3), 1000);
+    const savedTopK = localStorage.getItem("rag_top_k");
+    const configuredTopK = savedTopK ? Number(savedTopK) : 5;
+    const searchMode = localStorage.getItem("rag_search_mode") || "hybrid";
+    const rerankerEnabled = localStorage.getItem("rag_reranker_enabled") === "true";
 
     api.sendChatMessageStream({
       knowledgeBaseId: kbId,
       conversationId: conversationId ?? undefined,
       message: text,
+      topK: configuredTopK,
+      useHybrid: searchMode === "hybrid",
+      rerank: rerankerEnabled,
       onChunk: (chunk) => {
         clearTimeout(timer1);
         clearTimeout(timer2);
@@ -361,14 +371,38 @@ export function ChatContent() {
             )}
 
             <div className="flex items-center gap-2 truncate">
-              <span className="font-extrabold text-sm text-[#28264B] truncate">
-                {conversation?.title ?? (currentKb ? `${currentKb.name}` : "Discussion RAG")}
-              </span>
-              {currentKb && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#E8EAE7] px-2.5 py-0.5 text-[11px] font-semibold text-[#28264B] border border-[#dcdfd9]">
-                  <Layers className="size-3 text-marine" />
-                  {currentKb.documentCount} docs
-                </span>
+              {kbs.length > 0 ? (
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={kbId}
+                    onValueChange={(v) => {
+                      setKbId(v);
+                      setConversationId(null);
+                    }}
+                  >
+                    <SelectTrigger className="h-8 max-w-[220px] bg-[#E8EAE7]/60 border-[#dcdfd9] text-xs font-bold text-[#28264B] focus:ring-marine">
+                      <SelectValue placeholder="Choisir une base" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {kbs.map((kb) => (
+                        <SelectItem key={kb.id} value={kb.id}>
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="size-3.5 text-marine" />
+                            <span className="truncate">{kb.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {currentKb && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#E8EAE7] px-2.5 py-0.5 text-[11px] font-semibold text-[#28264B] border border-[#dcdfd9]">
+                      <Layers className="size-3 text-marine" />
+                      {currentKb.documentCount ?? 0} docs
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span className="font-extrabold text-sm text-[#28264B]">Discussion RAG</span>
               )}
             </div>
           </div>
@@ -386,6 +420,7 @@ export function ChatContent() {
                 setSelectedCitation(null);
                 inputRef.current?.focus();
               }}
+              disabled={!kbId}
               className="h-8 text-xs font-bold text-marine border-marine/30 hover:bg-brume"
             >
               <Plus className="size-3.5 mr-1" />
@@ -397,7 +432,27 @@ export function ChatContent() {
         {/* Scrollable Message Feed */}
         <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
           <div className="mx-auto max-w-4xl space-y-6">
-            {messages.length === 0 && streamingUserMsg === null ? (
+            {kbs.length === 0 ? (
+              <div className="my-12 flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-dashed border-[#dcdfd9] bg-white shadow-xs">
+                <div className="flex size-16 items-center justify-center rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 shadow-sm">
+                  <BookOpen className="size-8" />
+                </div>
+                <h3 className="mt-5 text-xl font-extrabold text-[#28264B]">
+                  Aucune base de connaissances disponible
+                </h3>
+                <p className="mt-2 max-w-md text-xs text-[#4E5174] leading-relaxed">
+                  Pour commencer à poser des questions et obtenir des réponses sourcées en temps réel, vous devez d'abord créer une base et y téléverser vos documents d'entreprise.
+                </p>
+                <div className="mt-6">
+                  <Link to="/knowledge-bases">
+                    <Button className="bg-marine text-white hover:bg-nuit text-xs font-bold px-4 py-2 shadow-xs">
+                      <Plus className="mr-1.5 size-4" />
+                      Créer une base de connaissances
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : messages.length === 0 && streamingUserMsg === null ? (
               <div className="my-12 flex flex-col items-center justify-center text-center">
                 <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#28264B] to-[#1c1a35] text-white shadow-lg">
                   <Sparkles className="size-8 text-orbite" />
@@ -415,7 +470,7 @@ export function ChatContent() {
                     <button
                       key={prompt}
                       onClick={() => handleSend(prompt)}
-                      className="group flex items-center justify-between rounded-xl border border-brume bg-white p-4 text-xs font-semibold text-nuit transition-all hover:border-marine hover:shadow-sm"
+                      className="group flex items-center justify-between rounded-xl border border-brume bg-white p-4 text-xs font-semibold text-nuit transition-all hover:border-marine hover:shadow-sm cursor-pointer"
                     >
                       <span className="line-clamp-2">{prompt}</span>
                       <ArrowRight className="ml-2 size-4 shrink-0 text-marine transition-transform group-hover:translate-x-1 group-hover:text-braise" />
@@ -534,9 +589,11 @@ export function ChatContent() {
             <Input
               ref={inputRef}
               placeholder={
-                currentKb
-                  ? `Interroger « ${currentKb.name} »…`
-                  : "Posez une question sur vos documents…"
+                kbs.length === 0
+                  ? "Créez d'abord une base de connaissances pour commencer à échanger…"
+                  : currentKb
+                    ? `Interroger « ${currentKb.name} »…`
+                    : "Sélectionnez une base de connaissances pour commencer…"
               }
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -673,8 +730,8 @@ function MarkdownFormatted({ content }: { content: string }) {
       {parts.map((part, index) => {
         if (part.startsWith("```") && part.endsWith("```")) {
           const lines = part.slice(3, -3).trim().split("\n");
-          const lang = lines[0] || "text";
-          const code = lines.slice(1).join("\n") || lines[0];
+          const lang = lines[0] ?? "text";
+          const code = lines.slice(1).join("\n") || lines[0] || "";
           return (
             <div
               key={index}

@@ -1,3 +1,4 @@
+from app.core.observability import get_prompt_with_fallback
 from app.models.chunk import Chunk
 from app.models.document import Document
 from app.models.message import Message, MessageRole
@@ -12,6 +13,11 @@ SYSTEM_PROMPT = (
     "Quand tu t'appuies sur un extrait, cite son numéro entre crochets, par exemple [1] ou [2]. "
     "Réponds dans la langue de la question."
 )
+
+
+def get_system_prompt() -> str:
+    """Récupère le prompt système depuis Langfuse Prompt Management ou repli local."""
+    return get_prompt_with_fallback("rag_system_prompt", SYSTEM_PROMPT)
 
 
 def build_context_block(results: list[tuple[Chunk, Document, float]]) -> str:
@@ -32,7 +38,8 @@ def build_chat_messages(
     récupéré. N'est appelé que quand `results` n'est pas vide — le cas
     'contexte insuffisant' est géré en amont, de façon déterministe (voir
     app/api/routes/chat.py), sans dépendre du LLM pour respecter la consigne."""
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    system_content = get_system_prompt()
+    messages = [{"role": "system", "content": system_content}]
 
     for msg in history:
         role = "user" if msg.role == MessageRole.USER else "assistant"

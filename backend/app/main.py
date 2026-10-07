@@ -15,6 +15,9 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.core.logging_config import configure_logging
 from app.core.rate_limit import limiter
+from app.db.session import SessionLocal
+from app.models.user import User, UserRole
+from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
 
 configure_logging()
 access_logger = logging.getLogger("rag_platform.access")
@@ -42,36 +45,52 @@ async def lifespan(app: FastAPI):
                 settings.local_embedding_model,
                 dims,
             )
-    # Vérification et promotion automatique du premier utilisateur en ADMIN si aucun admin n'existe
+    # ─── Promotion ADMIN au premier démarrage uniquement ─────────────────────
+    # Si la base est vide (première installation), le premier utilisateur
+    # inscrit sera promu ADMIN par le endpoint /auth/register lui-même.
+    # On intervient ICI uniquement pour garantir qu'il existe toujours au
+    # moins un ADMIN opérationnel, SANS jamais réécrire un choix explicite
+    # de l'administrateur (suppression de compte, rétrogradation, etc.).
+    with SessionLocal() as db:
+        total_users = db.query(User).count()
+        admin_count = db.query(User).filter(User.role == UserRole.ADMIN).count()
+
+        if total_users == 0:
+            # Installation fraîche — rien à faire, le 1er register promouvra.
+            pass
+        elif admin_count == 0:
+            # Des utilisateurs existent mais AUCUN n'est admin.
+            # Cela peut arriver si l'admin unique a été supprimé manuellement
+            # depuis la DB. On log un avertissement, mais ON NE MODIFIE RIEN
+            # automatiquement pour ne pas "annuler" une action délibérée.
+            startup_logger.warning(
+                "⚠️  AUCUN administrateur trouvé dans la base (%d user(s)). "
+                "Connectez-vous directement à la DB et exécutez : "
+                "UPDATE users SET role='ADMIN' WHERE email='<votre-email>';",
+                total_users,
+            )
+        else:
+            startup_logger.info("✓ Plateforme prête — %d admin(s) actif(s).", admin_count)
+
+        # S'assurer que chaque utilisateur a au moins un workspace
+        users = db.query(User).all()
+        for u in users:
+            has_ws = db.query(WorkspaceMember).filter(WorkspaceMember.user_id == u.id).first()
+            if not has_ws:
+                ws = Workspace(name=f"Workspace de {u.email.split('@')[0]}", created_by=u.id)
+                db.add(ws)
+                db.flush()
+                db.add(WorkspaceMember(workspace_id=ws.id, user_id=u.id, role=WorkspaceRole.ADMIN))
+                db.commit()
+                startup_logger.info("Workspace par défaut créé pour %s", u.email)
+
     try:
-        from app.db.session import SessionLocal
-        from app.models.user import User, UserRole
-        from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
+        yield
+    finally:
+        from app.core.observability import flush_observability, shutdown_observability
 
-        with SessionLocal() as db:
-            admin_user = db.query(User).filter(User.role == UserRole.ADMIN).first()
-            if not admin_user:
-                first_user = db.query(User).order_by(User.created_at.asc()).first()
-                if first_user:
-                    first_user.role = UserRole.ADMIN
-                    db.commit()
-                    startup_logger.info("Premier utilisateur %s promu automatiquement en ADMIN", first_user.email)
-
-            # S'assurer que chaque utilisateur a au moins un workspace
-            users = db.query(User).all()
-            for u in users:
-                has_ws = db.query(WorkspaceMember).filter(WorkspaceMember.user_id == u.id).first()
-                if not has_ws:
-                    ws = Workspace(name=f"Workspace de {u.email.split('@')[0]}", created_by=u.id)
-                    db.add(ws)
-                    db.flush()
-                    db.add(WorkspaceMember(workspace_id=ws.id, user_id=u.id, role=WorkspaceRole.ADMIN))
-                    db.commit()
-                    startup_logger.info("Workspace par défaut créé pour %s", u.email)
-    except Exception as e:
-        startup_logger.warning("Erreur lors de l'initialisation des utilisateurs/workspaces au démarrage : %s", e)
-
-    yield
+        flush_observability()
+        shutdown_observability()
 
 
 app = FastAPI(title="Production RAG Platform API", version="0.1.0", lifespan=lifespan)

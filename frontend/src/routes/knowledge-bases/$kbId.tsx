@@ -15,9 +15,18 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader, EmptyState } from "@/components/page-header";
 import { KpiCard } from "@/components/kpi-card";
 import { StatusBadge } from "@/components/status-badge";
-import { PreviewBadge } from "@/components/preview-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { api, documentStatusBadge, documentTypeLabel } from "@/lib/api";
 
 export const Route = createFileRoute("/knowledge-bases/$kbId")({
@@ -63,6 +72,7 @@ function KnowledgeBaseDetail() {
 
   const [isDragging, setIsDragging] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<(typeof docs)[number] | null>(null);
+  const [docToDelete, setDocToDelete] = useState<(typeof docs)[number] | null>(null);
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -308,11 +318,7 @@ function KnowledgeBaseDetail() {
                         variant="ghost"
                         size="icon"
                         aria-label="Supprimer"
-                        onClick={() => {
-                          if (confirm(`Voulez-vous supprimer « ${d.title} » ?`)) {
-                            deleteMutation.mutate(d.id);
-                          }
-                        }}
+                        onClick={() => setDocToDelete(d)}
                         disabled={deleteMutation.isPending}
                         className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                       >
@@ -369,8 +375,8 @@ function KnowledgeBaseDetail() {
               <h2 className="font-semibold">Comparer les stratégies de retrieval</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Une même question, cherchée en vectoriel seul, en hybride (BM25 + vectoriel), et en
-                hybride avec reranking — pour voir concrètement ce que chaque étape change (Sprint 5
-                du backend).
+                hybride avec reranking — pour observer l'impact de chaque étape sur la pertinence
+                des résultats.
               </p>
               <form
                 onSubmit={(e) => {
@@ -427,8 +433,8 @@ function KnowledgeBaseDetail() {
             <div className="panel p-5">
               <h2 className="font-semibold">État de l'indexation</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Recall@K / Precision@K / MRR se mesurent via un run d'évaluation (Sprint 7 du
-                backend) plutôt qu'en continu — lancez-en un depuis{" "}
+                Les métriques qualitatives approfondies (Recall@K, Precision@K, MRR) peuvent être
+                mesurées via un benchmark de retrieval depuis l'espace{" "}
                 <a href="/admin" className="text-primary underline">
                   Administration
                 </a>{" "}
@@ -455,7 +461,8 @@ function KnowledgeBaseDetail() {
           <section className="panel max-w-2xl p-5">
             <h2 className="font-semibold">Paramètres de la base</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Renommez la base. La configuration de chunking reste gérée côté backend.
+              Renommez la base. Le découpage documentaire (chunking) et les embeddings sont
+              optimisés automatiquement par le moteur d'indexation.
             </p>
             <div className="mt-5 grid gap-4">
               <label className="text-sm">
@@ -468,7 +475,7 @@ function KnowledgeBaseDetail() {
                 />
               </label>
             </div>
-            <div className="mt-6 flex gap-2">
+            <div className="mt-6 flex items-center gap-2">
               <Button
                 onClick={() => renameMutation.mutate()}
                 disabled={renameMutation.isPending || !newKbName.trim() || newKbName === kb?.name}
@@ -476,13 +483,44 @@ function KnowledgeBaseDetail() {
                 {renameMutation.isPending ? <Loader2 className="animate-spin" /> : null}
                 Enregistrer
               </Button>
-              <Button variant="outline" disabled>
-                Réindexer la base
+              <Button
+                variant="outline"
+                disabled
+                title="L'indexation s'actualise automatiquement à chaque ajout ou modification de document."
+              >
+                Indexation automatique active
               </Button>
             </div>
           </section>
         ) : null}
       </div>
+
+      {/* Boîte de confirmation de suppression accessible et stylisée */}
+      <AlertDialog open={!!docToDelete} onOpenChange={(open) => !open && setDocToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer ce document ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Voulez-vous vraiment supprimer définitivement « {docToDelete?.title} » ? Cette action
+              supprimera également les segments indexés et ne pourra pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (docToDelete) {
+                  deleteMutation.mutate(docToDelete.id);
+                  setDocToDelete(null);
+                }
+              }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }

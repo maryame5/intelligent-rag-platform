@@ -13,7 +13,7 @@ from app.models.conversation import Conversation
 from app.models.document import Document
 from app.models.feedback import FeedbackRating, MessageFeedback
 from app.models.knowledge_base import KnowledgeBase
-from app.models.message import Message
+from app.models.message import Message, MessageRole
 from app.models.user import User, UserRole
 from app.schemas.evaluation import RunEvaluationRequest, RunEvaluationResponse
 from app.schemas.feedback import AdminFeedbackItemOut
@@ -105,20 +105,38 @@ def list_feedback(
 
     rows = query.offset(offset).limit(limit).all()
 
-    return [
-        AdminFeedbackItemOut(
-            feedback_id=feedback.id,
-            rating="up" if feedback.rating == FeedbackRating.UP else "down",
-            comment=feedback.comment,
-            created_at=feedback.created_at,
-            message_id=message.id,
-            message_content=message.content,
-            knowledge_base_id=kb.id,
-            knowledge_base_name=kb.name,
-            user_email=author.email,
+    items: list[AdminFeedbackItemOut] = []
+    for feedback, message, conversation, kb, author in rows:
+        # Find the user prompt right before this assistant message
+        user_msg = (
+            db.query(Message)
+            .filter(
+                Message.conversation_id == conversation.id,
+                Message.role == MessageRole.USER,
+                Message.created_at <= message.created_at,
+            )
+            .order_by(Message.created_at.desc())
+            .first()
         )
-        for feedback, message, _conversation, kb, author in rows
-    ]
+        question_text = user_msg.content if user_msg else None
+
+        items.append(
+            AdminFeedbackItemOut(
+                feedback_id=feedback.id,
+                rating="up" if feedback.rating == FeedbackRating.UP else "down",
+                comment=feedback.comment,
+                created_at=feedback.created_at,
+                message_id=message.id,
+                message_content=message.content,
+                question_content=question_text,
+                citations=message.citations,
+                knowledge_base_id=kb.id,
+                knowledge_base_name=kb.name,
+                user_email=author.email,
+            )
+        )
+
+    return items
 
 
 @router.post("/evaluations/run", response_model=RunEvaluationResponse)

@@ -14,6 +14,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_optional_current_user
@@ -70,7 +71,23 @@ def create_workspace(
     current_user: User = Depends(get_current_user),
 ):
     """Create a workspace and make the creator an ADMIN member."""
-    ws = Workspace(name=payload.name.strip(), created_by=current_user.id)
+    clean_name = payload.name.strip()
+    if not clean_name:
+        raise HTTPException(status_code=400, detail="Le nom du workspace ne peut pas être vide.")
+
+    # Check if a workspace with the same name already exists (case-insensitive)
+    existing_ws = (
+        db.query(Workspace)
+        .filter(func.lower(Workspace.name) == clean_name.lower())
+        .first()
+    )
+    if existing_ws:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Un espace de travail nommé '{clean_name}' existe déjà. Veuillez choisir un autre nom.",
+        )
+
+    ws = Workspace(name=clean_name, created_by=current_user.id)
     db.add(ws)
     db.flush()  # get ws.id
 
@@ -335,7 +352,19 @@ def create_invitation(
         except Exception:
             pass
 
-    return invitation
+    invite_url = f"{settings.frontend_url.rstrip('/')}/accept-invite?token={invitation.token}"
+    return WorkspaceInvitationOut(
+        id=invitation.id,
+        workspace_id=invitation.workspace_id,
+        email=invitation.email,
+        role=invitation.role,
+        token=invitation.token,
+        invite_url=invite_url,
+        invited_by=invitation.invited_by,
+        created_at=invitation.created_at,
+        expires_at=invitation.expires_at,
+        accepted_at=invitation.accepted_at,
+    )
 
 
 @router.get("/{workspace_id}/invitations", response_model=list[WorkspaceInvitationOut])
@@ -354,9 +383,24 @@ def list_invitations(
             WorkspaceInvitation.accepted_at.is_(None),
             WorkspaceInvitation.expires_at > now,
         )
+        .order_by(WorkspaceInvitation.created_at.desc())
         .all()
     )
-    return invites
+    return [
+        WorkspaceInvitationOut(
+            id=inv.id,
+            workspace_id=inv.workspace_id,
+            email=inv.email,
+            role=inv.role,
+            token=inv.token,
+            invite_url=f"{settings.frontend_url.rstrip('/')}/accept-invite?token={inv.token}",
+            invited_by=inv.invited_by,
+            created_at=inv.created_at,
+            expires_at=inv.expires_at,
+            accepted_at=inv.accepted_at,
+        )
+        for inv in invites
+    ]
 
 
 @router.delete(

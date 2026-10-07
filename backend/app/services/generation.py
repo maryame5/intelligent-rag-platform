@@ -6,6 +6,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from app.core.config import settings
 from app.core.metrics import LLM_COST_USD_TOTAL, LLM_REQUESTS_TOTAL, LLM_TOKENS_TOTAL
+from app.core.observability import observe_span
 from app.services.cost_tracking import estimate_cost, estimate_tokens
 from app.services.spend_cap import check_spend_cap, record_spend
 
@@ -78,6 +79,20 @@ class OpenAIChatProvider:
         LLM_TOKENS_TOTAL.labels(model=self.model, direction="output").inc(output_tokens)
         LLM_COST_USD_TOTAL.labels(model=self.model).inc(actual_cost)
         record_spend(actual_cost)
+
+        with observe_span(
+            name="llm_chat_completion",
+            as_type="generation",
+            input_data=messages,
+            model=self.model,
+            usage={
+                "input": input_tokens,
+                "output": output_tokens,
+                "total": input_tokens + output_tokens,
+            },
+            cost=actual_cost,
+        ):
+            pass
 
         return content
 

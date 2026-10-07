@@ -67,10 +67,14 @@ def fixed_size_chunks(
             end = _snap_end(text, start, min(start + chunk_size, text_len), chunk_size)
             content = text[start:end].strip()
             if content:
-                chunks.append(
-                    ChunkResult(chunk_index=global_index, content=content, page=page_number, section=section)
-                )
-                global_index += 1
+                # If chunk is tiny (< 30 chars) and we already have a chunk in the same block/section, append it
+                if len(content) < 30 and chunks and chunks[-1].page == page_number and chunks[-1].section == section:
+                    chunks[-1].content = f"{chunks[-1].content}\n{content}"
+                else:
+                    chunks.append(
+                        ChunkResult(chunk_index=global_index, content=content, page=page_number, section=section)
+                    )
+                    global_index += 1
 
             if end >= text_len:
                 break

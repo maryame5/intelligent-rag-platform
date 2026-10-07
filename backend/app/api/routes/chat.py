@@ -7,6 +7,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_owned_kb
+from app.core.observability import observe_span, trace_rag_turn
 from app.core.rate_limit import limiter
 from app.db.session import get_db
 from app.models.conversation import Conversation
@@ -103,49 +104,62 @@ def _prepare_turn(
     db.commit()
 
     chat_provider = get_chat_provider()
-    standalone_query = rewrite_query(chat_provider, history, payload.message)
+    with observe_span(name="query_rewriting", as_type="span", input_data=payload.message):
+        standalone_query = rewrite_query(chat_provider, history, payload.message)
 
     embedding_provider = get_embedding_provider()
     candidate_k = max(payload.top_k, 20) if (payload.rerank or payload.expand_query) else payload.top_k
 
-    try:
-        if payload.expand_query:
-            queries = expand_query(chat_provider, standalone_query)
-            query_embeddings = embedding_provider.embed(queries)
-            results = multi_query_hybrid_search(
-                db,
-                knowledge_base_id=kb.id,
-                queries=queries,
-                query_embeddings=query_embeddings,
-                top_k=candidate_k,
-            )
-        elif payload.use_hybrid:
-            query_embedding = embedding_provider.embed([standalone_query])[0]
-            results = hybrid_search(
-                db,
-                knowledge_base_id=kb.id,
-                query=standalone_query,
-                query_embedding=query_embedding,
-                top_k=candidate_k,
-            )
-            # Le score RRF fusionné ne vit pas sur la même échelle que le cosinus :
-            # MIN_RELEVANCE_SCORE ne s'applique qu'en mode vectoriel pur. En
-            # hybride/expansion, le filtrage par pertinence minimale a déjà eu
-            # lieu AVANT la fusion (voir services/retrieval.py) — "aucun résultat"
-            # reste donc un signal fiable de "contexte insuffisant".
-        else:
-            query_embedding = embedding_provider.embed([standalone_query])[0]
-            results = search_chunks(
-                db, knowledge_base_id=kb.id, query_embedding=query_embedding, top_k=candidate_k
-            )
-            results = [r for r in results if r[2] >= MIN_RELEVANCE_SCORE]
-    except EmbeddingProviderError as exc:
-        logger.warning("Échec du service d'embeddings (%s), repli automatique sur BM25.", exc)
-        results = bm25_search(db, knowledge_base_id=kb.id, query=standalone_query, top_k=candidate_k)
+    with observe_span(
+        name="retrieval",
+        as_type="retriever",
+        input_data=standalone_query,
+        metadata={
+            "use_hybrid": payload.use_hybrid,
+            "expand_query": payload.expand_query,
+            "top_k": payload.top_k,
+        },
+    ):
+        try:
+            if payload.expand_query:
+                with observe_span(name="query_expansion", as_type="span", input_data=standalone_query):
+                    queries = expand_query(chat_provider, standalone_query)
+                query_embeddings = embedding_provider.embed(queries)
+                results = multi_query_hybrid_search(
+                    db,
+                    knowledge_base_id=kb.id,
+                    queries=queries,
+                    query_embeddings=query_embeddings,
+                    top_k=candidate_k,
+                )
+            elif payload.use_hybrid:
+                query_embedding = embedding_provider.embed([standalone_query])[0]
+                results = hybrid_search(
+                    db,
+                    knowledge_base_id=kb.id,
+                    query=standalone_query,
+                    query_embedding=query_embedding,
+                    top_k=candidate_k,
+                )
+            else:
+                query_embedding = embedding_provider.embed([standalone_query])[0]
+                results = search_chunks(
+                    db, knowledge_base_id=kb.id, query_embedding=query_embedding, top_k=candidate_k
+                )
+                results = [r for r in results if r[2] >= MIN_RELEVANCE_SCORE]
+        except EmbeddingProviderError as exc:
+            logger.warning("Échec du service d'embeddings (%s), repli automatique sur BM25.", exc)
+            results = bm25_search(db, knowledge_base_id=kb.id, query=standalone_query, top_k=candidate_k)
 
     if payload.rerank and results:
-        reranker = get_reranker(chat_provider)
-        results = reranker.rerank(standalone_query, results)
+        with observe_span(
+            name="rerank",
+            as_type="span",
+            input_data=standalone_query,
+            metadata={"candidate_count": len(results)},
+        ):
+            reranker = get_reranker(chat_provider)
+            results = reranker.rerank(standalone_query, results)
 
     return conversation, history, chat_provider, standalone_query, results[: payload.top_k]
 
@@ -174,38 +188,52 @@ def chat(
     user: User = Depends(get_current_user),
 ):
     kb = get_owned_kb(db, payload.knowledge_base_id, user)
-    conversation, history, chat_provider, standalone_query, results = _prepare_turn(db, payload, kb, user)
+    with trace_rag_turn(
+        trace_name="rag_chat",
+        user_id=str(user.id),
+        session_id=str(payload.conversation_id or "new_conversation"),
+        metadata={
+            "knowledge_base_id": str(kb.id),
+            "use_hybrid": payload.use_hybrid,
+            "rerank": payload.rerank,
+            "expand_query": payload.expand_query,
+        },
+    ):
+        conversation, history, chat_provider, standalone_query, results = _prepare_turn(
+            db, payload, kb, user
+        )
 
-    if not results:
-        # Refus déterministe : ne dépend pas du LLM pour respecter la consigne
-        # de grounding — garanti même si le modèle est indisponible ou capricieux.
-        answer_text = NO_CONTEXT_MESSAGE
-        grounded = False
-        citations_payload: list[dict] = []
-    else:
-        messages = build_chat_messages(payload.message, results, history)
-        try:
-            answer_text = chat_provider.generate(messages)
-        except SpendCapExceededError as exc:
-            raise HTTPException(
-                status_code=402,
-                detail=f"Plafond de dépense LLM atteint : {exc}. "
-                "Contactez l'administrateur ou attendez le mois prochain.",
-            )
-        except ChatProviderError as exc:
-            raise HTTPException(status_code=502, detail=f"Échec de la génération : {exc}")
-        grounded = True
-        citations_payload = _citations_from_results(results)
+        if not results:
+            # Refus déterministe : ne dépend pas du LLM pour respecter la consigne
+            # de grounding — garanti même si le modèle est indisponible ou capricieux.
+            answer_text = NO_CONTEXT_MESSAGE
+            grounded = False
+            citations_payload: list[dict] = []
+        else:
+            messages = build_chat_messages(payload.message, results, history)
+            try:
+                with observe_span(name="generation", as_type="generation", input_data=payload.message):
+                    answer_text = chat_provider.generate(messages)
+            except SpendCapExceededError as exc:
+                raise HTTPException(
+                    status_code=402,
+                    detail=f"Plafond de dépense LLM atteint : {exc}. "
+                    "Contactez l'administrateur ou attendez le mois prochain.",
+                )
+            except ChatProviderError as exc:
+                raise HTTPException(status_code=502, detail=f"Échec de la génération : {exc}")
+            grounded = True
+            citations_payload = _citations_from_results(results)
 
-    assistant_message = _persist_assistant_message(db, conversation, answer_text, citations_payload)
+        assistant_message = _persist_assistant_message(db, conversation, answer_text, citations_payload)
 
-    return ChatResponse(
-        conversation_id=conversation.id,
-        message_id=assistant_message.id,
-        answer=answer_text,
-        citations=[CitationOut(**c) for c in citations_payload],
-        grounded=grounded,
-    )
+        return ChatResponse(
+            conversation_id=conversation.id,
+            message_id=assistant_message.id,
+            answer=answer_text,
+            citations=[CitationOut(**c) for c in citations_payload],
+            grounded=grounded,
+        )
 
 
 def _sse(event: dict) -> str:
@@ -221,26 +249,24 @@ def chat_stream(
     user: User = Depends(get_current_user),
 ):
     """Variante streaming de /chat, même logique de retrieval/grounding,
-    réponse envoyée au format SSE (Server-Sent Events) plutôt qu'en un bloc.
-
-    Événements émis (une ligne JSON par `data: ` SSE) :
-    - {"type": "answer_chunk", "content": "..."} — un fragment de texte, au fil
-      de la génération (ou un seul, pour le refus déterministe non groundé).
-    - {"type": "done", "conversation_id", "message_id", "grounded", "citations"}
-      — dernier événement, une fois le message assistant persisté en base.
-    - {"type": "error", "message": "..."} — échec du service de génération ;
-      aucun message assistant n'est persisté dans ce cas.
-
-    Le calcul du retrieval et la décision "grounded" ont lieu AVANT de renvoyer
-    le premier octet au client, exactement comme /chat — seule la génération
-    elle-même est streamée."""
+    réponse envoyée au format SSE (Server-Sent Events) plutôt qu'en un bloc."""
     kb = get_owned_kb(db, payload.knowledge_base_id, user)
-    conversation, history, chat_provider, standalone_query, results = _prepare_turn(db, payload, kb, user)
+    with trace_rag_turn(
+        trace_name="rag_chat_stream",
+        user_id=str(user.id),
+        session_id=str(payload.conversation_id or "new_conversation"),
+        metadata={
+            "knowledge_base_id": str(kb.id),
+            "use_hybrid": payload.use_hybrid,
+            "rerank": payload.rerank,
+            "expand_query": payload.expand_query,
+        },
+    ):
+        conversation, history, chat_provider, standalone_query, results = _prepare_turn(
+            db, payload, kb, user
+        )
 
     # Capture scalar values NOW, while the SQLAlchemy session is still open.
-    # The event_stream generator runs *after* FastAPI closes the request-scoped
-    # session; accessing ORM attributes on a detached Conversation object would
-    # raise DetachedInstanceError.
     conversation_id_str = str(conversation.id)
 
     def event_stream():
@@ -260,9 +286,10 @@ def chat_stream(
         messages = build_chat_messages(payload.message, results, history)
         full_answer = ""
         try:
-            for delta in chat_provider.generate_stream(messages):
-                full_answer += delta
-                yield _sse({"type": "answer_chunk", "content": delta})
+            with observe_span(name="generation_stream", as_type="generation", input_data=payload.message):
+                for delta in chat_provider.generate_stream(messages):
+                    full_answer += delta
+                    yield _sse({"type": "answer_chunk", "content": delta})
         except SpendCapExceededError as exc:
             yield _sse({"type": "error", "message": f"Plafond de dépense LLM atteint : {exc}"})
             return

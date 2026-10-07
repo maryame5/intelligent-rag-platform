@@ -1,5 +1,6 @@
 import re
 
+from app.core.observability import get_prompt_with_fallback
 from app.services.generation import ChatProvider, ChatProviderError
 
 FAITHFULNESS_PROMPT = (
@@ -19,6 +20,14 @@ ANSWER_RELEVANCE_PROMPT = (
 )
 
 
+def get_faithfulness_prompt() -> str:
+    return get_prompt_with_fallback("rag_eval_faithfulness_prompt", FAITHFULNESS_PROMPT)
+
+
+def get_answer_relevance_prompt() -> str:
+    return get_prompt_with_fallback("rag_eval_answer_relevance_prompt", ANSWER_RELEVANCE_PROMPT)
+
+
 def _parse_score(raw: str) -> float:
     match = re.search(r"(\d+(?:\.\d+)?)", raw)
     if not match:
@@ -33,8 +42,9 @@ def score_faithfulness(chat_provider: ChatProvider, context: str, answer: str) -
     comparer des configurations entre elles (chunking A vs B, reranker on/off),
     pas à certifier qu'une réponse est correcte dans l'absolu. Retourne None si
     le score n'est pas parsable ou si l'appel échoue — jamais une valeur inventée."""
+    system_prompt = get_faithfulness_prompt()
     messages = [
-        {"role": "system", "content": FAITHFULNESS_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": f"Contexte :\n{context}\n\nRéponse à évaluer :\n{answer}"},
     ]
     try:
@@ -45,8 +55,9 @@ def score_faithfulness(chat_provider: ChatProvider, context: str, answer: str) -
 
 
 def score_answer_relevance(chat_provider: ChatProvider, question: str, answer: str) -> float | None:
+    system_prompt = get_answer_relevance_prompt()
     messages = [
-        {"role": "system", "content": ANSWER_RELEVANCE_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": f"Question : {question}\n\nRéponse à évaluer :\n{answer}"},
     ]
     try:

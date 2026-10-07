@@ -59,6 +59,12 @@ class Settings(BaseSettings):
     # Recommandé en prod pour les modèles payants : ex. 10.0 pour 10 $/mois.
     llm_monthly_spend_cap_usd: float = 0.0
 
+    # --- Langfuse (Observabilité LLM / Tracing) ---
+    langfuse_enabled: bool = False
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    langfuse_host: str = "http://localhost:3000"
+
     # --- Email / SMTP Settings ---
     smtp_host: str = ""
     smtp_port: int = 587

@@ -8,6 +8,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from app.core.config import settings
 from app.core.metrics import EMBEDDING_REQUESTS_TOTAL, LLM_COST_USD_TOTAL, LLM_TOKENS_TOTAL
+from app.core.observability import observe_span
 from app.services.cache import get_redis_client
 from app.services.cost_tracking import estimate_cost, estimate_tokens
 
@@ -106,8 +107,19 @@ class OpenAIEmbeddingProvider:
             total_input_tokens += input_tokens
             all_embeddings.extend([item["embedding"] for item in data.get("data", [])])
 
+        cost = estimate_cost(self.model, total_input_tokens)
         LLM_TOKENS_TOTAL.labels(model=self.model, direction="input").inc(total_input_tokens)
-        LLM_COST_USD_TOTAL.labels(model=self.model).inc(estimate_cost(self.model, total_input_tokens))
+        LLM_COST_USD_TOTAL.labels(model=self.model).inc(cost)
+
+        with observe_span(
+            name="embeddings_calculation",
+            as_type="embedding",
+            model=self.model,
+            usage={"input": total_input_tokens, "total": total_input_tokens},
+            cost=cost,
+            metadata={"batch_count": len(truncated)},
+        ):
+            pass
 
         return all_embeddings
 
@@ -209,6 +221,16 @@ class FastEmbedEmbeddingProvider:
         tokens = sum(estimate_tokens(t) for t in truncated)
         LLM_TOKENS_TOTAL.labels(model=self.model, direction="input").inc(tokens)
         LLM_COST_USD_TOTAL.labels(model=self.model).inc(0.0)
+
+        with observe_span(
+            name="embeddings_calculation",
+            as_type="embedding",
+            model=self.model,
+            usage={"input": tokens, "total": tokens},
+            cost=0.0,
+            metadata={"provider": "fastembed", "batch_count": len(truncated)},
+        ):
+            pass
 
         return vectors
 

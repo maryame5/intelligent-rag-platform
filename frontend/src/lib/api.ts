@@ -28,7 +28,7 @@ export function paginate<T>(items: T[], page: number, pageSize: number): Page<T>
 export interface KnowledgeBase {
   id: string;
   name: string;
-  workspaceId?: string | null;
+  workspaceId?: string | null | undefined;
   createdAt: string;
   /** Rempli séparément (l'API de liste ne renvoie pas le compte) — voir
    * `getKnowledgeBases()`, qui fait un appel par base. Acceptable au volume
@@ -437,6 +437,9 @@ export async function sendChatMessage(params: {
   knowledgeBaseId: string;
   conversationId?: string | undefined;
   message: string;
+  topK?: number | undefined;
+  useHybrid?: boolean | undefined;
+  rerank?: boolean | undefined;
 }): Promise<SendMessageResult> {
   const raw = await apiRequest<{
     conversation_id: string;
@@ -450,6 +453,9 @@ export async function sendChatMessage(params: {
       knowledge_base_id: params.knowledgeBaseId,
       conversation_id: params.conversationId,
       message: params.message,
+      top_k: params.topK ?? 5,
+      use_hybrid: params.useHybrid ?? true,
+      rerank: params.rerank ?? false,
     },
   });
   return {
@@ -482,6 +488,9 @@ export async function sendChatMessageStream(params: {
   knowledgeBaseId: string;
   conversationId?: string | undefined;
   message: string;
+  topK?: number | undefined;
+  useHybrid?: boolean | undefined;
+  rerank?: boolean | undefined;
   onChunk: (text: string) => void;
   onDone: (result: SendMessageResult) => void;
   onError: (err: Error) => void;
@@ -500,6 +509,9 @@ export async function sendChatMessageStream(params: {
         knowledge_base_id: params.knowledgeBaseId,
         conversation_id: params.conversationId ?? null,
         message: params.message,
+        top_k: params.topK ?? 5,
+        use_hybrid: params.useHybrid ?? true,
+        rerank: params.rerank ?? false,
       }),
     });
   } catch (err) {
@@ -589,6 +601,8 @@ export interface AdminFeedbackItem {
   createdAt: string;
   messageId: string;
   messageContent: string;
+  questionContent: string | null;
+  citations: string | null;
   knowledgeBaseId: string;
   knowledgeBaseName: string;
   userEmail: string;
@@ -604,6 +618,8 @@ export async function getAdminFeedback(rating?: "up" | "down"): Promise<AdminFee
       created_at: string;
       message_id: string;
       message_content: string;
+      question_content: string | null;
+      citations: string | null;
       knowledge_base_id: string;
       knowledge_base_name: string;
       user_email: string;
@@ -616,6 +632,8 @@ export async function getAdminFeedback(rating?: "up" | "down"): Promise<AdminFee
     createdAt: f.created_at,
     messageId: f.message_id,
     messageContent: f.message_content,
+    questionContent: f.question_content,
+    citations: f.citations,
     knowledgeBaseId: f.knowledge_base_id,
     knowledgeBaseName: f.knowledge_base_name,
     userEmail: f.user_email,
@@ -696,7 +714,7 @@ export interface UserProfile {
   email: string;
   role: string;
   displayName: string | null;
-  createdAt?: string | null;
+  createdAt?: string | null | undefined;
 }
 
 export async function getMe(): Promise<UserProfile> {
@@ -890,6 +908,148 @@ export async function addWorkspaceMember(
 
 export async function removeWorkspaceMember(workspaceId: string, userId: string): Promise<void> {
   await apiRequest(`/workspaces/${workspaceId}/members/${userId}`, { method: "DELETE" });
+}
+
+export interface WorkspaceInvitationInfo {
+  id: string;
+  workspaceId: string;
+  email: string;
+  role: "ADMIN" | "MEMBER";
+  token?: string | undefined;
+  inviteUrl?: string | undefined;
+  invitedBy: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface InvitationDetails {
+  token: string;
+  workspaceId: string;
+  workspaceName: string;
+  email: string;
+  role: "ADMIN" | "MEMBER";
+  inviterEmail: string;
+  inviterName?: string | null;
+  expiresAt: string;
+  isExpired: boolean;
+  isAccepted: boolean;
+}
+
+export async function createWorkspaceInvitation(
+  workspaceId: string,
+  email: string,
+  role: "ADMIN" | "MEMBER" = "MEMBER",
+): Promise<WorkspaceInvitationInfo> {
+  const raw = await apiRequest<{
+    id: string;
+    workspace_id: string;
+    email: string;
+    role: "ADMIN" | "MEMBER";
+    token?: string;
+    invite_url?: string;
+    invited_by: string;
+    created_at: string;
+    expires_at: string;
+  }>(`/workspaces/${workspaceId}/invitations`, {
+    method: "POST",
+    body: { email, role },
+  });
+  return {
+    id: raw.id,
+    workspaceId: raw.workspace_id,
+    email: raw.email,
+    role: raw.role,
+    token: raw.token,
+    inviteUrl: raw.invite_url,
+    invitedBy: raw.invited_by,
+    createdAt: raw.created_at,
+    expiresAt: raw.expires_at,
+  };
+}
+
+export async function getWorkspaceInvitations(
+  workspaceId: string,
+): Promise<WorkspaceInvitationInfo[]> {
+  const raw = await apiRequest<
+    Array<{
+      id: string;
+      workspace_id: string;
+      email: string;
+      role: "ADMIN" | "MEMBER";
+      token?: string;
+      invite_url?: string;
+      invited_by: string;
+      created_at: string;
+      expires_at: string;
+    }>
+  >(`/workspaces/${workspaceId}/invitations`);
+  return raw.map((inv) => ({
+    id: inv.id,
+    workspaceId: inv.workspace_id,
+    email: inv.email,
+    role: inv.role,
+    token: inv.token,
+    inviteUrl: inv.invite_url,
+    invitedBy: inv.invited_by,
+    createdAt: inv.created_at,
+    expiresAt: inv.expires_at,
+  }));
+}
+
+export async function revokeWorkspaceInvitation(
+  workspaceId: string,
+  invitationId: string,
+): Promise<void> {
+  await apiRequest(`/workspaces/${workspaceId}/invitations/${invitationId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getInvitationByToken(token: string): Promise<InvitationDetails> {
+  const raw = await apiRequest<{
+    token: string;
+    workspace_id: string;
+    workspace_name: string;
+    email: string;
+    role: "ADMIN" | "MEMBER";
+    inviter_email: string;
+    inviter_name?: string | null;
+    expires_at: string;
+    is_expired: boolean;
+    is_accepted: boolean;
+  }>(`/workspaces/invitations/${token}`);
+  return {
+    token: raw.token,
+    workspaceId: raw.workspace_id,
+    workspaceName: raw.workspace_name,
+    email: raw.email,
+    role: raw.role,
+    inviterEmail: raw.inviter_email,
+    inviterName: raw.inviter_name,
+    expiresAt: raw.expires_at,
+    isExpired: raw.is_expired,
+    isAccepted: raw.is_accepted,
+  };
+}
+
+export async function acceptInvitation(
+  token: string,
+  payload: { password?: string; displayName?: string },
+): Promise<{ accessToken: string; refreshToken: string }> {
+  const raw = await apiRequest<{ access_token: string; refresh_token: string }>(
+    `/workspaces/invitations/${token}/accept`,
+    {
+      method: "POST",
+      body: {
+        password: payload.password,
+        display_name: payload.displayName,
+      },
+    },
+  );
+  return {
+    accessToken: raw.access_token,
+    refreshToken: raw.refresh_token,
+  };
 }
 
 // ============================================================================
@@ -1184,6 +1344,11 @@ export const api = {
   getWorkspaceMembers,
   addWorkspaceMember,
   removeWorkspaceMember,
+  createWorkspaceInvitation,
+  getWorkspaceInvitations,
+  revokeWorkspaceInvitation,
+  getInvitationByToken,
+  acceptInvitation,
   // Verified Answers
   getVerifiedAnswers,
   createVerifiedAnswer,

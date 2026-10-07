@@ -1,5 +1,6 @@
 from typing import Protocol
 
+from app.core.observability import get_prompt_with_fallback
 from app.models.chunk import Chunk
 from app.models.document import Document
 from app.services.generation import ChatProvider, ChatProviderError
@@ -11,6 +12,11 @@ RERANK_SYSTEM_PROMPT = (
     "répondre à la question, séparés par des virgules (exemple : 3,1,4,2). "
     "N'ajoute aucun texte, aucune explication."
 )
+
+
+def get_rerank_prompt() -> str:
+    return get_prompt_with_fallback("rag_rerank_prompt", RERANK_SYSTEM_PROMPT)
+
 
 # Un appel LLM par recherche a un coût/latence non négligeable sur un plan
 # gratuit rate-limité : on ne reranke jamais plus que ce nombre de candidats.
@@ -42,8 +48,9 @@ class LLMReranker:
         listing = "\n".join(
             f"{i}. {chunk.content[:400]}" for i, (chunk, _doc, _score) in enumerate(limited, start=1)
         )
+        system_prompt = get_rerank_prompt()
         messages = [
-            {"role": "system", "content": RERANK_SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Question : {query}\n\nExtraits :\n{listing}"},
         ]
 

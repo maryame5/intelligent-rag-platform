@@ -91,9 +91,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (workspaces.length > 0) {
       if (!activeWorkspaceId || !workspaces.some((w) => w.id === activeWorkspaceId)) {
-        const firstId = workspaces[0].id;
-        setActiveWorkspaceId(firstId);
-        localStorage.setItem("rag.activeWorkspaceId", firstId);
+        const firstId = workspaces[0]?.id;
+        if (firstId) {
+          setActiveWorkspaceId(firstId);
+          localStorage.setItem("rag.activeWorkspaceId", firstId);
+        }
       }
     }
   }, [workspaces, activeWorkspaceId]);
