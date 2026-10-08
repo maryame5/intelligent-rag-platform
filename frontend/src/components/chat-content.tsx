@@ -76,7 +76,10 @@ export function ChatContent() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!kbId && kbs.length > 0) setKbId(kbs[0]?.id || "");
+    if (!kbId && kbs.length > 0) {
+      const best = kbs.find((k) => (k.documentCount ?? 0) > 0) || kbs[0];
+      setKbId(best?.id || "");
+    }
   }, [kbs, kbId]);
 
   const { data: conversations = [] } = useQuery({
@@ -142,10 +145,10 @@ export function ChatContent() {
     streamingBufferRef.current = "";
 
     const timer1 = setTimeout(() => setPipelineStep(2), 500);
-    const savedTopK = localStorage.getItem("rag_top_k");
+    const savedTopK = typeof window !== "undefined" ? localStorage.getItem("rag_top_k") : null;
     const configuredTopK = savedTopK ? Number(savedTopK) : 5;
-    const searchMode = localStorage.getItem("rag_search_mode") || "hybrid";
-    const rerankerEnabled = localStorage.getItem("rag_reranker_enabled") === "true";
+    const searchMode = (typeof window !== "undefined" ? localStorage.getItem("rag_search_mode") : null) || "hybrid";
+    const rerankerEnabled = typeof window !== "undefined" && localStorage.getItem("rag_reranker_enabled") === "true";
 
     api.sendChatMessageStream({
       knowledgeBaseId: kbId,
@@ -156,12 +159,12 @@ export function ChatContent() {
       rerank: rerankerEnabled,
       onChunk: (chunk) => {
         clearTimeout(timer1);
-        clearTimeout(timer2);
         setPipelineStep(3);
         streamingBufferRef.current += chunk;
         setStreamingContent((prev) => (prev ?? "") + chunk);
       },
       onDone: (result) => {
+        clearTimeout(timer1);
         const newConversationId = result.conversationId;
         const accumulated = streamingBufferRef.current;
 
@@ -193,6 +196,7 @@ export function ChatContent() {
         setPipelineStep(0);
       },
       onError: (err) => {
+        clearTimeout(timer1);
         toast.error(err.message || "Échec de l'envoi du message.");
         setStreamingContent(null);
         setStreamingUserMsg(null);

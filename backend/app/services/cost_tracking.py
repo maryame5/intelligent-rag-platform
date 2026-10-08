@@ -12,6 +12,12 @@ PRICING_PER_MILLION_TOKENS: dict[str, dict[str, float]] = {
     "llama3-8b-8192": {"input": 0.05, "output": 0.08},
     "llama3-70b-8192": {"input": 0.59, "output": 0.79},
     "mixtral-8x7b-32768": {"input": 0.24, "output": 0.24},
+    # Google Gemini
+    "gemini-3.8-flash": {"input": 0.075, "output": 0.30},
+    "gemini-2.5-flash": {"input": 0.075, "output": 0.30},
+    "gemini-2.0-flash": {"input": 0.10, "output": 0.40},
+    "gemini-1.5-flash": {"input": 0.075, "output": 0.30},
+    "gemini-1.5-pro": {"input": 1.25, "output": 5.00},
     # Modèles locaux FastEmbed (ONNX) : coût nul
     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2": {"input": 0.0, "output": 0.0},
     "BAAI/bge-small-en-v1.5": {"input": 0.0, "output": 0.0},

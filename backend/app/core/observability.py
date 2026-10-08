@@ -28,6 +28,7 @@ def get_langfuse_client():
         _langfuse_instance = Langfuse(
             public_key=settings.langfuse_public_key,
             secret_key=settings.langfuse_secret_key,
+            base_url=settings.langfuse_host,
             host=settings.langfuse_host,
         )
         logger.info("Langfuse client initialisé avec succès sur %s", settings.langfuse_host)

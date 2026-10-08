@@ -63,7 +63,9 @@ function KnowledgeBaseDetail() {
     queryFn: api.getWorkspaces,
   });
   const targetWsId =
-    kb?.workspaceId || localStorage.getItem("rag.activeWorkspaceId") || workspaces[0]?.id;
+    kb?.workspaceId ||
+    (typeof window !== "undefined" ? localStorage.getItem("rag.activeWorkspaceId") : null) ||
+    workspaces[0]?.id;
   const { data: members = [] } = useQuery({
     queryKey: ["workspace-members", targetWsId],
     queryFn: () => (targetWsId ? api.getWorkspaceMembers(targetWsId) : Promise.resolve([])),

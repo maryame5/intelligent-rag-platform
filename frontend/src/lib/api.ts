@@ -533,35 +533,39 @@ export async function sendChatMessageStream(params: {
   const decoder = new TextDecoder();
   let buffer = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      let evt: ChatStreamEvent;
-      try {
-        evt = JSON.parse(line.slice(6)) as ChatStreamEvent;
-      } catch {
-        continue;
-      }
-      if (evt.type === "answer_chunk") {
-        params.onChunk(evt.content);
-      } else if (evt.type === "done") {
-        params.onDone({
-          conversationId: evt.conversation_id,
-          messageId: evt.message_id ?? "",
-          answer: "", // accumulé côté composant via onChunk
-          grounded: evt.grounded,
-          citations: toCitations(evt.citations),
-        });
-      } else if (evt.type === "error") {
-        params.onError(new Error(evt.message));
-        return;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        let evt: ChatStreamEvent;
+        try {
+          evt = JSON.parse(line.slice(6)) as ChatStreamEvent;
+        } catch {
+          continue;
+        }
+        if (evt.type === "answer_chunk") {
+          params.onChunk(evt.content);
+        } else if (evt.type === "done") {
+          params.onDone({
+            conversationId: evt.conversation_id,
+            messageId: evt.message_id ?? "",
+            answer: "", // accumulé côté composant via onChunk
+            grounded: evt.grounded,
+            citations: toCitations(evt.citations),
+          });
+        } else if (evt.type === "error") {
+          params.onError(new Error(evt.message));
+          return;
+        }
       }
     }
+  } catch (err) {
+    params.onError(err instanceof Error ? err : new Error(String(err)));
   }
 }
 
@@ -1034,7 +1038,7 @@ export async function getInvitationByToken(token: string): Promise<InvitationDet
 
 export async function acceptInvitation(
   token: string,
-  payload: { password?: string; displayName?: string },
+  payload: { password?: string | undefined; displayName?: string | undefined },
 ): Promise<{ accessToken: string; refreshToken: string }> {
   const raw = await apiRequest<{ access_token: string; refresh_token: string }>(
     `/workspaces/invitations/${token}/accept`,

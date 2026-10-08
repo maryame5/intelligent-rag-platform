@@ -1475,13 +1475,16 @@ export function SettingsContent() {
 
   // ── Modèles ──────────────────────────────────────────────────────────
   const [searchMode, setSearchMode] = useState<"vector" | "hybrid">(() => {
+    if (typeof window === "undefined") return "hybrid";
     return (localStorage.getItem("rag_search_mode") as "vector" | "hybrid") || "hybrid";
   });
   const [topK, setTopK] = useState<number>(() => {
+    if (typeof window === "undefined") return 5;
     const saved = localStorage.getItem("rag_top_k");
     return saved ? Number(saved) : 5;
   });
   const [rerankerEnabled, setRerankerEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
     return localStorage.getItem("rag_reranker_enabled") === "true";
   });
 

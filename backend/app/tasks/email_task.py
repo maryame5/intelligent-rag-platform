@@ -44,13 +44,14 @@ def send_invitation_email_task(self, invitation_id: str):
             expires_in_hours=settings.invitation_expire_hours,
         )
 
-        if not success and settings.smtp_host:
-            raise Exception("SMTP delivery failed")
-
+        if not success:
+            logger.warning(
+                "L'envoi de l'e-mail d'invitation à %s a échoué (ex: IP non autorisée sur Brevo). "
+                "Lien direct utilisable : %s",
+                invitation.email,
+                invite_url,
+            )
     except Exception as exc:
         logger.error("Error in send_invitation_email_task for %s: %s", invitation_id, exc)
-        if settings.smtp_host:
-            # Only retry if a real SMTP server was configured and failed
-            raise self.retry(exc=exc, countdown=30 * (2**self.request.retries))
     finally:
         db.close()
