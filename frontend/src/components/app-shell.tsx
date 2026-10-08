@@ -84,16 +84,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryKey: ["workspaces"],
     queryFn: api.getWorkspaces,
   });
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(
-    () => localStorage.getItem("rag.activeWorkspaceId") || "",
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("rag.activeWorkspaceId") || "" : "",
   );
 
   useEffect(() => {
     if (workspaces.length > 0) {
       if (!activeWorkspaceId || !workspaces.some((w) => w.id === activeWorkspaceId)) {
-        const firstId = workspaces[0].id;
-        setActiveWorkspaceId(firstId);
-        localStorage.setItem("rag.activeWorkspaceId", firstId);
+        const firstId = workspaces[0]?.id;
+        if (firstId) {
+          setActiveWorkspaceId(firstId);
+          localStorage.setItem("rag.activeWorkspaceId", firstId);
+        }
       }
     }
   }, [workspaces, activeWorkspaceId]);

@@ -57,6 +57,8 @@ class WorkspaceInvitationOut(BaseModel):
     workspace_id: uuid.UUID
     email: str
     role: WorkspaceRole
+    token: str | None = None
+    invite_url: str | None = None
     invited_by: uuid.UUID
     created_at: datetime | None = None
     expires_at: datetime

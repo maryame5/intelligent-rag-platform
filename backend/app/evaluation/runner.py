@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from sqlalchemy.orm import Session
 
 from app.core.metrics import RAG_FAITHFULNESS_SCORE
+from app.core.observability import flush_observability, record_evaluation_score
 from app.evaluation import metrics
 from app.evaluation.llm_judge import score_answer_relevance, score_faithfulness
 from app.evaluation.schema import EvaluationDataset
@@ -106,6 +107,17 @@ def _evaluate_single_question(
 
     latency_ms = (time.perf_counter() - start) * 1000
 
+    # Envoi des scores vers Langfuse pour observabilité et suivi des benchmarks
+    if faithfulness is not None:
+        record_evaluation_score(name="faithfulness", value=faithfulness)
+    if answer_relevance is not None:
+        record_evaluation_score(name="answer_relevance", value=answer_relevance)
+    if recall is not None:
+        record_evaluation_score(name="recall_at_k", value=recall)
+    if precision is not None:
+        record_evaluation_score(name="precision_at_k", value=precision)
+    record_evaluation_score(name="reciprocal_rank", value=rr)
+
     return QuestionResult(
         question_id=question.id,
         retrieved_filenames=retrieved_filenames,
@@ -178,6 +190,8 @@ def run_evaluation(
 
     total = len(dataset.questions)
     latencies = [r.latency_ms for r in question_results if r.error is None]
+
+    flush_observability()
 
     return EvaluationSummary(
         dataset_name=dataset.name,

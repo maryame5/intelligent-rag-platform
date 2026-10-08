@@ -1,3 +1,4 @@
+from app.core.observability import get_prompt_with_fallback
 from app.models.message import Message, MessageRole
 from app.services.generation import ChatProvider, ChatProviderError
 
@@ -13,6 +14,10 @@ QUERY_REWRITE_SYSTEM_PROMPT = (
 )
 
 
+def get_query_rewrite_prompt() -> str:
+    return get_prompt_with_fallback("rag_query_rewrite_prompt", QUERY_REWRITE_SYSTEM_PROMPT)
+
+
 def rewrite_query(chat_provider: ChatProvider, history: list[Message], question: str) -> str:
     """Transforme une question dépendante du contexte conversationnel (« et pour
     l'autre document ? ») en requête autonome, pour que la recherche vectorielle
@@ -25,7 +30,8 @@ def rewrite_query(chat_provider: ChatProvider, history: list[Message], question:
     if not history:
         return question
 
-    messages = [{"role": "system", "content": QUERY_REWRITE_SYSTEM_PROMPT}]
+    system_prompt = get_query_rewrite_prompt()
+    messages = [{"role": "system", "content": system_prompt}]
     for msg in history:
         role = "user" if msg.role == MessageRole.USER else "assistant"
         messages.append({"role": role, "content": msg.content})

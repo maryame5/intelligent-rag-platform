@@ -1,0 +1,28 @@
+{
+  "name": "sample_benchmark_v1",
+  "version": "1.0.0",
+  "description": "Dataset de référence pour l'évaluation de la qualité RAG (Recall@K, Precision@K, MRR, Faithfulness, Relevance).",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Quelles sont les conditions et procédures requises ?",
+      "expected_answer": "Les conditions et procédures dépendent des règles documentaires en vigueur.",
+      "expected_document_filenames": [],
+      "notes": "Question générale testant la fidélité de réponse et le rappel contextuel."
+    },
+    {
+      "id": "q2",
+      "question": "Quelles sont les obligations légales et délais applicables ?",
+      "expected_answer": "Les délais et obligations sont détaillés dans les textes et directives de référence.",
+      "expected_document_filenames": [],
+      "notes": "Évaluation de la précision de recherche sémantique."
+    },
+    {
+      "id": "q3",
+      "question": "Comment s'effectue la mise en œuvre de la rupture ou convention ?",
+      "expected_answer": "La convention nécessite un accord mutuel et le respect des formalités administratives.",
+      "expected_document_filenames": [],
+      "notes": "Vérification des citations documentaires et des liens officiels."
+    }
+  ]
+}

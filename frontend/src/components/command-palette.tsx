@@ -20,7 +20,10 @@ export function CommandPalette({
   onOpenChange: (v: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const { data: convos = [] } = useQuery({
     queryKey: ["all-convos", kbs.map((k) => k.id)],
     queryFn: async () => {
@@ -82,10 +85,9 @@ export function CommandPalette({
         <CommandSeparator />
         <CommandGroup heading="Conversations">
           {convos.slice(0, 5).map((c) => (
-            <CommandItem key={c.id} value={c.title} onSelect={() => go("/chat")}>
+            <CommandItem key={c.id} value={c.title ?? ""} onSelect={() => go("/chat")}>
               <MessagesSquare className="size-4" />
-              <span className="truncate">{c.title}</span>
-              <span className="ml-auto text-xs text-muted-foreground">{c.project}</span>
+              <span className="truncate">{c.title ?? "Conversation"}</span>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -104,7 +106,7 @@ export function CommandPalette({
             <CommandItem
               key={d.id}
               value={d.title}
-              onSelect={() => go("/knowledge-bases/$kbId", { kbId: d.knowledgeBaseId })}
+              onSelect={() => go("/knowledge-bases/$kbId", { kbId: d.kbId })}
             >
               <FileText className="size-4" />
               <span className="truncate">{d.title}</span>

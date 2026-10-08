@@ -148,7 +148,7 @@ const DEMO_SCENARIOS: [DemoScenario, ...DemoScenario[]] = [
   },
 ];
 
-export function LandingPage() {
+function LandingPage() {
   const { session } = useAuth();
   const [activeScenarioId, setActiveScenarioId] = useState("legal");
   const [openFaq, setOpenFaq] = useState<number | null>(null);

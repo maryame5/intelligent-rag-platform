@@ -8,6 +8,7 @@ import {
   Check,
   ChevronRight,
   Clock3,
+  Copy,
   Crown,
   Eye,
   EyeOff,
@@ -15,6 +16,7 @@ import {
   KeyRound,
   Loader2,
   Lock,
+  Mail,
   MessagesSquare,
   Play,
   Plus,
@@ -44,6 +46,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -59,7 +71,10 @@ import { PreviewBadge } from "@/components/preview-badge";
 export function DashboardContent() {
   const { data: metrics } = useQuery({ queryKey: ["metrics"], queryFn: api.getMetrics });
   const { data: activity = [] } = useQuery({ queryKey: ["activity"], queryFn: api.getActivity });
-  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const realDocumentCount = kbs.reduce((sum, kb) => sum + kb.documentCount, 0);
 
   // Pipeline réel : tous les documents de toutes les KBs, triés par date
@@ -133,9 +148,15 @@ export function DashboardContent() {
               <p className="text-3xl font-extrabold font-mono text-slate-900">
                 {realDocumentCount}
               </p>
-              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
-                <Check className="size-3" /> 100% Vectorisés
-              </span>
+              {realDocumentCount > 0 ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
+                  <Check className="size-3" /> Vectorisés
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 text-[10px] font-medium">
+                  En attente
+                </span>
+              )}
             </div>
             <p className="mt-1.5 text-xs text-slate-500">
               Répartis sur{" "}
@@ -292,9 +313,15 @@ export function DashboardContent() {
                     <div className="flex size-8 items-center justify-center rounded-lg bg-brume text-marine border border-marine/20">
                       <BookOpen className="size-4" />
                     </div>
-                    <span className="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
-                      Opérationnelle
-                    </span>
+                    {kb.documentCount > 0 ? (
+                      <span className="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold">
+                        Opérationnelle
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 text-[10px] font-medium">
+                        Base vide
+                      </span>
+                    )}
                   </div>
                   <h3 className="font-bold text-sm text-slate-900 truncate">{kb.name}</h3>
                   <p className="text-xs text-slate-500 mt-1">
@@ -526,8 +553,12 @@ export function VerifiedContent() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [tagsInput, setTagsInput] = useState("");
+  const [answerToDelete, setAnswerToDelete] = useState<string | null>(null);
 
-  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const { data: answers = [], isLoading } = useQuery({
     queryKey: ["verified"],
     queryFn: () => api.getVerifiedAnswers(),
@@ -733,11 +764,7 @@ export function VerifiedContent() {
                     size="icon"
                     className="size-8 shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     title="Supprimer"
-                    onClick={() => {
-                      if (confirm("Voulez-vous vraiment supprimer cette réponse vérifiée ?")) {
-                        deleteMutation.mutate(a.id);
-                      }
-                    }}
+                    onClick={() => setAnswerToDelete(a.id)}
                   >
                     <Trash2 className="size-4" />
                   </Button>
@@ -747,6 +774,35 @@ export function VerifiedContent() {
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!answerToDelete}
+        onOpenChange={(open) => !open && setAnswerToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette réponse certifiée ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette réponse de référence ne sera plus prioritaire lors des futures requêtes des
+              utilisateurs.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (answerToDelete) {
+                  deleteMutation.mutate(answerToDelete);
+                  setAnswerToDelete(null);
+                }
+              }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
@@ -755,11 +811,14 @@ export function TeamContent() {
   const queryClient = useQueryClient();
   const [selectedWsId, setSelectedWsId] = useState<string | null>(null);
   const [isCreateWsOpen, setIsCreateWsOpen] = useState(false);
-  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [newWsName, setNewWsName] = useState("");
-  const [memberEmail, setMemberEmail] = useState("");
-  const [memberPassword, setMemberPassword] = useState("");
-  const [memberRole, setMemberRole] = useState<"ADMIN" | "MEMBER">("MEMBER");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"ADMIN" | "MEMBER">("MEMBER");
+  const [memberToRemove, setMemberToRemove] = useState<{ userId: string; email: string } | null>(
+    null,
+  );
+  const [lastInviteUrl, setLastInviteUrl] = useState<string | null>(null);
 
   // Charger la liste des workspaces réels
   const { data: workspaces = [], isLoading: isLoadingWs } = useQuery({
@@ -778,6 +837,13 @@ export function TeamContent() {
     enabled: !!currentWsId,
   });
 
+  // Charger les invitations en attente
+  const { data: pendingInvitations = [], isLoading: isLoadingInvites } = useQuery({
+    queryKey: ["workspace-invitations", currentWsId],
+    queryFn: () => (currentWsId ? api.getWorkspaceInvitations(currentWsId) : Promise.resolve([])),
+    enabled: !!currentWsId,
+  });
+
   // Créer un workspace
   const createWsMutation = useMutation({
     mutationFn: (name: string) => api.createWorkspace(name),
@@ -791,21 +857,36 @@ export function TeamContent() {
     onError: (err: Error) => toast.error(err.message || "Erreur lors de la création du workspace"),
   });
 
-  // Ajouter un membre
-  const addMemberMutation = useMutation({
+  // Inviter un membre par e-mail
+  const inviteMutation = useMutation({
     mutationFn: () => {
       if (!currentWsId) throw new Error("Aucun workspace sélectionné");
-      return api.addWorkspaceMember(currentWsId, memberEmail, memberPassword, memberRole);
+      return api.createWorkspaceInvitation(currentWsId, inviteEmail.trim(), inviteRole);
+    },
+    onSuccess: (invitation) => {
+      queryClient.invalidateQueries({ queryKey: ["workspace-invitations", currentWsId] });
+      setInviteEmail("");
+      setInviteRole("MEMBER");
+      setIsInviteOpen(false);
+      if (invitation.inviteUrl) {
+        setLastInviteUrl(invitation.inviteUrl);
+      }
+      toast.success("Invitation envoyée avec succès par e-mail !");
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de l'envoi de l'invitation"),
+  });
+
+  // Révoquer une invitation
+  const revokeInviteMutation = useMutation({
+    mutationFn: (invId: string) => {
+      if (!currentWsId) throw new Error("Aucun workspace sélectionné");
+      return api.revokeWorkspaceInvitation(currentWsId, invId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspace-members", currentWsId] });
-      setMemberEmail("");
-      setMemberPassword("");
-      setMemberRole("MEMBER");
-      setIsAddMemberOpen(false);
-      toast.success("Membre ajouté avec succès au workspace !");
+      queryClient.invalidateQueries({ queryKey: ["workspace-invitations", currentWsId] });
+      toast.success("Invitation révoquée.");
     },
-    onError: (err: Error) => toast.error(err.message || "Erreur lors de l'ajout du membre"),
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de la révocation"),
   });
 
   // Supprimer un membre
@@ -821,11 +902,16 @@ export function TeamContent() {
     onError: (err: Error) => toast.error(err.message || "Erreur lors de la suppression"),
   });
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Lien d'invitation copié dans le presse-papier !");
+  };
+
   return (
     <>
       <PageHeader
         title="Espaces de travail & Équipe"
-        description="Gérez vos workspaces, attribuez les rôles (Admin / Membre) et invitez vos collaborateurs."
+        description="Gérez vos workspaces, invitez vos collaborateurs par e-mail et attribuez les rôles (Admin / Membre)."
         actions={
           <div className="flex items-center gap-2">
             <Dialog open={isCreateWsOpen} onOpenChange={setIsCreateWsOpen}>
@@ -884,60 +970,47 @@ export function TeamContent() {
             </Dialog>
 
             {currentWorkspace && (
-              <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+              <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-marine text-papier hover:bg-nuit">
-                    <UserPlus className="mr-1.5 size-4 text-marine" />
-                    Ajouter un membre
+                    <Mail className="mr-1.5 size-4 text-papier" />
+                    Inviter par e-mail
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-[#28264B] dark:text-[#E8EAE7]">
-                      <UserPlus className="size-5 text-marine" />
-                      Ajouter un collaborateur
+                      <Mail className="size-5 text-marine" />
+                      Inviter un collaborateur
                     </DialogTitle>
                     <DialogDescription>
-                      Ajoutez un utilisateur existant ou créez un nouveau compte avec son mot de
-                      passe initial.
+                      Un e-mail contenant un lien sécurisé d'invitation sera envoyé. Le
+                      collaborateur définira son propre mot de passe lors de son inscription.
                     </DialogDescription>
                   </DialogHeader>
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      addMemberMutation.mutate();
+                      inviteMutation.mutate();
                     }}
                     className="space-y-4 py-2"
                   >
                     <div className="space-y-2">
-                      <Label htmlFor="mEmail">Adresse e-mail</Label>
+                      <Label htmlFor="mEmail">Adresse e-mail du collaborateur</Label>
                       <Input
                         id="mEmail"
                         type="email"
                         placeholder="collaborateur@entreprise.com"
-                        value={memberEmail}
-                        onChange={(e) => setMemberEmail(e.target.value)}
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mPass">Mot de passe temporaire (pour nouveau compte)</Label>
-                      <Input
-                        id="mPass"
-                        type="password"
-                        placeholder="••••••••"
-                        value={memberPassword}
-                        onChange={(e) => setMemberPassword(e.target.value)}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Laissez vide si l'utilisateur possède déjà un compte sur la plateforme.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
                       <Label htmlFor="mRole">Rôle dans le workspace</Label>
                       <Select
-                        value={memberRole}
-                        onValueChange={(val) => setMemberRole(val as "ADMIN" | "MEMBER")}
+                        value={inviteRole}
+                        onValueChange={(val) => setInviteRole(val as "ADMIN" | "MEMBER")}
                       >
                         <SelectTrigger id="mRole">
                           <SelectValue placeholder="Sélectionner le rôle" />
@@ -949,22 +1022,18 @@ export function TeamContent() {
                       </Select>
                     </div>
                     <DialogFooter className="mt-4">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setIsAddMemberOpen(false)}
-                      >
+                      <Button type="button" variant="ghost" onClick={() => setIsInviteOpen(false)}>
                         Annuler
                       </Button>
                       <Button
                         type="submit"
-                        disabled={addMemberMutation.isPending || !memberEmail.trim()}
+                        disabled={inviteMutation.isPending || !inviteEmail.trim()}
                         className="bg-marine text-papier hover:bg-nuit"
                       >
-                        {addMemberMutation.isPending && (
+                        {inviteMutation.isPending && (
                           <Loader2 className="mr-2 size-4 animate-spin" />
                         )}
-                        Ajouter
+                        Envoyer l'invitation
                       </Button>
                     </DialogFooter>
                   </form>
@@ -990,6 +1059,11 @@ export function TeamContent() {
                 <span className="rounded-full bg-orbite-soft px-2 py-0.5 text-xs font-medium text-braise">
                   {members.length} {members.length > 1 ? "membres" : "membre"}
                 </span>
+                {pendingInvitations.length > 0 && (
+                  <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    {pendingInvitations.length} en attente
+                  </span>
+                )}
               </div>
               <p className="text-xs text-muted-foreground">
                 {currentWorkspace
@@ -1018,6 +1092,38 @@ export function TeamContent() {
           )}
         </div>
 
+        {/* Dernier lien d'invitation généré (utile si l'envoi d'email local est simulé) */}
+        {lastInviteUrl && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs">
+            <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+              <Check className="size-4 shrink-0" />
+              <span>
+                <strong>Lien d'invitation généré :</strong> Partagez ce lien directement si
+                nécessaire.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs border-emerald-500/40 hover:bg-emerald-500/20"
+                onClick={() => copyToClipboard(lastInviteUrl)}
+              >
+                <Copy className="mr-1.5 size-3" />
+                Copier le lien
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-xs"
+                onClick={() => setLastInviteUrl(null)}
+              >
+                Fermer
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Member list / Empty State */}
         {workspaces.length === 0 && !isLoadingWs ? (
           <div className="panel flex flex-col items-center justify-center py-16 text-center">
@@ -1040,91 +1146,192 @@ export function TeamContent() {
             </Button>
           </div>
         ) : (
-          <div className="panel overflow-hidden border border-border/70 shadow-sm">
-            <div className="grid grid-cols-[1fr_auto] border-b bg-surface-raised px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid-cols-[1fr_160px_160px_100px]">
-              <span>Membre & Coordonnées</span>
-              <span className="hidden md:block">Rôle</span>
-              <span className="hidden md:block">Date d'adhésion</span>
-              <span className="text-right">Actions</span>
-            </div>
+          <div className="space-y-6">
+            {/* Table des membres actifs */}
+            <div className="panel overflow-hidden border border-border/70 shadow-sm">
+              <div className="border-b bg-surface-raised px-5 py-3">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Membres actifs du workspace
+                </h3>
+              </div>
+              <div className="grid grid-cols-[1fr_auto] border-b bg-surface-raised/50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid-cols-[1fr_160px_160px_100px]">
+                <span>Membre & Coordonnées</span>
+                <span className="hidden md:block">Rôle</span>
+                <span className="hidden md:block">Date d'adhésion</span>
+                <span className="text-right">Actions</span>
+              </div>
 
-            {isLoadingMembers ? (
-              <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                <Loader2 className="mr-2 size-5 animate-spin text-marine" />
-                Chargement des membres...
-              </div>
-            ) : members.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">
-                Aucun membre trouvé dans ce workspace.
-              </div>
-            ) : (
-              members.map((m) => {
-                const initials = (m.displayName || m.email).split("@")[0].slice(0, 2).toUpperCase();
-                return (
-                  <div
-                    key={m.id}
-                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-5 py-4 transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_160px_160px_100px]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-10 items-center justify-center rounded-xl bg-marine text-xs font-semibold text-papier shadow-sm">
-                        {initials}
+              {isLoadingMembers ? (
+                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 size-5 animate-spin text-marine" />
+                  Chargement des membres...
+                </div>
+              ) : members.length === 0 ? (
+                <div className="py-12 text-center text-sm text-muted-foreground">
+                  Aucun membre trouvé dans ce workspace.
+                </div>
+              ) : (
+                members.map((m) => {
+                  const initials =
+                    (m.displayName || m.email || "?").split("@")[0]?.slice(0, 2).toUpperCase() ??
+                    "??";
+                  return (
+                    <div
+                      key={m.id}
+                      className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-5 py-4 transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_160px_160px_100px]"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-10 items-center justify-center rounded-xl bg-marine text-xs font-semibold text-papier shadow-sm">
+                          {initials}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-[#28264B] dark:text-[#E8EAE7]">
+                            {m.displayName || m.email.split("@")[0]}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{m.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="hidden md:flex items-center gap-1.5">
+                        {m.role === "ADMIN" ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-orbite-soft px-2.5 py-1 text-xs font-medium text-braise border border-braise/30">
+                            <Crown className="size-3.5" />
+                            Admin
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground border border-border">
+                            <Shield className="size-3.5" />
+                            Membre
+                          </span>
+                        )}
+                      </div>
+
+                      <span className="hidden text-xs text-muted-foreground md:block">
+                        {m.joinedAt
+                          ? new Date(m.joinedAt).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "—"}
                       </span>
-                      <div>
-                        <p className="text-sm font-medium text-[#28264B] dark:text-[#E8EAE7]">
-                          {m.displayName || m.email.split("@")[0]}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{m.email}</p>
+
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          title="Retirer le membre"
+                          onClick={() => setMemberToRemove({ userId: m.userId, email: m.email })}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
                       </div>
                     </div>
+                  );
+                })
+              )}
+            </div>
 
-                    <div className="hidden md:flex items-center gap-1.5">
-                      {m.role === "ADMIN" ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-orbite-soft px-2.5 py-1 text-xs font-medium text-braise border border-braise/30">
-                          <Crown className="size-3.5" />
-                          Admin
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-orbite-soft px-2.5 py-1 text-xs font-medium text-braise border border-braise/30">
-                          <Shield className="size-3.5" />
-                          Membre
-                        </span>
-                      )}
+            {/* Table des invitations en attente */}
+            {pendingInvitations.length > 0 && (
+              <div className="panel overflow-hidden border border-border/70 shadow-sm">
+                <div className="border-b bg-surface-raised px-5 py-3">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Invitations en attente d'acceptation
+                  </h3>
+                </div>
+                <div className="grid grid-cols-[1fr_auto] border-b bg-surface-raised/50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid-cols-[1fr_140px_160px_140px]">
+                  <span>E-mail invité</span>
+                  <span className="hidden md:block">Rôle proposé</span>
+                  <span className="hidden md:block">Expire le</span>
+                  <span className="text-right">Actions</span>
+                </div>
+
+                {pendingInvitations.map((inv) => (
+                  <div
+                    key={inv.id}
+                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b px-5 py-3.5 transition-colors last:border-0 hover:bg-surface-raised/40 md:grid-cols-[1fr_140px_160px_140px]"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Mail className="size-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">{inv.email}</span>
+                    </div>
+
+                    <div className="hidden md:block">
+                      <span className="inline-flex rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {inv.role === "ADMIN" ? "Administrateur" : "Membre"}
+                      </span>
                     </div>
 
                     <span className="hidden text-xs text-muted-foreground md:block">
-                      {m.joinedAt
-                        ? new Date(m.joinedAt).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "—"}
+                      {new Date(inv.expiresAt).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
 
-                    <div className="flex justify-end">
+                    <div className="flex items-center justify-end gap-1">
+                      {inv.inviteUrl && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-marine dark:text-orbite hover:bg-secondary"
+                          title="Copier le lien d'invitation"
+                          onClick={() => copyToClipboard(inv.inviteUrl!)}
+                        >
+                          <Copy className="mr-1 size-3.5" />
+                          Copier lien
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
                         className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        title="Retirer le membre"
-                        onClick={() => {
-                          if (
-                            confirm(`Voulez-vous vraiment retirer ${m.email} de ce workspace ?`)
-                          ) {
-                            removeMemberMutation.mutate(m.userId);
-                          }
-                        }}
+                        title="Révoquer l'invitation"
+                        onClick={() => revokeInviteMutation.mutate(inv.id)}
                       >
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
                   </div>
-                );
-              })
+                ))}
+              </div>
             )}
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!memberToRemove}
+        onOpenChange={(open) => !open && setMemberToRemove(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Retirer ce collaborateur ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Voulez-vous vraiment retirer {memberToRemove?.email} de ce workspace ? L'utilisateur
+              n'aura plus accès aux bases de connaissances associées à cet espace.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (memberToRemove) {
+                  removeMemberMutation.mutate(memberToRemove.userId);
+                  setMemberToRemove(null);
+                }
+              }}
+            >
+              Retirer le collaborateur
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
@@ -1276,9 +1483,39 @@ export function SettingsContent() {
   });
 
   // ── Modèles ──────────────────────────────────────────────────────────
-  const [searchMode, setSearchMode] = useState<"vector" | "hybrid">("hybrid");
-  const [topK, setTopK] = useState(5);
-  const [rerankerEnabled, setRerankerEnabled] = useState(false);
+  const [searchMode, setSearchMode] = useState<"vector" | "hybrid">(() => {
+    if (typeof window === "undefined") return "hybrid";
+    return (localStorage.getItem("rag_search_mode") as "vector" | "hybrid") || "hybrid";
+  });
+  const [topK, setTopK] = useState<number>(() => {
+    if (typeof window === "undefined") return 5;
+    const saved = localStorage.getItem("rag_top_k");
+    return saved ? Number(saved) : 5;
+  });
+  const [rerankerEnabled, setRerankerEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("rag_reranker_enabled") === "true";
+  });
+
+  const handleSearchModeChange = (mode: "vector" | "hybrid") => {
+    setSearchMode(mode);
+    localStorage.setItem("rag_search_mode", mode);
+    toast.success(`Mode de recherche défini sur ${mode === "hybrid" ? "Hybride" : "Vectoriel"}`);
+  };
+
+  const handleTopKChange = (val: number) => {
+    setTopK(val);
+    localStorage.setItem("rag_top_k", String(val));
+  };
+
+  const handleRerankerChange = () => {
+    setRerankerEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem("rag_reranker_enabled", String(next));
+      toast.success(`Reranker ${next ? "activé" : "désactivé"}`);
+      return next;
+    });
+  };
 
   return (
     <>
@@ -1320,7 +1557,7 @@ export function SettingsContent() {
               {/* Avatar + infos */}
               <div className="flex items-center gap-4">
                 <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-marine/20 to-braise/20 text-2xl font-bold text-marine">
-                  {(profile?.displayName ?? profile?.email ?? "?")[0].toUpperCase()}
+                  {(profile?.displayName ?? profile?.email ?? "?")[0]?.toUpperCase() ?? "?"}
                 </div>
                 <div>
                   <p className="font-semibold">{profile?.displayName || "—"}</p>
@@ -1442,7 +1679,7 @@ export function SettingsContent() {
                       {members.map((m) => (
                         <div key={m.id} className="flex items-center gap-3 py-2.5">
                           <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-marine/20 to-braise/20 text-sm font-semibold text-marine">
-                            {(m.displayName ?? m.email)[0].toUpperCase()}
+                            {(m.displayName ?? m.email ?? "?")[0]?.toUpperCase() ?? "?"}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">
@@ -1582,7 +1819,7 @@ export function SettingsContent() {
                       {(["vector", "hybrid"] as const).map((mode) => (
                         <button
                           key={mode}
-                          onClick={() => setSearchMode(mode)}
+                          onClick={() => handleSearchModeChange(mode)}
                           className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
                             searchMode === mode
                               ? "border-marine bg-orbite-soft/40 text-marine"
@@ -1610,7 +1847,7 @@ export function SettingsContent() {
                         min={1}
                         max={20}
                         value={topK}
-                        onChange={(e) => setTopK(Number(e.target.value))}
+                        onChange={(e) => handleTopKChange(Number(e.target.value))}
                         className="flex-1 accent-marine"
                       />
                       <span className="w-8 text-center font-mono text-sm font-semibold">
@@ -1630,7 +1867,7 @@ export function SettingsContent() {
                       </p>
                     </div>
                     <button
-                      onClick={() => setRerankerEnabled((v) => !v)}
+                      onClick={handleRerankerChange}
                       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
                         rerankerEnabled ? "bg-marine" : "bg-muted"
                       }`}
@@ -1654,8 +1891,27 @@ export function SettingsContent() {
                   Le modèle de génération est configuré globalement par l'administrateur via les
                   variables d'environnement du backend.
                 </p>
-                <div className="mt-3 rounded-lg bg-secondary/50 px-4 py-3 text-sm font-mono">
-                  LLM_MODEL=gpt-4o-mini · EMBEDDING_MODEL=text-embedding-3-small
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-lg border border-border/80 bg-surface-raised p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Modèle de génération
+                    </p>
+                    <p className="mt-1 font-mono text-sm font-bold text-foreground">GPT-4o mini</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      Synthèse & réponses RAG avec citations
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-border/80 bg-surface-raised p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Modèle d'embedding
+                    </p>
+                    <p className="mt-1 font-mono text-sm font-bold text-foreground">
+                      text-embedding-3-small
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      1536 dimensions · Indexation sémantique
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
@@ -1674,7 +1930,10 @@ export function AdminContent() {
     queryKey: ["admin-feedback", "down"],
     queryFn: () => api.getAdminFeedback("down"),
   });
-  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: api.getKnowledgeBases });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const { data: allUsers = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["admin-users"],
     queryFn: api.getAdminUsers,
@@ -1684,9 +1943,19 @@ export function AdminContent() {
   const [mode, setMode] = useState<"vector" | "hybrid">("vector");
   const [rerank, setRerank] = useState(false);
 
+  // Auto-sélectionner la première base si aucune sélectionnée
+  React.useEffect(() => {
+    if (!selectedKb && kbs.length > 0) {
+      setSelectedKb(kbs[0].id);
+    }
+  }, [kbs, selectedKb]);
+
   const evalMutation = useMutation({
     mutationFn: () => api.runEvaluation({ knowledgeBaseId: selectedKb, mode, rerank }),
-    onSuccess: () => toast.success("Évaluation terminée."),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      toast.success("Évaluation terminée avec succès !");
+    },
     onError: (error: Error) => toast.error(error.message || "Échec de l'évaluation."),
   });
 
@@ -1710,14 +1979,11 @@ export function AdminContent() {
       />
       <div className="space-y-5 p-4 md:p-6">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <KPICard title="Utilisateurs (réel)" value={String(counts?.totalUsers ?? "—")} />
+          <KPICard title="Utilisateurs" value={String(counts?.totalUsers ?? "—")} />
+          <KPICard title="Knowledge bases" value={String(counts?.totalKnowledgeBases ?? "—")} />
+          <KPICard title="Documents indexés" value={String(counts?.totalDocuments ?? "—")} />
           <KPICard
-            title="Knowledge bases (réel)"
-            value={String(counts?.totalKnowledgeBases ?? "—")}
-          />
-          <KPICard title="Documents (réel)" value={String(counts?.totalDocuments ?? "—")} />
-          <KPICard
-            title="Feedback (réel)"
+            title="Satisfaction réponses"
             value={counts ? `${counts.totalFeedbackUp} 👍 / ${counts.totalFeedbackDown} 👎` : "—"}
           />
         </div>
@@ -1727,15 +1993,17 @@ export function AdminContent() {
             <h2 className="font-semibold">Lancer un benchmark retrieval</h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Recall@K, Precision@K, MRR et faithfulness (LLM-as-judge) sur le dataset d'exemple, en
-            conditions réelles contre une knowledge base (Sprint 7 du backend).
+            Recall@K, Precision@K, MRR et fidélité de réponse (LLM-as-judge) calculés sur le dataset
+            d'évaluation en conditions réelles contre une base de connaissances.
           </p>
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <div className="min-w-48">
               <Label className="text-xs text-muted-foreground">Knowledge base</Label>
               <Select value={selectedKb} onValueChange={setSelectedKb}>
                 <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder="Choisir une base" />
+                  <SelectValue
+                    placeholder={kbs.length === 0 ? "Aucune base disponible" : "Choisir une base"}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {kbs.map((kb) => (
@@ -1768,9 +2036,14 @@ export function AdminContent() {
             <Button
               onClick={() => evalMutation.mutate()}
               disabled={!selectedKb || evalMutation.isPending}
+              className="bg-marine text-papier hover:bg-nuit"
             >
-              {evalMutation.isPending ? <Loader2 className="animate-spin" /> : <Play />}
-              Lancer
+              {evalMutation.isPending ? (
+                <Loader2 className="mr-2 animate-spin size-4" />
+              ) : (
+                <Play className="mr-2 size-4" />
+              )}
+              {evalMutation.isPending ? "Évaluation en cours..." : "Lancer le benchmark"}
             </Button>
           </div>
 
@@ -1842,20 +2115,49 @@ export function AdminContent() {
             {feedbackItems.length === 0 ? (
               <p className="p-4 text-sm text-muted-foreground">Aucun 👎 pour l’instant.</p>
             ) : (
-              feedbackItems.slice(0, 7).map((f) => (
-                <div key={f.feedbackId} className="border-b px-4 py-3 text-xs last:border-0">
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span>
-                      {f.knowledgeBaseName} · {f.userEmail}
-                    </span>
-                    <span>{new Date(f.createdAt).toLocaleDateString("fr-FR")}</span>
+              <div className="divide-y max-h-[420px] overflow-y-auto">
+                {feedbackItems.map((f) => (
+                  <div key={f.feedbackId} className="p-4 text-xs space-y-2.5">
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span className="font-semibold text-foreground">
+                        {f.knowledgeBaseName} · {f.userEmail}
+                      </span>
+                      <span>
+                        {new Date(f.createdAt).toLocaleDateString("fr-FR", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    {f.questionContent ? (
+                      <div className="rounded-lg bg-secondary/60 p-2.5">
+                        <span className="font-semibold text-marine dark:text-orbite text-[11px] block mb-1">
+                          Question posée par l'utilisateur :
+                        </span>
+                        <p className="text-foreground font-medium text-xs">{f.questionContent}</p>
+                      </div>
+                    ) : null}
+
+                    <div className="rounded-lg bg-muted/40 p-2.5">
+                      <span className="font-semibold text-muted-foreground text-[11px] block mb-1">
+                        Réponse générée par le modèle :
+                      </span>
+                      <p className="font-mono text-xs text-foreground whitespace-pre-wrap leading-relaxed">
+                        {f.messageContent}
+                      </p>
+                    </div>
+
+                    {f.comment ? (
+                      <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5 text-xs text-amber-700 dark:text-amber-300">
+                        <strong>Commentaire :</strong> « {f.comment} »
+                      </div>
+                    ) : null}
                   </div>
-                  <p className="mt-1 truncate font-mono">{f.messageContent}</p>
-                  {f.comment ? (
-                    <p className="mt-1 italic text-muted-foreground">« {f.comment} »</p>
-                  ) : null}
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </section>
         </div>
@@ -1882,7 +2184,7 @@ export function AdminContent() {
               {allUsers.map((u) => (
                 <div key={u.id} className="flex items-center gap-3 px-4 py-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-marine/20 to-braise/20 text-sm font-semibold text-marine">
-                    {(u.displayName ?? u.email)[0].toUpperCase()}
+                    {(u.displayName ?? u.email ?? "?")[0]?.toUpperCase() ?? "?"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{u.displayName ?? u.email}</p>

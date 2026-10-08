@@ -1,3 +1,4 @@
+from app.core.observability import get_prompt_with_fallback
 from app.services.generation import ChatProvider, ChatProviderError
 
 QUERY_EXPANSION_SYSTEM_PROMPT = (
@@ -10,6 +11,10 @@ QUERY_EXPANSION_SYSTEM_PROMPT = (
 MAX_EXPANSIONS = 3
 
 
+def get_query_expansion_prompt() -> str:
+    return get_prompt_with_fallback("rag_query_expansion_prompt", QUERY_EXPANSION_SYSTEM_PROMPT)
+
+
 def expand_query(chat_provider: ChatProvider, query: str) -> list[str]:
     """Retourne la requête originale suivie de quelques reformulations.
 
@@ -18,8 +23,9 @@ def expand_query(chat_provider: ChatProvider, query: str) -> list[str]:
     du rappel, jamais une dépendance dont l'échec casserait la recherche.
     Les doublons (reformulation identique à l'originale, ou entre elles) sont
     éliminés pour ne pas gaspiller des appels de recherche redondants."""
+    system_prompt = get_query_expansion_prompt()
     messages = [
-        {"role": "system", "content": QUERY_EXPANSION_SYSTEM_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": query},
     ]
 

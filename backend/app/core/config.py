@@ -45,8 +45,14 @@ class Settings(BaseSettings):
 
     # --- LLM / Embeddings ---
     llm_api_key: str = ""  # clé Groq/OpenRouter ; voir https://console.groq.com/keys
-    llm_model: str = "z-ai/glm-5.2:free"
-    llm_api_base_url: str = "https://openrouter.ai/api/v1"
+    llm_model: str = "qwen/qwen3.8-27b"
+    llm_api_base_url: str = "https://api.groq.com/openai/v1"
+
+    # --- LLM Fallback (Google Gemini via endpoint compatible OpenAI) ---
+    llm_fallback_api_key: str = ""
+    llm_fallback_model: str = "gemini-3.8-flash"
+    llm_fallback_api_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai"
+
     # "local" utilise FastEmbed (ONNX, CPU, sans API key, sans rate limit) — recommandé.
     # "openai" délègue à n'importe quel service compatible API OpenAI (OpenRouter, Azure, vLLM…).
     embedding_provider_type: str = "local"
@@ -58,6 +64,12 @@ class Settings(BaseSettings):
     # 0 = désactivé (par défaut). Utilisé par app/services/spend_cap.py.
     # Recommandé en prod pour les modèles payants : ex. 10.0 pour 10 $/mois.
     llm_monthly_spend_cap_usd: float = 0.0
+
+    # --- Langfuse (Observabilité LLM / Tracing) ---
+    langfuse_enabled: bool = False
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    langfuse_host: str = "http://localhost:3000"
 
     # --- Email / SMTP Settings ---
     smtp_host: str = ""
