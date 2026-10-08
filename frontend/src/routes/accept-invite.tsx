@@ -85,8 +85,10 @@ function AcceptInviteScreen() {
 
       toast.success(`Bienvenue dans le workspace "${invite.workspaceName}" !`);
       window.location.href = "/dashboard";
-    } catch (err: any) {
-      toast.error(err.message || "Échec de l'acceptation de l'invitation.");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Échec de l'acceptation de l'invitation.";
+      toast.error(message);
       setSubmitting(false);
     }
   }
@@ -121,7 +123,8 @@ function AcceptInviteScreen() {
             Rejoignez votre équipe sur SmartRAG.
           </h1>
           <p className="mt-4 text-slate-300">
-            Accédez aux bases documentaires, interrogez les connaissances de l'organisation avec des citations vérifiables.
+            Accédez aux bases documentaires, interrogez les connaissances de l'organisation avec des
+            citations vérifiables.
           </p>
 
           <div className="mt-8 space-y-3">
@@ -223,7 +226,8 @@ function AcceptInviteScreen() {
                   </>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Vous êtes actuellement connecté(e). Cliquez ci-dessous pour rejoindre ce workspace avec votre compte.
+                    Vous êtes actuellement connecté(e). Cliquez ci-dessous pour rejoindre ce
+                    workspace avec votre compte.
                   </p>
                 )}
 

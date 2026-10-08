@@ -84,8 +84,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryKey: ["workspaces"],
     queryFn: api.getWorkspaces,
   });
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(
-    () => (typeof window !== "undefined" ? localStorage.getItem("rag.activeWorkspaceId") || "" : ""),
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("rag.activeWorkspaceId") || "" : "",
   );
 
   useEffect(() => {

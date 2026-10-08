@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from sqlalchemy.orm import Session
 
 from app.core.metrics import RAG_FAITHFULNESS_SCORE
-from app.core.observability import flush_observability, record_evaluation_score, trace_rag_turn
+from app.core.observability import flush_observability, record_evaluation_score
 from app.evaluation import metrics
 from app.evaluation.llm_judge import score_answer_relevance, score_faithfulness
 from app.evaluation.schema import EvaluationDataset

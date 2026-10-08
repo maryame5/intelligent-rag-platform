@@ -71,7 +71,10 @@ import { PreviewBadge } from "@/components/preview-badge";
 export function DashboardContent() {
   const { data: metrics } = useQuery({ queryKey: ["metrics"], queryFn: api.getMetrics });
   const { data: activity = [] } = useQuery({ queryKey: ["activity"], queryFn: api.getActivity });
-  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({ queryKey: ["kbs"], queryFn: () => api.getKnowledgeBases() });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const realDocumentCount = kbs.reduce((sum, kb) => sum + kb.documentCount, 0);
 
   // Pipeline réel : tous les documents de toutes les KBs, triés par date
@@ -552,7 +555,10 @@ export function VerifiedContent() {
   const [tagsInput, setTagsInput] = useState("");
   const [answerToDelete, setAnswerToDelete] = useState<string | null>(null);
 
-  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({ queryKey: ["kbs"], queryFn: () => api.getKnowledgeBases() });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const { data: answers = [], isLoading } = useQuery({
     queryKey: ["verified"],
     queryFn: () => api.getVerifiedAnswers(),
@@ -978,8 +984,8 @@ export function TeamContent() {
                       Inviter un collaborateur
                     </DialogTitle>
                     <DialogDescription>
-                      Un e-mail contenant un lien sécurisé d'invitation sera envoyé. Le collaborateur
-                      définira son propre mot de passe lors de son inscription.
+                      Un e-mail contenant un lien sécurisé d'invitation sera envoyé. Le
+                      collaborateur définira son propre mot de passe lors de son inscription.
                     </DialogDescription>
                   </DialogHeader>
                   <form
@@ -1016,11 +1022,7 @@ export function TeamContent() {
                       </Select>
                     </div>
                     <DialogFooter className="mt-4">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setIsInviteOpen(false)}
-                      >
+                      <Button type="button" variant="ghost" onClick={() => setIsInviteOpen(false)}>
                         Annuler
                       </Button>
                       <Button
@@ -1096,7 +1098,8 @@ export function TeamContent() {
             <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
               <Check className="size-4 shrink-0" />
               <span>
-                <strong>Lien d'invitation généré :</strong> Partagez ce lien directement si nécessaire.
+                <strong>Lien d'invitation généré :</strong> Partagez ce lien directement si
+                nécessaire.
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -1147,7 +1150,9 @@ export function TeamContent() {
             {/* Table des membres actifs */}
             <div className="panel overflow-hidden border border-border/70 shadow-sm">
               <div className="border-b bg-surface-raised px-5 py-3">
-                <h3 className="text-sm font-semibold text-foreground">Membres actifs du workspace</h3>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Membres actifs du workspace
+                </h3>
               </div>
               <div className="grid grid-cols-[1fr_auto] border-b bg-surface-raised/50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid-cols-[1fr_160px_160px_100px]">
                 <span>Membre & Coordonnées</span>
@@ -1167,7 +1172,9 @@ export function TeamContent() {
                 </div>
               ) : (
                 members.map((m) => {
-                  const initials = (m.displayName || m.email || "?").split("@")[0]?.slice(0, 2).toUpperCase() ?? "??";
+                  const initials =
+                    (m.displayName || m.email || "?").split("@")[0]?.slice(0, 2).toUpperCase() ??
+                    "??";
                   return (
                     <div
                       key={m.id}
@@ -1230,7 +1237,9 @@ export function TeamContent() {
             {pendingInvitations.length > 0 && (
               <div className="panel overflow-hidden border border-border/70 shadow-sm">
                 <div className="border-b bg-surface-raised px-5 py-3">
-                  <h3 className="text-sm font-semibold text-foreground">Invitations en attente d'acceptation</h3>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Invitations en attente d'acceptation
+                  </h3>
                 </div>
                 <div className="grid grid-cols-[1fr_auto] border-b bg-surface-raised/50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid-cols-[1fr_140px_160px_140px]">
                   <span>E-mail invité</span>
@@ -1921,7 +1930,10 @@ export function AdminContent() {
     queryKey: ["admin-feedback", "down"],
     queryFn: () => api.getAdminFeedback("down"),
   });
-  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({ queryKey: ["kbs"], queryFn: () => api.getKnowledgeBases() });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const { data: allUsers = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["admin-users"],
     queryFn: api.getAdminUsers,
@@ -1989,7 +2001,9 @@ export function AdminContent() {
               <Label className="text-xs text-muted-foreground">Knowledge base</Label>
               <Select value={selectedKb} onValueChange={setSelectedKb}>
                 <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder={kbs.length === 0 ? "Aucune base disponible" : "Choisir une base"} />
+                  <SelectValue
+                    placeholder={kbs.length === 0 ? "Aucune base disponible" : "Choisir une base"}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {kbs.map((kb) => (
@@ -2024,7 +2038,11 @@ export function AdminContent() {
               disabled={!selectedKb || evalMutation.isPending}
               className="bg-marine text-papier hover:bg-nuit"
             >
-              {evalMutation.isPending ? <Loader2 className="mr-2 animate-spin size-4" /> : <Play className="mr-2 size-4" />}
+              {evalMutation.isPending ? (
+                <Loader2 className="mr-2 animate-spin size-4" />
+              ) : (
+                <Play className="mr-2 size-4" />
+              )}
               {evalMutation.isPending ? "Évaluation en cours..." : "Lancer le benchmark"}
             </Button>
           </div>

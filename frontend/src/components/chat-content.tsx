@@ -55,7 +55,10 @@ const SAMPLE_PROMPTS = [
 
 export function ChatContent() {
   const queryClient = useQueryClient();
-  const { data: kbs = [] } = useQuery({ queryKey: ["kbs"], queryFn: () => api.getKnowledgeBases() });
+  const { data: kbs = [] } = useQuery({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const [kbId, setKbId] = useState<string>("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -147,8 +150,10 @@ export function ChatContent() {
     const timer1 = setTimeout(() => setPipelineStep(2), 500);
     const savedTopK = typeof window !== "undefined" ? localStorage.getItem("rag_top_k") : null;
     const configuredTopK = savedTopK ? Number(savedTopK) : 5;
-    const searchMode = (typeof window !== "undefined" ? localStorage.getItem("rag_search_mode") : null) || "hybrid";
-    const rerankerEnabled = typeof window !== "undefined" && localStorage.getItem("rag_reranker_enabled") === "true";
+    const searchMode =
+      (typeof window !== "undefined" ? localStorage.getItem("rag_search_mode") : null) || "hybrid";
+    const rerankerEnabled =
+      typeof window !== "undefined" && localStorage.getItem("rag_reranker_enabled") === "true";
 
     api.sendChatMessageStream({
       knowledgeBaseId: kbId,
@@ -445,7 +450,9 @@ export function ChatContent() {
                   Aucune base de connaissances disponible
                 </h3>
                 <p className="mt-2 max-w-md text-xs text-[#4E5174] leading-relaxed">
-                  Pour commencer à poser des questions et obtenir des réponses sourcées en temps réel, vous devez d'abord créer une base et y téléverser vos documents d'entreprise.
+                  Pour commencer à poser des questions et obtenir des réponses sourcées en temps
+                  réel, vous devez d'abord créer une base et y téléverser vos documents
+                  d'entreprise.
                 </p>
                 <div className="mt-6">
                   <Link to="/knowledge-bases">

@@ -20,7 +20,10 @@ export function CommandPalette({
   onOpenChange: (v: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({ queryKey: ["kbs"], queryFn: () => api.getKnowledgeBases() });
+  const { data: kbs = [] } = useQuery<import("@/lib/api").KnowledgeBase[]>({
+    queryKey: ["kbs"],
+    queryFn: () => api.getKnowledgeBases(),
+  });
   const { data: convos = [] } = useQuery({
     queryKey: ["all-convos", kbs.map((k) => k.id)],
     queryFn: async () => {

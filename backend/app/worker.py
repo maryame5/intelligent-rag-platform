@@ -1,6 +1,8 @@
 from celery import Celery
+from celery.signals import worker_shutdown
 
 from app.core.config import settings
+from app.core.observability import flush_observability, shutdown_observability
 
 celery_app = Celery(
     "rag_platform",
@@ -24,10 +26,6 @@ celery_app.conf.update(
 @celery_app.on_after_configure.connect
 def setup_observability_signals(sender, **kwargs):
     pass
-
-
-from celery.signals import worker_shutdown
-from app.core.observability import flush_observability, shutdown_observability
 
 
 @worker_shutdown.connect
