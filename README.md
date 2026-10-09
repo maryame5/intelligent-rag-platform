@@ -25,6 +25,10 @@ docker compose up -d --build
 - API docs : http://localhost:8000/docs
 - Frontend : http://localhost:5173
 - MinIO console : http://localhost:9001
+- Flower (Monitoring Celery) : http://localhost:5555 (auth par défaut : `admin` / `admin`)
+- Prometheus : http://localhost:9090
+- Grafana : http://localhost:3001 (auth : `admin` / `admin`)
+- Langfuse (LLM Tracing) : http://localhost:3000
 
 ## Déploiement production
 

@@ -116,7 +116,25 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    command: celery -A app.worker.celery_app worker --loglevel=info
+    command: celery -A app.worker.celery_app worker -E --loglevel=info
+
+  flower:
+    build:
+      context: ./backend
+    container_name: rag_flower
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      REDIS_URL: ${REDIS_URL}
+      FLOWER_BASIC_AUTH: ${FLOWER_BASIC_AUTH:-admin:admin}
+    volumes:
+      - flower_data:/data
+    ports:
+      - "5555:5555"
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: celery -A app.worker.celery_app --broker=${REDIS_URL} flower --port=5555 --persistent=True --db=/data/flower_db --basic_auth=${FLOWER_BASIC_AUTH:-admin:admin}
 
   frontend:
     build:
@@ -247,6 +265,7 @@ services:
       - "9090:9090"
     depends_on:
       - backend
+      - flower
 
   grafana:
     image: grafana/grafana:latest
@@ -256,6 +275,10 @@ services:
       - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
 
@@ -266,4 +289,5 @@ volumes:
   redis_data:
   minio_data:
   fastembed_cache:
+  flower_data:
 
